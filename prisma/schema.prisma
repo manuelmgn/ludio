@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum Language {
+  GL
+  PT_PT
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum PlaythroughStatus {
+  PLAYING
+  COMPLETED
+  ABANDONED
+  ON_HOLD
+}
+
+enum PrivacyLevel {
+  PRIVATE
+  FOLLOWERS
+  PUBLIC
+}
+
+model User {
+  id           String  @id @default(uuid())
+  email        String  @unique
+  passwordHash String
+  username     String  @unique
+  avatarUrl    String?
+  bio          String?
+
+  theme    Theme    @default(SYSTEM)
+  language Language @default(GL)
+
+  followers Follow[] @relation("following")
+  following Follow[] @relation("follower")
+
+  libraryEntries LibraryEntry[]
+  lists          List[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Follow {
+  id         String @id @default(uuid())
+  followerId String
+  follower   User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followingId String
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  status FollowStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([followerId, followingId])
+}
+
+model Game {
+  id       String  @id // External API ID (e.g., IGDB/RAWG ID)
+  title    String
+  coverUrl String?
+
+  libraryEntries LibraryEntry[]
+  listItems      ListItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LibraryEntry {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  rating         Int? // 1 to 5
+  publicReview   String?
+  reviewPlatform String?
+
+  playthroughs Playthrough[]
+  journalEntry JournalEntry?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, gameId]) // A user only has one entry per game
+}
+
+model Playthrough {
+  id             String       @id @default(uuid())
+  libraryEntryId String
+  libraryEntry   LibraryEntry @relation(fields: [libraryEntryId], references: [id], onDelete: Cascade)
+
+  status   PlaythroughStatus
+  platform String
+  startDate String? // Allows partial dates like "2015"
+  endDate   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JournalEntry {
+  id             String       @id @default(uuid())
+  libraryEntryId String       @unique
+  libraryEntry   LibraryEntry @relation(fields: [libraryEntryId], references: [id], onDelete: Cascade)
+
+  content String // Rich text
+
+  images JournalImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JournalImage {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  localUrl     String
+  privacyLevel PrivacyLevel @default(PRIVATE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model List {
+  id           String       @id @default(uuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title        String
+  description  String?
+  privacyLevel PrivacyLevel @default(PRIVATE)
+
+  items ListItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ListItem {
+  id     String @id @default(uuid())
+  listId String
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  order Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listId, gameId]) // A game can only be in a list once
+}
