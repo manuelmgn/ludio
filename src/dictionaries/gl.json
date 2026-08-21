@@ -1,0 +1,13 @@
+{
+  "welcome": "Benvido a Ludio",
+  "login": "Iniciar sesión",
+  "dashboard": "Panel de control",
+  "settings": "Axustes",
+  "language": "Idioma",
+  "logout": "Pechar sesión",
+  "search": "Buscar",
+  "search_placeholder": "Buscar un xogo...",
+  "search_empty": "Non se atoparon resultados.",
+  "search_hint": "Escribe o nome dun xogo para buscalo.",
+  "search_loading": "Buscando..."
+}

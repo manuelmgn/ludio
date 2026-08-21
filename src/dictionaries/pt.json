@@ -1,0 +1,13 @@
+{
+  "welcome": "Bem-vindo ao Ludio",
+  "login": "Iniciar sessão",
+  "dashboard": "Painel de controlo",
+  "settings": "Definições",
+  "language": "Idioma",
+  "logout": "Terminar sessão",
+  "search": "Pesquisar",
+  "search_placeholder": "Pesquisar um jogo...",
+  "search_empty": "Nenhum resultado encontrado.",
+  "search_hint": "Escreve o nome de um jogo para pesquisar.",
+  "search_loading": "A pesquisar..."
+}
