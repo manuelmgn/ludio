@@ -1,10 +1,12 @@
 {
   "welcome": "Benvido a Ludio",
+  "home": "Inicio",
   "login": "Iniciar sesión",
   "dashboard": "Panel de control",
   "settings": "Axustes",
   "language": "Idioma",
   "logout": "Pechar sesión",
+  "library": "A Miña Biblioteca",
   "search": "Buscar",
   "search_placeholder": "Buscar un xogo...",
   "search_empty": "Non se atoparon resultados.",

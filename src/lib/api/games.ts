@@ -15,36 +15,28 @@ interface SearchError {
 
 type SearchResult = SearchSuccess | SearchError
 
-interface ExternalGame {
-  id: string
-  title: string
-  coverUrl: string | null
+interface IGDBGame {
+  id: number
+  name: string
+  cover?: {
+    id: number
+    url: string
+  }
 }
 
-function fetchExternalAPI(query: string): ExternalGame[] {
-  const lowerQuery = query.toLowerCase()
-
-  const mockDatabase: ExternalGame[] = [
-    { id: "ext-zelda-botw", title: "The Legend of Zelda: Breath of the Wild", coverUrl: null },
-    { id: "ext-zelda-totk", title: "The Legend of Zelda: Tears of the Kingdom", coverUrl: null },
-    { id: "ext-zelda-oot", title: "The Legend of Zelda: Ocarina of Time", coverUrl: null },
-    { id: "ext-zelda-mm", title: "The Legend of Zelda: Majora's Mask", coverUrl: null },
-    { id: "ext-zelda-alttp", title: "The Legend of Zelda: A Link to the Past", coverUrl: null },
-    { id: "ext-mario-odyssey", title: "Super Mario Odyssey", coverUrl: null },
-    { id: "ext-mario-galaxy", title: "Super Mario Galaxy", coverUrl: null },
-    { id: "ext-mario-64", title: "Super Mario 64", coverUrl: null },
-    { id: "ext-elden-ring", title: "Elden Ring", coverUrl: null },
-    { id: "ext-dark-souls", title: "Dark Souls", coverUrl: null },
-    { id: "ext-hollow-knight", title: "Hollow Knight", coverUrl: null },
-    { id: "ext-celeste", title: "Celeste", coverUrl: null },
-    { id: "ext-hades", title: "Hades", coverUrl: null },
-    { id: "ext-metroid-dread", title: "Metroid Dread", coverUrl: null },
-    { id: "ext-persona-5", title: "Persona 5 Royal", coverUrl: null },
-  ]
-
-  return mockDatabase.filter((game) =>
-    game.title.toLowerCase().includes(lowerQuery)
-  )
+async function getIGDBToken(): Promise<string> {
+  const url = `https://id.twitch.tv/oauth2/token?client_id=${process.env.IGDB_CLIENT_ID}&client_secret=${process.env.IGDB_CLIENT_SECRET}&grant_type=client_credentials`
+  
+  const response = await fetch(url, {
+    method: 'POST'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch IGDB token')
+  }
+  
+  const data = await response.json()
+  return data.access_token
 }
 
 export async function searchGames(query: string): Promise<SearchResult> {
@@ -55,7 +47,7 @@ export async function searchGames(query: string): Promise<SearchResult> {
   }
 
   try {
-    // Step A: Search local database first (Cache Hit)
+    // Paso 1: Search local database first (Cache Hit)
     const localGames = await prisma.game.findMany({
       where: {
         title: {
@@ -63,35 +55,57 @@ export async function searchGames(query: string): Promise<SearchResult> {
           mode: "insensitive",
         },
       },
-      take: 20,
+      take: 10,
     })
 
-    // Step B: If we have local results, return them immediately
     if (localGames.length > 0) {
       return { success: true, data: localGames }
     }
 
-    // Step C: No local results — fetch from external API (simulated)
-    const externalResults = fetchExternalAPI(trimmed)
+    // Paso 2: Cache Miss - fetch from external API (IGDB)
+    const token = await getIGDBToken()
+    
+    const response = await fetch('https://api.igdb.com/v4/games', {
+      method: 'POST',
+      headers: {
+        'Client-ID': process.env.IGDB_CLIENT_ID as string,
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      body: `search "${trimmed}"; fields name, cover.url; limit 10;`,
+    })
 
-    if (externalResults.length === 0) {
+    if (!response.ok) {
+      throw new Error(`IGDB API error: ${response.statusText}`)
+    }
+
+    const igdbGames: IGDBGame[] = await response.json()
+
+    if (igdbGames.length === 0) {
       return { success: true, data: [] }
     }
 
-    // Step D: Cache Miss → Save to database and return
+    // Cache Miss → Save to database and return
     const savedGames: Game[] = []
 
-    for (const externalGame of externalResults) {
+    for (const igdbGame of igdbGames) {
+      const externalId = igdbGame.id.toString()
+      let coverUrl = null
+
+      if (igdbGame.cover?.url) {
+        coverUrl = `https:${igdbGame.cover.url.replace('t_thumb', 't_cover_big')}`
+      }
+
       const saved = await prisma.game.upsert({
-        where: { id: externalGame.id },
+        where: { id: externalId },
         update: {
-          title: externalGame.title,
-          coverUrl: externalGame.coverUrl,
+          title: igdbGame.name,
+          coverUrl: coverUrl,
         },
         create: {
-          id: externalGame.id,
-          title: externalGame.title,
-          coverUrl: externalGame.coverUrl,
+          id: externalId,
+          title: igdbGame.name,
+          coverUrl: coverUrl,
         },
       })
       savedGames.push(saved)

@@ -52,6 +52,7 @@ model User {
 
   libraryEntries LibraryEntry[]
   lists          List[]
+  customPlatforms CustomPlatform[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -174,4 +175,13 @@ model ListItem {
   updatedAt DateTime @updatedAt
 
   @@unique([listId, gameId]) // A game can only be in a list once
+}
+
+model CustomPlatform {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
