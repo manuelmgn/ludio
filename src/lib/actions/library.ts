@@ -17,6 +17,13 @@ export interface AddGameData {
   endDate?: string
   rating?: number
   publicReview?: string
+  // Pricing
+  purchasePrice?: number
+  purchaseStoreId?: string
+  purchaseDate?: string
+  salePrice?: number
+  saleStoreId?: string
+  saleDate?: string
 }
 
 async function getAuthenticatedOrDemoUser() {
@@ -83,6 +90,12 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
           platform: data.platform || "PC",
           startDate: data.startDate || null,
           endDate: data.endDate || null,
+          purchasePrice: data.purchasePrice ?? null,
+          purchaseStoreId: data.purchaseStoreId || null,
+          purchaseDate: data.purchaseDate || null,
+          salePrice: data.salePrice ?? null,
+          saleStoreId: data.saleStoreId || null,
+          saleDate: data.saleDate || null,
         },
       })
     }
@@ -127,5 +140,95 @@ export async function removeGameFromLibrary(gameId: string): Promise<ActionRespo
   } catch (error) {
     console.error("[removeGameFromLibrary] Error:", error)
     return { success: false, error: "Non se puido eliminar da biblioteca." }
+  }
+}
+
+export interface UpdatePlaythroughData {
+  status: PlaythroughStatus
+  platform: string
+  startDate?: string | null
+  endDate?: string | null
+  purchasePrice?: number | null
+  purchaseStoreId?: string | null
+  purchaseDate?: string | null
+  salePrice?: number | null
+  saleStoreId?: string | null
+  saleDate?: string | null
+}
+
+export async function updatePlaythrough(
+  playthroughId: string,
+  gameId: string,
+  data: UpdatePlaythroughData
+): Promise<ActionResponse> {
+  try {
+    const user = await getAuthenticatedOrDemoUser()
+
+    const playthrough = await prisma.playthrough.findUnique({
+      where: { id: playthroughId },
+      include: { libraryEntry: true },
+    })
+
+    if (!playthrough || playthrough.libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para modificar esta partida." }
+    }
+
+    await prisma.playthrough.update({
+      where: { id: playthroughId },
+      data: {
+        status: data.status,
+        platform: data.platform,
+        startDate: data.startDate !== undefined ? data.startDate : playthrough.startDate,
+        endDate: data.endDate !== undefined ? data.endDate : playthrough.endDate,
+        purchasePrice: data.purchasePrice !== undefined ? data.purchasePrice : playthrough.purchasePrice,
+        purchaseStoreId: data.purchaseStoreId !== undefined ? data.purchaseStoreId : playthrough.purchaseStoreId,
+        purchaseDate: data.purchaseDate !== undefined ? data.purchaseDate : playthrough.purchaseDate,
+        salePrice: data.salePrice !== undefined ? data.salePrice : playthrough.salePrice,
+        saleStoreId: data.saleStoreId !== undefined ? data.saleStoreId : playthrough.saleStoreId,
+        saleDate: data.saleDate !== undefined ? data.saleDate : playthrough.saleDate,
+      },
+    })
+
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath("/library")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+
+    return { success: true }
+  } catch (error) {
+    console.error("[updatePlaythrough] Error:", error)
+    return { success: false, error: "Erro ao actualizar a partida." }
+  }
+}
+
+export async function deletePlaythrough(
+  playthroughId: string,
+  gameId: string
+): Promise<ActionResponse> {
+  try {
+    const user = await getAuthenticatedOrDemoUser()
+
+    const playthrough = await prisma.playthrough.findUnique({
+      where: { id: playthroughId },
+      include: { libraryEntry: true },
+    })
+
+    if (!playthrough || playthrough.libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para eliminar esta partida." }
+    }
+
+    await prisma.playthrough.delete({
+      where: { id: playthroughId },
+    })
+
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath("/library")
+    revalidatePath("/dashboard")
+    revalidatePath("/")
+
+    return { success: true }
+  } catch (error) {
+    console.error("[deletePlaythrough] Error:", error)
+    return { success: false, error: "Erro ao eliminar a partida." }
   }
 }

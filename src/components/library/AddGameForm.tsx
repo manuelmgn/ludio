@@ -8,16 +8,23 @@ import { addGameToLibrary } from "@/lib/actions/library"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { useLanguage } from "@/contexts/LanguageContext"
 
+interface StoreOption {
+  id: string
+  name: string
+}
+
 interface AddGameFormProps {
   gameId: string
   customPlatforms?: string[]
+  stores?: StoreOption[]
 }
 
-export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) {
+export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGameFormProps) {
   const router = useRouter()
   const { t } = useLanguage()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [showPricing, setShowPricing] = useState(false)
 
   const [status, setStatus] = useState<"WISHED" | PlaythroughStatus>("WISHED")
   
@@ -52,6 +59,14 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
     const ratingStr = formData.get("rating") as string
     const publicReview = formData.get("publicReview") as string
 
+    // Pricing fields
+    const purchasePriceStr = formData.get("purchasePrice") as string
+    const purchaseStoreId = formData.get("purchaseStoreId") as string
+    const purchaseDate = formData.get("purchaseDate") as string
+    const salePriceStr = formData.get("salePrice") as string
+    const saleStoreId = formData.get("saleStoreId") as string
+    const saleDate = formData.get("saleDate") as string
+
     if (isPlaythrough && !platform?.trim()) {
       setError("Debes indicar unha plataforma para rexistrar a partida.")
       return
@@ -63,6 +78,8 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
     }
 
     const rating = isCompleted && ratingStr ? parseInt(ratingStr, 10) : undefined
+    const purchasePrice = purchasePriceStr?.trim() ? parseFloat(purchasePriceStr) : undefined
+    const salePrice = salePriceStr?.trim() ? parseFloat(salePriceStr) : undefined
 
     startTransition(async () => {
       const result = await addGameToLibrary(gameId, {
@@ -72,6 +89,12 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
         endDate: endDate?.trim() || undefined,
         rating,
         publicReview: publicReview?.trim() || undefined,
+        purchasePrice,
+        purchaseStoreId: purchaseStoreId?.trim() || undefined,
+        purchaseDate: purchaseDate?.trim() || undefined,
+        salePrice,
+        saleStoreId: saleStoreId?.trim() || undefined,
+        saleDate: saleDate?.trim() || undefined,
       })
 
       if (result.success) {
@@ -163,6 +186,128 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
                 />
               </div>
             </div>
+
+            {/* Pricing toggle */}
+            <button
+              type="button"
+              onClick={() => setShowPricing(!showPricing)}
+              className="flex items-center gap-2 text-sm font-sans text-zinc-400 hover:text-white transition-colors self-start mt-1"
+            >
+              <span className="text-base">{showPricing ? "▼" : "▶"}</span>
+              <span>💶 {t("pricing_toggle")}</span>
+            </button>
+
+            {showPricing && (
+              <div className="p-4 border border-amber-500/20 bg-amber-500/5 rounded-xl flex flex-col gap-4 animate-in fade-in duration-200">
+                <span className="text-xs font-mono uppercase tracking-wider text-amber-400/80">
+                  {t("pricing_section_title")}
+                </span>
+
+                {/* Purchase section */}
+                <div className="flex flex-col gap-3">
+                  <span className="text-xs font-sans text-zinc-400 flex items-center gap-1.5">
+                    <span>💸</span> {t("purchase_label")}
+                  </span>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="purchasePrice" className="text-white/50 font-sans text-xs">
+                        {t("price_label")}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="purchasePrice"
+                        id="purchasePrice"
+                        placeholder="0.00"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="purchaseStoreId" className="text-white/50 font-sans text-xs">
+                        {t("store_label")}
+                      </label>
+                      <select
+                        name="purchaseStoreId"
+                        id="purchaseStoreId"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      >
+                        <option value="">{t("select_store")}</option>
+                        {stores.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="purchaseDate" className="text-white/50 font-sans text-xs">
+                        {t("date_label")}
+                      </label>
+                      <input
+                        type="date"
+                        name="purchaseDate"
+                        id="purchaseDate"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sale section */}
+                <div className="flex flex-col gap-3 pt-3 border-t border-white/5">
+                  <span className="text-xs font-sans text-zinc-400 flex items-center gap-1.5">
+                    <span>💰</span> {t("sale_label")}
+                  </span>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="salePrice" className="text-white/50 font-sans text-xs">
+                        {t("price_label")}
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="salePrice"
+                        id="salePrice"
+                        placeholder="0.00"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="saleStoreId" className="text-white/50 font-sans text-xs">
+                        {t("store_label")}
+                      </label>
+                      <select
+                        name="saleStoreId"
+                        id="saleStoreId"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      >
+                        <option value="">{t("select_store")}</option>
+                        {stores.map((s) => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label htmlFor="saleDate" className="text-white/50 font-sans text-xs">
+                        {t("date_label")}
+                      </label>
+                      <input
+                        type="date"
+                        name="saleDate"
+                        id="saleDate"
+                        disabled={isPending}
+                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
 

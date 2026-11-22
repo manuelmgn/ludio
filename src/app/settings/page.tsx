@@ -4,11 +4,18 @@ import { useState, useTransition, useEffect } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
-import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform } from "@/lib/actions/settings"
+import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform, getStores, addStore, deleteStore } from "@/lib/actions/settings"
 
 interface CustomPlatform {
   id: string
   name: string
+  createdAt: Date
+}
+
+interface StoreItem {
+  id: string
+  name: string
+  isDefault: boolean
   createdAt: Date
 }
 
@@ -20,11 +27,23 @@ export default function SettingsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
+  // Stores state
+  const [storeName, setStoreName] = useState("")
+  const [storesList, setStoresList] = useState<StoreItem[]>([])
+  const [isStorePending, startStoreTransition] = useTransition()
+  const [deletingStoreId, setDeletingStoreId] = useState<string | null>(null)
+  const [storeMessage, setStoreMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
   useEffect(() => {
     let isMounted = true
     getCustomPlatforms().then((res) => {
       if (isMounted && res.success && res.data) {
         setPlatforms(res.data)
+      }
+    })
+    getStores().then((res) => {
+      if (isMounted && res.success && res.data) {
+        setStoresList(res.data as StoreItem[])
       }
     })
     return () => {
@@ -63,6 +82,41 @@ export default function SettingsPage() {
       alert(result.error || "Erro ao eliminar.")
     }
   }
+
+  const handleAddStore = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!storeName.trim()) return
+
+    setStoreMessage(null)
+    startStoreTransition(async () => {
+      const result = await addStore(storeName)
+      if (result.success && result.data) {
+        setStoreMessage({ type: "success", text: t("store_added_success") })
+        setStoresList((prev) => [...prev, result.data as StoreItem])
+        setStoreName("")
+        setTimeout(() => setStoreMessage(null), 3000)
+      } else {
+        setStoreMessage({ type: "error", text: result.error || t("store_add_error") })
+      }
+    })
+  }
+
+  const handleDeleteStore = async (id: string) => {
+    if (!confirm(t("store_delete_confirm"))) return
+
+    setDeletingStoreId(id)
+    const result = await deleteStore(id)
+    setDeletingStoreId(null)
+
+    if (result.success) {
+      setStoresList((prev) => prev.filter((s) => s.id !== id))
+    } else {
+      alert(result.error || t("store_delete_error"))
+    }
+  }
+
+  const defaultStores = storesList.filter((s) => s.isDefault)
+  const customStores = storesList.filter((s) => !s.isDefault)
 
   return (
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
@@ -177,6 +231,91 @@ export default function SettingsPage() {
               </p>
             )}
           </div>
+        </GlassPanel>
+
+        {/* Section 3: Stores (Tiendas) */}
+        <GlassPanel>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">🏪</span>
+            <h2 className="text-xl font-medium text-white font-sans">{t("stores_title")}</h2>
+          </div>
+          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
+            {t("stores_desc")}
+          </p>
+
+          <form onSubmit={handleAddStore} className="flex gap-2 mb-6 items-end">
+            <div className="flex-1">
+              <Input
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                placeholder={t("store_name_placeholder")}
+                disabled={isStorePending}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={isStorePending || storeName.trim().length === 0}
+              className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
+            >
+              {isStorePending ? t("saving") : t("add_store_btn")}
+            </button>
+          </form>
+
+          {storeMessage && (
+            <p className={`mb-4 text-xs ${storeMessage.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+              {storeMessage.text}
+            </p>
+          )}
+
+          {/* Default Stores */}
+          <div className="pt-4 border-t border-white/10">
+            <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+              {t("stores_default_label")} ({defaultStores.length})
+            </span>
+            {defaultStores.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {defaultStores.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs font-sans text-zinc-200"
+                  >
+                    <span>{s.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500 italic mb-4">
+                {t("no_stores")}
+              </p>
+            )}
+          </div>
+
+          {/* Custom Stores */}
+          {customStores.length > 0 && (
+            <div className="pt-3 border-t border-white/10">
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+                {t("stores_custom_label")} ({customStores.length})
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {customStores.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-sans text-zinc-200"
+                  >
+                    <span>{s.name}</span>
+                    <button
+                      onClick={() => handleDeleteStore(s.id)}
+                      disabled={deletingStoreId === s.id}
+                      className="text-zinc-500 hover:text-rose-400 transition-colors ml-1"
+                      title={t("delete")}
+                    >
+                      {deletingStoreId === s.id ? "..." : "✕"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </GlassPanel>
 
       </div>

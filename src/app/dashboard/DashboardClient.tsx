@@ -180,6 +180,50 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
           </div>
         </GlassPanel>
 
+        {/* Gamer Economy / Financial Section */}
+        <GlassPanel className="p-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">💶</span>
+              <h2 className="text-sm font-sans text-zinc-300 font-medium uppercase tracking-wider">
+                {t("economy_title") || "Economía Gamer & Prezos"}
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">
+              {stats.pricingGamesCount} {t("pricing_games_tracked") || "xogos con prezos rexistrados"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-500/20 flex flex-col gap-1">
+              <span className="text-xs text-rose-300/80 font-sans flex items-center gap-1.5">
+                <span>💸</span> {t("total_spent") || "Total Invertido (Compras)"}
+              </span>
+              <span className="text-2xl font-pixel text-rose-400 tracking-wider">
+                {stats.totalSpent.toFixed(2)}€
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-1">
+              <span className="text-xs text-emerald-300/80 font-sans flex items-center gap-1.5">
+                <span>💰</span> {t("total_earned") || "Total Recuperado (Vendas)"}
+              </span>
+              <span className="text-2xl font-pixel text-emerald-400 tracking-wider">
+                {stats.totalEarned.toFixed(2)}€
+              </span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/20 flex flex-col gap-1">
+              <span className="text-xs text-purple-300/80 font-sans flex items-center gap-1.5">
+                <span>⚖️</span> {t("net_balance") || "Balance Neto"}
+              </span>
+              <span className={`text-2xl font-pixel tracking-wider ${stats.netBalance >= 0 ? "text-emerald-400" : "text-zinc-200"}`}>
+                {stats.netBalance >= 0 ? `+${stats.netBalance.toFixed(2)}€` : `${stats.netBalance.toFixed(2)}€`}
+              </span>
+            </div>
+          </div>
+        </GlassPanel>
+
         {/* Recent Activity Section */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">

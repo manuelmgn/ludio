@@ -62,7 +62,8 @@ export const ModelName = {
   ListItem: 'ListItem',
   CustomPlatform: 'CustomPlatform',
   GameCanvas: 'GameCanvas',
-  CanvasImage: 'CanvasImage'
+  CanvasImage: 'CanvasImage',
+  Store: 'Store'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -142,6 +143,12 @@ export const PlaythroughScalarFieldEnum = {
   platform: 'platform',
   startDate: 'startDate',
   endDate: 'endDate',
+  purchasePrice: 'purchasePrice',
+  purchaseStoreId: 'purchaseStoreId',
+  purchaseDate: 'purchaseDate',
+  salePrice: 'salePrice',
+  saleStoreId: 'saleStoreId',
+  saleDate: 'saleDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -229,6 +236,18 @@ export const CanvasImageScalarFieldEnum = {
 } as const
 
 export type CanvasImageScalarFieldEnum = (typeof CanvasImageScalarFieldEnum)[keyof typeof CanvasImageScalarFieldEnum]
+
+
+export const StoreScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  isDefault: 'isDefault',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoreScalarFieldEnum = (typeof StoreScalarFieldEnum)[keyof typeof StoreScalarFieldEnum]
 
 
 export const SortOrder = {

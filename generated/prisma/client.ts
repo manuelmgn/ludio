@@ -101,3 +101,8 @@ export type GameCanvas = Prisma.GameCanvasModel
  * 
  */
 export type CanvasImage = Prisma.CanvasImageModel
+/**
+ * Model Store
+ * 
+ */
+export type Store = Prisma.StoreModel

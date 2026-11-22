@@ -13,6 +13,10 @@ export interface UserStats {
   wishlistCount: number
   averageRating: number | null
   ratedGamesCount: number
+  totalSpent: number
+  totalEarned: number
+  netBalance: number
+  pricingGamesCount: number
   recentEntries: {
     id: string
     rating?: number | null
@@ -50,6 +54,10 @@ export default async function DashboardPage() {
     wishlistCount: 0,
     averageRating: null,
     ratedGamesCount: 0,
+    totalSpent: 0,
+    totalEarned: 0,
+    netBalance: 0,
+    pricingGamesCount: 0,
     recentEntries: [],
   }
 
@@ -69,6 +77,8 @@ export default async function DashboardPage() {
           select: {
             status: true,
             platform: true,
+            purchasePrice: true,
+            salePrice: true,
           },
         },
       },
@@ -84,10 +94,29 @@ export default async function DashboardPage() {
     let ratingSum = 0
     let ratedGamesCount = 0
 
+    let totalSpent = 0
+    let totalEarned = 0
+    let pricingGamesCount = 0
+
     for (const entry of entries) {
       if (entry.rating) {
         ratingSum += entry.rating
         ratedGamesCount++
+      }
+
+      let hasPricing = false
+      for (const pt of entry.playthroughs) {
+        if (pt.purchasePrice != null) {
+          totalSpent += pt.purchasePrice
+          hasPricing = true
+        }
+        if (pt.salePrice != null) {
+          totalEarned += pt.salePrice
+          hasPricing = true
+        }
+      }
+      if (hasPricing) {
+        pricingGamesCount++
       }
 
       if (entry.playthroughs.length === 0) {
@@ -102,6 +131,7 @@ export default async function DashboardPage() {
     }
 
     const averageRating = ratedGamesCount > 0 ? Number((ratingSum / ratedGamesCount).toFixed(1)) : null
+    const netBalance = Number((totalEarned - totalSpent).toFixed(2))
 
     const recentEntries = entries.slice(0, 5).map((e) => ({
       id: e.id,
@@ -121,6 +151,10 @@ export default async function DashboardPage() {
       wishlistCount,
       averageRating,
       ratedGamesCount,
+      totalSpent: Number(totalSpent.toFixed(2)),
+      totalEarned: Number(totalEarned.toFixed(2)),
+      netBalance,
+      pricingGamesCount,
       recentEntries,
     }
   }

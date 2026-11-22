@@ -21,6 +21,8 @@ export interface LibraryEntryWithDetails {
   playthroughs: { 
     status: PlaythroughStatus
     platform?: string
+    purchasePrice?: number | null
+    salePrice?: number | null
   }[]
 }
 
@@ -209,11 +211,25 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                   {entry.game.title}
                 </Link>
 
-                {latestPlaythrough?.platform && (
-                  <span className="text-[10px] text-zinc-500 font-mono mt-1 block">
-                    {latestPlaythrough.platform}
-                  </span>
-                )}
+                <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
+                  {latestPlaythrough?.platform ? (
+                    <span className="text-zinc-500 truncate">
+                      {latestPlaythrough.platform}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  {latestPlaythrough?.purchasePrice != null && (
+                    <span className="text-rose-400 font-semibold ml-auto">
+                      {latestPlaythrough.purchasePrice.toFixed(0)}€
+                    </span>
+                  )}
+                  {latestPlaythrough?.purchasePrice == null && latestPlaythrough?.salePrice != null && (
+                    <span className="text-emerald-400 font-semibold ml-auto">
+                      +{latestPlaythrough.salePrice.toFixed(0)}€
+                    </span>
+                  )}
+                </div>
               </GlassPanel>
             )
           })}

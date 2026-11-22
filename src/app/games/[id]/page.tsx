@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { AddGameForm } from "@/components/library/AddGameForm"
 import { RemoveGameButton } from "@/components/library/RemoveGameButton"
+import { PlaythroughList } from "@/components/library/PlaythroughList"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { ensureDefaultStores } from "@/lib/actions/settings"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -50,6 +52,10 @@ export default async function GamePage({ params }: GamePageProps) {
         include: {
           playthroughs: {
             orderBy: { createdAt: "desc" },
+            include: {
+              purchaseStore: true,
+              saleStore: true,
+            },
           },
           journalEntry: {
             include: {
@@ -73,6 +79,20 @@ export default async function GamePage({ params }: GamePageProps) {
     : []
 
   const customPlatformNames = customPlatforms.map((p) => p.name)
+
+  // Fetch stores for the pricing form
+  await ensureDefaultStores()
+  const stores = await prisma.store.findMany({
+    where: {
+      OR: [
+        { isDefault: true },
+        ...(user ? [{ userId: user.id }] : []),
+      ]
+    },
+    orderBy: [{ isDefault: "desc" }, { name: "asc" }]
+  })
+
+  const storeOptions = stores.map((s) => ({ id: s.id, name: s.name }))
 
   return (
     <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
@@ -197,42 +217,26 @@ export default async function GamePage({ params }: GamePageProps) {
               )}
 
               {libraryEntry.playthroughs.length > 0 ? (
-                <div className="flex flex-col gap-3">
-                  {libraryEntry.playthroughs.map((pt) => {
-                    const statusLabels: Record<string, { label: string; color: string }> = {
-                      PLAYING: { label: "Xogando", color: "bg-blue-500/20 text-blue-300 border-blue-500/40" },
-                      COMPLETED: { label: "Completado", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" },
-                      ON_HOLD: { label: "En Pausa", color: "bg-amber-500/20 text-amber-300 border-amber-500/40" },
-                      ABANDONED: { label: "Abandonado", color: "bg-rose-500/20 text-rose-300 border-rose-500/40" },
-                    }
-                    const badge = statusLabels[pt.status] || { label: pt.status, color: "bg-zinc-800 text-zinc-300 border-zinc-700" }
-
-                    return (
-                      <div
-                        key={pt.id}
-                        className="flex items-center justify-between p-3.5 rounded-xl bg-black/40 border border-white/5"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}>
-                            {badge.label}
-                          </span>
-                          <span className="text-sm font-sans text-zinc-200">
-                            {pt.platform}
-                          </span>
-                        </div>
-                        <div className="text-xs font-mono text-zinc-400">
-                          {pt.startDate || pt.endDate ? (
-                            <span>
-                              {pt.startDate || "?"} → {pt.endDate || "Presente"}
-                            </span>
-                          ) : (
-                            <span>Rexistrada</span>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                <PlaythroughList
+                  gameId={game.id}
+                  playthroughs={libraryEntry.playthroughs.map((pt) => ({
+                    id: pt.id,
+                    status: pt.status,
+                    platform: pt.platform,
+                    startDate: pt.startDate,
+                    endDate: pt.endDate,
+                    purchasePrice: pt.purchasePrice,
+                    purchaseStoreId: pt.purchaseStoreId,
+                    purchaseStore: pt.purchaseStore ? { id: pt.purchaseStore.id, name: pt.purchaseStore.name } : null,
+                    purchaseDate: pt.purchaseDate,
+                    salePrice: pt.salePrice,
+                    saleStoreId: pt.saleStoreId,
+                    saleStore: pt.saleStore ? { id: pt.saleStore.id, name: pt.saleStore.name } : null,
+                    saleDate: pt.saleDate,
+                  }))}
+                  stores={storeOptions}
+                  customPlatforms={customPlatformNames}
+                />
               ) : (
                 <div className="text-sm text-zinc-400 bg-white/5 rounded-xl p-4 text-center">
                   Este xogo está na túa lista de <strong>Desexados</strong>. Rexistra a túa primeira partida abaixo cando comeces a xogalo.
@@ -247,13 +251,13 @@ export default async function GamePage({ params }: GamePageProps) {
                     <span className="text-xs transition-transform group-open:rotate-180">▼</span>
                   </summary>
                   <div className="mt-4">
-                    <AddGameForm gameId={game.id} customPlatforms={customPlatformNames} />
+                    <AddGameForm gameId={game.id} customPlatforms={customPlatformNames} stores={storeOptions} />
                   </div>
                 </details>
               </div>
             </GlassPanel>
           ) : (
-            <AddGameForm gameId={game.id} customPlatforms={customPlatformNames} />
+            <AddGameForm gameId={game.id} customPlatforms={customPlatformNames} stores={storeOptions} />
           )}
         </div>
       </div>
