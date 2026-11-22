@@ -226,6 +226,7 @@ export type UserWhereInput = {
   following?: Prisma.FollowListRelationFilter
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
   lists?: Prisma.ListListRelationFilter
+  customPlatforms?: Prisma.CustomPlatformListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -243,6 +244,7 @@ export type UserOrderByWithRelationInput = {
   following?: Prisma.FollowOrderByRelationAggregateInput
   libraryEntries?: Prisma.LibraryEntryOrderByRelationAggregateInput
   lists?: Prisma.ListOrderByRelationAggregateInput
+  customPlatforms?: Prisma.CustomPlatformOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -263,6 +265,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   following?: Prisma.FollowListRelationFilter
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
   lists?: Prisma.ListListRelationFilter
+  customPlatforms?: Prisma.CustomPlatformListRelationFilter
 }, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
@@ -312,6 +315,7 @@ export type UserCreateInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutUserInput
   lists?: Prisma.ListCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -329,6 +333,7 @@ export type UserUncheckedCreateInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutUserInput
   lists?: Prisma.ListUncheckedCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -346,6 +351,7 @@ export type UserUpdateInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -363,6 +369,7 @@ export type UserUncheckedUpdateInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUncheckedUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -524,6 +531,20 @@ export type UserUpdateOneRequiredWithoutListsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutListsInput, Prisma.UserUpdateWithoutListsInput>, Prisma.UserUncheckedUpdateWithoutListsInput>
 }
 
+export type UserCreateNestedOneWithoutCustomPlatformsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustomPlatformsInput, Prisma.UserUncheckedCreateWithoutCustomPlatformsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomPlatformsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCustomPlatformsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCustomPlatformsInput, Prisma.UserUncheckedCreateWithoutCustomPlatformsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCustomPlatformsInput
+  upsert?: Prisma.UserUpsertWithoutCustomPlatformsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCustomPlatformsInput, Prisma.UserUpdateWithoutCustomPlatformsInput>, Prisma.UserUncheckedUpdateWithoutCustomPlatformsInput>
+}
+
 export type UserCreateWithoutFollowingInput = {
   id?: string
   email: string
@@ -538,6 +559,7 @@ export type UserCreateWithoutFollowingInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutUserInput
   lists?: Prisma.ListCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -554,6 +576,7 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutUserInput
   lists?: Prisma.ListUncheckedCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -575,6 +598,7 @@ export type UserCreateWithoutFollowersInput = {
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutUserInput
   lists?: Prisma.ListCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -591,6 +615,7 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutUserInput
   lists?: Prisma.ListUncheckedCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -623,6 +648,7 @@ export type UserUpdateWithoutFollowingInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -639,6 +665,7 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUncheckedUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -666,6 +693,7 @@ export type UserUpdateWithoutFollowersInput = {
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -682,6 +710,7 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutUserNestedInput
   lists?: Prisma.ListUncheckedUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLibraryEntriesInput = {
@@ -698,6 +727,7 @@ export type UserCreateWithoutLibraryEntriesInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   lists?: Prisma.ListCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLibraryEntriesInput = {
@@ -714,6 +744,7 @@ export type UserUncheckedCreateWithoutLibraryEntriesInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   lists?: Prisma.ListUncheckedCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLibraryEntriesInput = {
@@ -746,6 +777,7 @@ export type UserUpdateWithoutLibraryEntriesInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   lists?: Prisma.ListUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLibraryEntriesInput = {
@@ -762,6 +794,7 @@ export type UserUncheckedUpdateWithoutLibraryEntriesInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   lists?: Prisma.ListUncheckedUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutListsInput = {
@@ -778,6 +811,7 @@ export type UserCreateWithoutListsInput = {
   followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutListsInput = {
@@ -794,6 +828,7 @@ export type UserUncheckedCreateWithoutListsInput = {
   followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutUserInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutListsInput = {
@@ -826,6 +861,7 @@ export type UserUpdateWithoutListsInput = {
   followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutListsInput = {
@@ -842,6 +878,91 @@ export type UserUncheckedUpdateWithoutListsInput = {
   followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutUserNestedInput
+  customPlatforms?: Prisma.CustomPlatformUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutCustomPlatformsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  username: string
+  avatarUrl?: string | null
+  bio?: string | null
+  theme?: $Enums.Theme
+  language?: $Enums.Language
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  followers?: Prisma.FollowCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowCreateNestedManyWithoutFollowerInput
+  libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutUserInput
+  lists?: Prisma.ListCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutCustomPlatformsInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  username: string
+  avatarUrl?: string | null
+  bio?: string | null
+  theme?: $Enums.Theme
+  language?: $Enums.Language
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput
+  libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutUserInput
+  lists?: Prisma.ListUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutCustomPlatformsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustomPlatformsInput, Prisma.UserUncheckedCreateWithoutCustomPlatformsInput>
+}
+
+export type UserUpsertWithoutCustomPlatformsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCustomPlatformsInput, Prisma.UserUncheckedUpdateWithoutCustomPlatformsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCustomPlatformsInput, Prisma.UserUncheckedCreateWithoutCustomPlatformsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCustomPlatformsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCustomPlatformsInput, Prisma.UserUncheckedUpdateWithoutCustomPlatformsInput>
+}
+
+export type UserUpdateWithoutCustomPlatformsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  followers?: Prisma.FollowUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUpdateManyWithoutFollowerNestedInput
+  libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutUserNestedInput
+  lists?: Prisma.ListUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCustomPlatformsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.EnumThemeFieldUpdateOperationsInput | $Enums.Theme
+  language?: Prisma.EnumLanguageFieldUpdateOperationsInput | $Enums.Language
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput
+  libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutUserNestedInput
+  lists?: Prisma.ListUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -854,6 +975,7 @@ export type UserCountOutputType = {
   following: number
   libraryEntries: number
   lists: number
+  customPlatforms: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -861,6 +983,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   following?: boolean | UserCountOutputTypeCountFollowingArgs
   libraryEntries?: boolean | UserCountOutputTypeCountLibraryEntriesArgs
   lists?: boolean | UserCountOutputTypeCountListsArgs
+  customPlatforms?: boolean | UserCountOutputTypeCountCustomPlatformsArgs
 }
 
 /**
@@ -901,6 +1024,13 @@ export type UserCountOutputTypeCountListsArgs<ExtArgs extends runtime.Types.Exte
   where?: Prisma.ListWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCustomPlatformsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CustomPlatformWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -917,6 +1047,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   libraryEntries?: boolean | Prisma.User$libraryEntriesArgs<ExtArgs>
   lists?: boolean | Prisma.User$listsArgs<ExtArgs>
+  customPlatforms?: boolean | Prisma.User$customPlatformsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -965,6 +1096,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   libraryEntries?: boolean | Prisma.User$libraryEntriesArgs<ExtArgs>
   lists?: boolean | Prisma.User$listsArgs<ExtArgs>
+  customPlatforms?: boolean | Prisma.User$customPlatformsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -977,6 +1109,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     following: Prisma.$FollowPayload<ExtArgs>[]
     libraryEntries: Prisma.$LibraryEntryPayload<ExtArgs>[]
     lists: Prisma.$ListPayload<ExtArgs>[]
+    customPlatforms: Prisma.$CustomPlatformPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1387,6 +1520,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   libraryEntries<T extends Prisma.User$libraryEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$libraryEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LibraryEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lists<T extends Prisma.User$listsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$listsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ListPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  customPlatforms<T extends Prisma.User$customPlatformsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customPlatformsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomPlatformPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1912,6 +2046,30 @@ export type User$listsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.ListScalarFieldEnum | Prisma.ListScalarFieldEnum[]
+}
+
+/**
+ * User.customPlatforms
+ */
+export type User$customPlatformsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CustomPlatform
+   */
+  select?: Prisma.CustomPlatformSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CustomPlatform
+   */
+  omit?: Prisma.CustomPlatformOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomPlatformInclude<ExtArgs> | null
+  where?: Prisma.CustomPlatformWhereInput
+  orderBy?: Prisma.CustomPlatformOrderByWithRelationInput | Prisma.CustomPlatformOrderByWithRelationInput[]
+  cursor?: Prisma.CustomPlatformWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CustomPlatformScalarFieldEnum | Prisma.CustomPlatformScalarFieldEnum[]
 }
 
 /**

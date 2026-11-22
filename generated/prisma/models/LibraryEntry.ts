@@ -244,6 +244,7 @@ export type LibraryEntryWhereInput = {
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
   playthroughs?: Prisma.PlaythroughListRelationFilter
   journalEntry?: Prisma.XOR<Prisma.JournalEntryNullableScalarRelationFilter, Prisma.JournalEntryWhereInput> | null
+  gameCanvas?: Prisma.XOR<Prisma.GameCanvasNullableScalarRelationFilter, Prisma.GameCanvasWhereInput> | null
 }
 
 export type LibraryEntryOrderByWithRelationInput = {
@@ -259,6 +260,7 @@ export type LibraryEntryOrderByWithRelationInput = {
   game?: Prisma.GameOrderByWithRelationInput
   playthroughs?: Prisma.PlaythroughOrderByRelationAggregateInput
   journalEntry?: Prisma.JournalEntryOrderByWithRelationInput
+  gameCanvas?: Prisma.GameCanvasOrderByWithRelationInput
 }
 
 export type LibraryEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +280,7 @@ export type LibraryEntryWhereUniqueInput = Prisma.AtLeast<{
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
   playthroughs?: Prisma.PlaythroughListRelationFilter
   journalEntry?: Prisma.XOR<Prisma.JournalEntryNullableScalarRelationFilter, Prisma.JournalEntryWhereInput> | null
+  gameCanvas?: Prisma.XOR<Prisma.GameCanvasNullableScalarRelationFilter, Prisma.GameCanvasWhereInput> | null
 }, "id" | "userId_gameId">
 
 export type LibraryEntryOrderByWithAggregationInput = {
@@ -321,6 +324,7 @@ export type LibraryEntryCreateInput = {
   game: Prisma.GameCreateNestedOneWithoutLibraryEntriesInput
   playthroughs?: Prisma.PlaythroughCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUncheckedCreateInput = {
@@ -334,6 +338,7 @@ export type LibraryEntryUncheckedCreateInput = {
   updatedAt?: Date | string
   playthroughs?: Prisma.PlaythroughUncheckedCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasUncheckedCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUpdateInput = {
@@ -347,6 +352,7 @@ export type LibraryEntryUpdateInput = {
   game?: Prisma.GameUpdateOneRequiredWithoutLibraryEntriesNestedInput
   playthroughs?: Prisma.PlaythroughUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateInput = {
@@ -360,6 +366,7 @@ export type LibraryEntryUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   playthroughs?: Prisma.PlaythroughUncheckedUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUncheckedUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUncheckedUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryCreateManyInput = {
@@ -574,6 +581,20 @@ export type LibraryEntryUpdateOneRequiredWithoutJournalEntryNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LibraryEntryUpdateToOneWithWhereWithoutJournalEntryInput, Prisma.LibraryEntryUpdateWithoutJournalEntryInput>, Prisma.LibraryEntryUncheckedUpdateWithoutJournalEntryInput>
 }
 
+export type LibraryEntryCreateNestedOneWithoutGameCanvasInput = {
+  create?: Prisma.XOR<Prisma.LibraryEntryCreateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedCreateWithoutGameCanvasInput>
+  connectOrCreate?: Prisma.LibraryEntryCreateOrConnectWithoutGameCanvasInput
+  connect?: Prisma.LibraryEntryWhereUniqueInput
+}
+
+export type LibraryEntryUpdateOneRequiredWithoutGameCanvasNestedInput = {
+  create?: Prisma.XOR<Prisma.LibraryEntryCreateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedCreateWithoutGameCanvasInput>
+  connectOrCreate?: Prisma.LibraryEntryCreateOrConnectWithoutGameCanvasInput
+  upsert?: Prisma.LibraryEntryUpsertWithoutGameCanvasInput
+  connect?: Prisma.LibraryEntryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LibraryEntryUpdateToOneWithWhereWithoutGameCanvasInput, Prisma.LibraryEntryUpdateWithoutGameCanvasInput>, Prisma.LibraryEntryUncheckedUpdateWithoutGameCanvasInput>
+}
+
 export type LibraryEntryCreateWithoutUserInput = {
   id?: string
   rating?: number | null
@@ -584,6 +605,7 @@ export type LibraryEntryCreateWithoutUserInput = {
   game: Prisma.GameCreateNestedOneWithoutLibraryEntriesInput
   playthroughs?: Prisma.PlaythroughCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUncheckedCreateWithoutUserInput = {
@@ -596,6 +618,7 @@ export type LibraryEntryUncheckedCreateWithoutUserInput = {
   updatedAt?: Date | string
   playthroughs?: Prisma.PlaythroughUncheckedCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasUncheckedCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryCreateOrConnectWithoutUserInput = {
@@ -648,6 +671,7 @@ export type LibraryEntryCreateWithoutGameInput = {
   user: Prisma.UserCreateNestedOneWithoutLibraryEntriesInput
   playthroughs?: Prisma.PlaythroughCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUncheckedCreateWithoutGameInput = {
@@ -660,6 +684,7 @@ export type LibraryEntryUncheckedCreateWithoutGameInput = {
   updatedAt?: Date | string
   playthroughs?: Prisma.PlaythroughUncheckedCreateNestedManyWithoutLibraryEntryInput
   journalEntry?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasUncheckedCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryCreateOrConnectWithoutGameInput = {
@@ -698,6 +723,7 @@ export type LibraryEntryCreateWithoutPlaythroughsInput = {
   user: Prisma.UserCreateNestedOneWithoutLibraryEntriesInput
   game: Prisma.GameCreateNestedOneWithoutLibraryEntriesInput
   journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUncheckedCreateWithoutPlaythroughsInput = {
@@ -710,6 +736,7 @@ export type LibraryEntryUncheckedCreateWithoutPlaythroughsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   journalEntry?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasUncheckedCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryCreateOrConnectWithoutPlaythroughsInput = {
@@ -738,6 +765,7 @@ export type LibraryEntryUpdateWithoutPlaythroughsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutLibraryEntriesNestedInput
   game?: Prisma.GameUpdateOneRequiredWithoutLibraryEntriesNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateWithoutPlaythroughsInput = {
@@ -750,6 +778,7 @@ export type LibraryEntryUncheckedUpdateWithoutPlaythroughsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journalEntry?: Prisma.JournalEntryUncheckedUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUncheckedUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryCreateWithoutJournalEntryInput = {
@@ -762,6 +791,7 @@ export type LibraryEntryCreateWithoutJournalEntryInput = {
   user: Prisma.UserCreateNestedOneWithoutLibraryEntriesInput
   game: Prisma.GameCreateNestedOneWithoutLibraryEntriesInput
   playthroughs?: Prisma.PlaythroughCreateNestedManyWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryUncheckedCreateWithoutJournalEntryInput = {
@@ -774,6 +804,7 @@ export type LibraryEntryUncheckedCreateWithoutJournalEntryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   playthroughs?: Prisma.PlaythroughUncheckedCreateNestedManyWithoutLibraryEntryInput
+  gameCanvas?: Prisma.GameCanvasUncheckedCreateNestedOneWithoutLibraryEntryInput
 }
 
 export type LibraryEntryCreateOrConnectWithoutJournalEntryInput = {
@@ -802,6 +833,7 @@ export type LibraryEntryUpdateWithoutJournalEntryInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutLibraryEntriesNestedInput
   game?: Prisma.GameUpdateOneRequiredWithoutLibraryEntriesNestedInput
   playthroughs?: Prisma.PlaythroughUpdateManyWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateWithoutJournalEntryInput = {
@@ -814,6 +846,75 @@ export type LibraryEntryUncheckedUpdateWithoutJournalEntryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   playthroughs?: Prisma.PlaythroughUncheckedUpdateManyWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUncheckedUpdateOneWithoutLibraryEntryNestedInput
+}
+
+export type LibraryEntryCreateWithoutGameCanvasInput = {
+  id?: string
+  rating?: number | null
+  publicReview?: string | null
+  reviewPlatform?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutLibraryEntriesInput
+  game: Prisma.GameCreateNestedOneWithoutLibraryEntriesInput
+  playthroughs?: Prisma.PlaythroughCreateNestedManyWithoutLibraryEntryInput
+  journalEntry?: Prisma.JournalEntryCreateNestedOneWithoutLibraryEntryInput
+}
+
+export type LibraryEntryUncheckedCreateWithoutGameCanvasInput = {
+  id?: string
+  userId: string
+  gameId: string
+  rating?: number | null
+  publicReview?: string | null
+  reviewPlatform?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  playthroughs?: Prisma.PlaythroughUncheckedCreateNestedManyWithoutLibraryEntryInput
+  journalEntry?: Prisma.JournalEntryUncheckedCreateNestedOneWithoutLibraryEntryInput
+}
+
+export type LibraryEntryCreateOrConnectWithoutGameCanvasInput = {
+  where: Prisma.LibraryEntryWhereUniqueInput
+  create: Prisma.XOR<Prisma.LibraryEntryCreateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedCreateWithoutGameCanvasInput>
+}
+
+export type LibraryEntryUpsertWithoutGameCanvasInput = {
+  update: Prisma.XOR<Prisma.LibraryEntryUpdateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedUpdateWithoutGameCanvasInput>
+  create: Prisma.XOR<Prisma.LibraryEntryCreateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedCreateWithoutGameCanvasInput>
+  where?: Prisma.LibraryEntryWhereInput
+}
+
+export type LibraryEntryUpdateToOneWithWhereWithoutGameCanvasInput = {
+  where?: Prisma.LibraryEntryWhereInput
+  data: Prisma.XOR<Prisma.LibraryEntryUpdateWithoutGameCanvasInput, Prisma.LibraryEntryUncheckedUpdateWithoutGameCanvasInput>
+}
+
+export type LibraryEntryUpdateWithoutGameCanvasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  publicReview?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewPlatform?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutLibraryEntriesNestedInput
+  game?: Prisma.GameUpdateOneRequiredWithoutLibraryEntriesNestedInput
+  playthroughs?: Prisma.PlaythroughUpdateManyWithoutLibraryEntryNestedInput
+  journalEntry?: Prisma.JournalEntryUpdateOneWithoutLibraryEntryNestedInput
+}
+
+export type LibraryEntryUncheckedUpdateWithoutGameCanvasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  gameId?: Prisma.StringFieldUpdateOperationsInput | string
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  publicReview?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewPlatform?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  playthroughs?: Prisma.PlaythroughUncheckedUpdateManyWithoutLibraryEntryNestedInput
+  journalEntry?: Prisma.JournalEntryUncheckedUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryCreateManyUserInput = {
@@ -836,6 +937,7 @@ export type LibraryEntryUpdateWithoutUserInput = {
   game?: Prisma.GameUpdateOneRequiredWithoutLibraryEntriesNestedInput
   playthroughs?: Prisma.PlaythroughUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateWithoutUserInput = {
@@ -848,6 +950,7 @@ export type LibraryEntryUncheckedUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   playthroughs?: Prisma.PlaythroughUncheckedUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUncheckedUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUncheckedUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateManyWithoutUserInput = {
@@ -880,6 +983,7 @@ export type LibraryEntryUpdateWithoutGameInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutLibraryEntriesNestedInput
   playthroughs?: Prisma.PlaythroughUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateWithoutGameInput = {
@@ -892,6 +996,7 @@ export type LibraryEntryUncheckedUpdateWithoutGameInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   playthroughs?: Prisma.PlaythroughUncheckedUpdateManyWithoutLibraryEntryNestedInput
   journalEntry?: Prisma.JournalEntryUncheckedUpdateOneWithoutLibraryEntryNestedInput
+  gameCanvas?: Prisma.GameCanvasUncheckedUpdateOneWithoutLibraryEntryNestedInput
 }
 
 export type LibraryEntryUncheckedUpdateManyWithoutGameInput = {
@@ -948,6 +1053,7 @@ export type LibraryEntrySelect<ExtArgs extends runtime.Types.Extensions.Internal
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   playthroughs?: boolean | Prisma.LibraryEntry$playthroughsArgs<ExtArgs>
   journalEntry?: boolean | Prisma.LibraryEntry$journalEntryArgs<ExtArgs>
+  gameCanvas?: boolean | Prisma.LibraryEntry$gameCanvasArgs<ExtArgs>
   _count?: boolean | Prisma.LibraryEntryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["libraryEntry"]>
 
@@ -994,6 +1100,7 @@ export type LibraryEntryInclude<ExtArgs extends runtime.Types.Extensions.Interna
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   playthroughs?: boolean | Prisma.LibraryEntry$playthroughsArgs<ExtArgs>
   journalEntry?: boolean | Prisma.LibraryEntry$journalEntryArgs<ExtArgs>
+  gameCanvas?: boolean | Prisma.LibraryEntry$gameCanvasArgs<ExtArgs>
   _count?: boolean | Prisma.LibraryEntryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LibraryEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1012,6 +1119,7 @@ export type $LibraryEntryPayload<ExtArgs extends runtime.Types.Extensions.Intern
     game: Prisma.$GamePayload<ExtArgs>
     playthroughs: Prisma.$PlaythroughPayload<ExtArgs>[]
     journalEntry: Prisma.$JournalEntryPayload<ExtArgs> | null
+    gameCanvas: Prisma.$GameCanvasPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1420,6 +1528,7 @@ export interface Prisma__LibraryEntryClient<T, Null = never, ExtArgs extends run
   game<T extends Prisma.GameDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GameDefaultArgs<ExtArgs>>): Prisma.Prisma__GameClient<runtime.Types.Result.GetResult<Prisma.$GamePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   playthroughs<T extends Prisma.LibraryEntry$playthroughsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LibraryEntry$playthroughsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlaythroughPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   journalEntry<T extends Prisma.LibraryEntry$journalEntryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LibraryEntry$journalEntryArgs<ExtArgs>>): Prisma.Prisma__JournalEntryClient<runtime.Types.Result.GetResult<Prisma.$JournalEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  gameCanvas<T extends Prisma.LibraryEntry$gameCanvasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LibraryEntry$gameCanvasArgs<ExtArgs>>): Prisma.Prisma__GameCanvasClient<runtime.Types.Result.GetResult<Prisma.$GameCanvasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1898,6 +2007,25 @@ export type LibraryEntry$journalEntryArgs<ExtArgs extends runtime.Types.Extensio
    */
   include?: Prisma.JournalEntryInclude<ExtArgs> | null
   where?: Prisma.JournalEntryWhereInput
+}
+
+/**
+ * LibraryEntry.gameCanvas
+ */
+export type LibraryEntry$gameCanvasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GameCanvas
+   */
+  select?: Prisma.GameCanvasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GameCanvas
+   */
+  omit?: Prisma.GameCanvasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GameCanvasInclude<ExtArgs> | null
+  where?: Prisma.GameCanvasWhereInput
 }
 
 /**

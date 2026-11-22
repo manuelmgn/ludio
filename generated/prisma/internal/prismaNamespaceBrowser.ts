@@ -59,7 +59,10 @@ export const ModelName = {
   JournalEntry: 'JournalEntry',
   JournalImage: 'JournalImage',
   List: 'List',
-  ListItem: 'ListItem'
+  ListItem: 'ListItem',
+  CustomPlatform: 'CustomPlatform',
+  GameCanvas: 'GameCanvas',
+  CanvasImage: 'CanvasImage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -191,6 +194,40 @@ export const ListItemScalarFieldEnum = {
 } as const
 
 export type ListItemScalarFieldEnum = (typeof ListItemScalarFieldEnum)[keyof typeof ListItemScalarFieldEnum]
+
+
+export const CustomPlatformScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomPlatformScalarFieldEnum = (typeof CustomPlatformScalarFieldEnum)[keyof typeof CustomPlatformScalarFieldEnum]
+
+
+export const GameCanvasScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  libraryEntryId: 'libraryEntryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GameCanvasScalarFieldEnum = (typeof GameCanvasScalarFieldEnum)[keyof typeof GameCanvasScalarFieldEnum]
+
+
+export const CanvasImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  privacy: 'privacy',
+  canvasId: 'canvasId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CanvasImageScalarFieldEnum = (typeof CanvasImageScalarFieldEnum)[keyof typeof CanvasImageScalarFieldEnum]
 
 
 export const SortOrder = {

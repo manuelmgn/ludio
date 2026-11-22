@@ -86,3 +86,18 @@ export type List = Prisma.ListModel
  * 
  */
 export type ListItem = Prisma.ListItemModel
+/**
+ * Model CustomPlatform
+ * 
+ */
+export type CustomPlatform = Prisma.CustomPlatformModel
+/**
+ * Model GameCanvas
+ * 
+ */
+export type GameCanvas = Prisma.GameCanvasModel
+/**
+ * Model CanvasImage
+ * 
+ */
+export type CanvasImage = Prisma.CanvasImageModel

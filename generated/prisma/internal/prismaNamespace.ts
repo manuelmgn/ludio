@@ -405,7 +405,10 @@ export const ModelName = {
   JournalEntry: 'JournalEntry',
   JournalImage: 'JournalImage',
   List: 'List',
-  ListItem: 'ListItem'
+  ListItem: 'ListItem',
+  CustomPlatform: 'CustomPlatform',
+  GameCanvas: 'GameCanvas',
+  CanvasImage: 'CanvasImage'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "follow" | "game" | "libraryEntry" | "playthrough" | "journalEntry" | "journalImage" | "list" | "listItem"
+    modelProps: "user" | "follow" | "game" | "libraryEntry" | "playthrough" | "journalEntry" | "journalImage" | "list" | "listItem" | "customPlatform" | "gameCanvas" | "canvasImage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1091,6 +1094,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CustomPlatform: {
+      payload: Prisma.$CustomPlatformPayload<ExtArgs>
+      fields: Prisma.CustomPlatformFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CustomPlatformFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CustomPlatformFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        findFirst: {
+          args: Prisma.CustomPlatformFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CustomPlatformFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        findMany: {
+          args: Prisma.CustomPlatformFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>[]
+        }
+        create: {
+          args: Prisma.CustomPlatformCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        createMany: {
+          args: Prisma.CustomPlatformCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CustomPlatformCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>[]
+        }
+        delete: {
+          args: Prisma.CustomPlatformDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        update: {
+          args: Prisma.CustomPlatformUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        deleteMany: {
+          args: Prisma.CustomPlatformDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CustomPlatformUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CustomPlatformUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>[]
+        }
+        upsert: {
+          args: Prisma.CustomPlatformUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomPlatformPayload>
+        }
+        aggregate: {
+          args: Prisma.CustomPlatformAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCustomPlatform>
+        }
+        groupBy: {
+          args: Prisma.CustomPlatformGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomPlatformGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CustomPlatformCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomPlatformCountAggregateOutputType> | number
+        }
+      }
+    }
+    GameCanvas: {
+      payload: Prisma.$GameCanvasPayload<ExtArgs>
+      fields: Prisma.GameCanvasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GameCanvasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GameCanvasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        findFirst: {
+          args: Prisma.GameCanvasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GameCanvasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        findMany: {
+          args: Prisma.GameCanvasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>[]
+        }
+        create: {
+          args: Prisma.GameCanvasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        createMany: {
+          args: Prisma.GameCanvasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GameCanvasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>[]
+        }
+        delete: {
+          args: Prisma.GameCanvasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        update: {
+          args: Prisma.GameCanvasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        deleteMany: {
+          args: Prisma.GameCanvasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GameCanvasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GameCanvasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>[]
+        }
+        upsert: {
+          args: Prisma.GameCanvasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameCanvasPayload>
+        }
+        aggregate: {
+          args: Prisma.GameCanvasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGameCanvas>
+        }
+        groupBy: {
+          args: Prisma.GameCanvasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameCanvasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GameCanvasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameCanvasCountAggregateOutputType> | number
+        }
+      }
+    }
+    CanvasImage: {
+      payload: Prisma.$CanvasImagePayload<ExtArgs>
+      fields: Prisma.CanvasImageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CanvasImageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CanvasImageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        findFirst: {
+          args: Prisma.CanvasImageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CanvasImageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        findMany: {
+          args: Prisma.CanvasImageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>[]
+        }
+        create: {
+          args: Prisma.CanvasImageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        createMany: {
+          args: Prisma.CanvasImageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CanvasImageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>[]
+        }
+        delete: {
+          args: Prisma.CanvasImageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        update: {
+          args: Prisma.CanvasImageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        deleteMany: {
+          args: Prisma.CanvasImageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CanvasImageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CanvasImageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>[]
+        }
+        upsert: {
+          args: Prisma.CanvasImageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CanvasImagePayload>
+        }
+        aggregate: {
+          args: Prisma.CanvasImageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCanvasImage>
+        }
+        groupBy: {
+          args: Prisma.CanvasImageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CanvasImageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CanvasImageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CanvasImageCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1243,6 +1468,40 @@ export const ListItemScalarFieldEnum = {
 } as const
 
 export type ListItemScalarFieldEnum = (typeof ListItemScalarFieldEnum)[keyof typeof ListItemScalarFieldEnum]
+
+
+export const CustomPlatformScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomPlatformScalarFieldEnum = (typeof CustomPlatformScalarFieldEnum)[keyof typeof CustomPlatformScalarFieldEnum]
+
+
+export const GameCanvasScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  libraryEntryId: 'libraryEntryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GameCanvasScalarFieldEnum = (typeof GameCanvasScalarFieldEnum)[keyof typeof GameCanvasScalarFieldEnum]
+
+
+export const CanvasImageScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  privacy: 'privacy',
+  canvasId: 'canvasId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CanvasImageScalarFieldEnum = (typeof CanvasImageScalarFieldEnum)[keyof typeof CanvasImageScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1560,6 +1819,9 @@ export type GlobalOmitConfig = {
   journalImage?: Prisma.JournalImageOmit
   list?: Prisma.ListOmit
   listItem?: Prisma.ListItemOmit
+  customPlatform?: Prisma.CustomPlatformOmit
+  gameCanvas?: Prisma.GameCanvasOmit
+  canvasImage?: Prisma.CanvasImageOmit
 }
 
 /* Types for Logging */

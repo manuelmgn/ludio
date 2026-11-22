@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import type { Game } from "../../../generated/prisma/client"
+import type { Game } from "@generated/prisma/client"
 
 interface SearchSuccess {
   success: true
