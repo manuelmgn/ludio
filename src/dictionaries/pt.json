@@ -133,5 +133,12 @@
   "net_balance": "Saldo Líquido",
   "pricing_games_tracked": "jogos com preços registados",
   "edit_playthrough": "Editar Sessão",
-  "delete_playthrough_confirm": "Tens a certeza de que queres eliminar esta sessão?"
+  "delete_playthrough_confirm": "Tens a certeza de que queres eliminar esta sessão?",
+  "filter_all_platforms": "Todas as plataformas",
+  "filter_all_stores": "Todas as lojas",
+  "filter_only_with_price": "Apenas com preço",
+  "sort_price_desc": "💶 Preço (Maior)",
+  "sort_price_asc": "💶 Preço (Menor)",
+  "sort_title_desc": "🔤 Título (Z-A)",
+  "sort_updated_desc": "🕒 Atualizados recentemente"
 }

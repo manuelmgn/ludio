@@ -43,6 +43,12 @@ export default async function LibraryPage() {
           platform: true,
           purchasePrice: true,
           salePrice: true,
+          purchaseStore: {
+            select: { name: true }
+          },
+          saleStore: {
+            select: { name: true }
+          }
         },
         orderBy: { updatedAt: "desc" }
       }

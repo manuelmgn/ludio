@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 
 type PlaythroughStatus = "PLAYING" | "COMPLETED" | "ABANDONED" | "ON_HOLD"
 type FilterTab = PlaythroughStatus | "WISH" | "ALL"
+type SortOption = "updated_desc" | "title_asc" | "title_desc" | "rating_desc" | "price_desc" | "price_asc"
 
 export interface LibraryEntryWithDetails {
   id: string
@@ -23,6 +24,8 @@ export interface LibraryEntryWithDetails {
     platform?: string
     purchasePrice?: number | null
     salePrice?: number | null
+    purchaseStore?: { name: string } | null
+    saleStore?: { name: string } | null
   }[]
 }
 
@@ -34,6 +37,33 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL")
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedPlatform, setSelectedPlatform] = useState("ALL")
+  const [selectedStore, setSelectedStore] = useState("ALL")
+  const [sortBy, setSortBy] = useState<SortOption>("updated_desc")
+  const [onlyWithPrice, setOnlyWithPrice] = useState(false)
+
+  // Extract unique platforms
+  const availablePlatforms = useMemo(() => {
+    const set = new Set<string>()
+    entries.forEach((e) => {
+      e.playthroughs.forEach((p) => {
+        if (p.platform) set.add(p.platform)
+      })
+    })
+    return Array.from(set).sort()
+  }, [entries])
+
+  // Extract unique stores
+  const availableStores = useMemo(() => {
+    const set = new Set<string>()
+    entries.forEach((e) => {
+      e.playthroughs.forEach((p) => {
+        if (p.purchaseStore?.name) set.add(p.purchaseStore.name)
+        if (p.saleStore?.name) set.add(p.saleStore.name)
+      })
+    })
+    return Array.from(set).sort()
+  }, [entries])
 
   const counts = useMemo(() => {
     const total = entries.length
@@ -55,9 +85,25 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     { id: "ABANDONED", label: t("filter_abandoned"), count: counts.abandoned },
   ]
 
-  const filteredEntries = useMemo(() => {
-    return entries.filter((entry) => {
-      // 1. Filter by search query
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    selectedPlatform !== "ALL" ||
+    selectedStore !== "ALL" ||
+    onlyWithPrice ||
+    sortBy !== "updated_desc"
+
+  const handleResetFilters = () => {
+    setSearchQuery("")
+    setSelectedPlatform("ALL")
+    setSelectedStore("ALL")
+    setSortBy("updated_desc")
+    setOnlyWithPrice(false)
+  }
+
+  const filteredAndSortedEntries = useMemo(() => {
+    // 1. Filtering
+    const result = entries.filter((entry) => {
+      // Search query
       if (searchQuery.trim() !== "") {
         const query = searchQuery.toLowerCase().trim()
         if (!entry.game.title.toLowerCase().includes(query)) {
@@ -65,14 +111,68 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
         }
       }
 
-      // 2. Filter by status tab
-      if (activeTab === "ALL") return true
+      // Status tab
       if (activeTab === "WISH") {
-        return entry.playthroughs.length === 0
+        if (entry.playthroughs.length !== 0) return false
+      } else if (activeTab !== "ALL") {
+        if (!entry.playthroughs.some((p) => p.status === activeTab)) return false
       }
-      return entry.playthroughs.some((p) => p.status === activeTab)
+
+      // Platform filter
+      if (selectedPlatform !== "ALL") {
+        const hasPlatform = entry.playthroughs.some((p) => p.platform === selectedPlatform)
+        if (!hasPlatform) return false
+      }
+
+      // Store filter
+      if (selectedStore !== "ALL") {
+        const hasStore = entry.playthroughs.some(
+          (p) => p.purchaseStore?.name === selectedStore || p.saleStore?.name === selectedStore
+        )
+        if (!hasStore) return false
+      }
+
+      // Only with price
+      if (onlyWithPrice) {
+        const hasPrice = entry.playthroughs.some(
+          (p) => p.purchasePrice != null || p.salePrice != null
+        )
+        if (!hasPrice) return false
+      }
+
+      return true
     })
-  }, [entries, activeTab, searchQuery])
+
+    // 2. Sorting
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "title_asc":
+          return a.game.title.localeCompare(b.game.title)
+        case "title_desc":
+          return b.game.title.localeCompare(a.game.title)
+        case "rating_desc": {
+          const rA = a.rating ?? -1
+          const rB = b.rating ?? -1
+          return rB - rA
+        }
+        case "price_desc": {
+          const pA = Math.max(...a.playthroughs.map((p) => p.purchasePrice ?? -1), -1)
+          const pB = Math.max(...b.playthroughs.map((p) => p.purchasePrice ?? -1), -1)
+          return pB - pA
+        }
+        case "price_asc": {
+          const pA = Math.min(...a.playthroughs.filter((p) => p.purchasePrice != null).map((p) => p.purchasePrice!), Infinity)
+          const pB = Math.min(...b.playthroughs.filter((p) => p.purchasePrice != null).map((p) => p.purchasePrice!), Infinity)
+          return pA - pB
+        }
+        case "updated_desc":
+        default:
+          return 0 // preserved from database order
+      }
+    })
+
+    return result
+  }, [entries, activeTab, searchQuery, selectedPlatform, selectedStore, onlyWithPrice, sortBy])
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -129,10 +229,91 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
         })}
       </div>
 
+      {/* Filter and Sorting Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-black/40 border border-white/10 p-3 rounded-2xl backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-2 flex-1">
+          {/* Platform Filter */}
+          {availablePlatforms.length > 0 && (
+            <select
+              value={selectedPlatform}
+              onChange={(e) => setSelectedPlatform(e.target.value)}
+              className="rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-primary/50 font-sans cursor-pointer hover:border-white/20 transition-colors"
+            >
+              <option value="ALL">🎮 {t("filter_all_platforms") || "Todas as plataformas"}</option>
+              {availablePlatforms.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Store Filter */}
+          {availableStores.length > 0 && (
+            <select
+              value={selectedStore}
+              onChange={(e) => setSelectedStore(e.target.value)}
+              className="rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-primary/50 font-sans cursor-pointer hover:border-white/20 transition-colors"
+            >
+              <option value="ALL">🏪 {t("filter_all_stores") || "Todas as tendas"}</option>
+              {availableStores.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {/* Only with price toggle */}
+          <button
+            type="button"
+            onClick={() => setOnlyWithPrice(!onlyWithPrice)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-sans border transition-all flex items-center gap-1.5 ${
+              onlyWithPrice
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
+                : "bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <span>💶</span>
+            <span>{t("filter_only_with_price") || "Só con prezo"}</span>
+          </button>
+
+          {/* Clear filters button */}
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="text-xs text-zinc-400 hover:text-rose-400 transition-colors px-2 py-1 flex items-center gap-1"
+            >
+              <span>✕</span>
+              <span>Limpar</span>
+            </button>
+          )}
+        </div>
+
+        {/* Sort Select */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-zinc-500 font-sans hidden sm:inline">
+            {t("sort_by") || "Ordenar"}:
+          </span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="rounded-xl border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-zinc-200 outline-none focus:border-primary/50 font-sans cursor-pointer hover:border-white/20 transition-colors"
+          >
+            <option value="updated_desc">{t("sort_updated_desc") || "🕒 Actualizados recentemente"}</option>
+            <option value="title_asc">{t("sort_title") || "🔤 Título (A-Z)"}</option>
+            <option value="title_desc">{t("sort_title_desc") || "🔤 Título (Z-A)"}</option>
+            <option value="rating_desc">{t("sort_rating") || "⭐ Mellor valorados"}</option>
+            <option value="price_desc">{t("sort_price_desc") || "💶 Prezo (Maior)"}</option>
+            <option value="price_asc">{t("sort_price_asc") || "💶 Prezo (Menor)"}</option>
+          </select>
+        </div>
+      </div>
+
       {/* Games Grid */}
-      {filteredEntries.length > 0 ? (
+      {filteredAndSortedEntries.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
-          {filteredEntries.map((entry) => {
+          {filteredAndSortedEntries.map((entry) => {
             const latestPlaythrough = entry.playthroughs[0]
             const isWish = entry.playthroughs.length === 0
             const statusBadge = isWish
@@ -213,19 +394,19 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
 
                 <div className="flex items-center justify-between mt-1 text-[10px] font-mono">
                   {latestPlaythrough?.platform ? (
-                    <span className="text-zinc-500 truncate">
+                    <span className="text-zinc-500 truncate max-w-[90px]">
                       {latestPlaythrough.platform}
                     </span>
                   ) : (
                     <span />
                   )}
                   {latestPlaythrough?.purchasePrice != null && (
-                    <span className="text-rose-400 font-semibold ml-auto">
+                    <span className="text-rose-400 font-semibold ml-auto" title={latestPlaythrough.purchaseStore?.name}>
                       {latestPlaythrough.purchasePrice.toFixed(0)}€
                     </span>
                   )}
                   {latestPlaythrough?.purchasePrice == null && latestPlaythrough?.salePrice != null && (
-                    <span className="text-emerald-400 font-semibold ml-auto">
+                    <span className="text-emerald-400 font-semibold ml-auto" title={latestPlaythrough.saleStore?.name}>
                       +{latestPlaythrough.salePrice.toFixed(0)}€
                     </span>
                   )}
@@ -238,17 +419,28 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
         <div className="flex flex-col items-center justify-center py-16 px-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md text-center">
           <div className="text-4xl mb-3">👾</div>
           <p className="text-white/70 font-sans text-base mb-2">
-            {t("library_empty")}
+            {hasActiveFilters ? "Non hai xogos que coincidan cos filtros." : t("library_empty")}
           </p>
           <p className="text-zinc-500 text-xs max-w-sm mb-6">
-            Busca calquera videoxogo e engádeo para comezar o teu diario e caderno de capturas.
+            {hasActiveFilters
+              ? "Proba a cambiar ou limpar os filtros de busca, plataforma ou tenda."
+              : "Busca calquera videoxogo e engádeo para comezar o teu diario e caderno de capturas."}
           </p>
-          <Link
-            href="/search"
-            className="rounded-xl bg-primary px-6 py-2.5 text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.4)] transition-all text-sm"
-          >
-            {t("library_explore_cta")} →
-          </Link>
+          {hasActiveFilters ? (
+            <button
+              onClick={handleResetFilters}
+              className="rounded-xl bg-white/10 border border-white/20 px-5 py-2 text-white font-medium hover:bg-white/20 transition-all text-xs"
+            >
+              Limpar Filtros
+            </button>
+          ) : (
+            <Link
+              href="/search"
+              className="rounded-xl bg-primary px-6 py-2.5 text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.4)] transition-all text-sm"
+            >
+              {t("library_explore_cta")} →
+            </Link>
+          )}
         </div>
       )}
     </div>

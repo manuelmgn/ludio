@@ -133,5 +133,12 @@
   "net_balance": "Balance Neto",
   "pricing_games_tracked": "xogos con prezos rexistrados",
   "edit_playthrough": "Editar Partida",
-  "delete_playthrough_confirm": "Tes a certeza de que queres eliminar esta partida?"
+  "delete_playthrough_confirm": "Tes a certeza de que queres eliminar esta partida?",
+  "filter_all_platforms": "Todas as plataformas",
+  "filter_all_stores": "Todas as tendas",
+  "filter_only_with_price": "Só con prezo",
+  "sort_price_desc": "💶 Prezo (Maior)",
+  "sort_price_asc": "💶 Prezo (Menor)",
+  "sort_title_desc": "🔤 Título (Z-A)",
+  "sort_updated_desc": "🕒 Actualizados recentemente"
 }
