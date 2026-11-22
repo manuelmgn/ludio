@@ -36,11 +36,49 @@ function SearchContent() {
     error: null,
     hasSearched: false,
   })
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+
+  // Load recent searches from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("ludio_recent_searches")
+      if (saved) {
+        setRecentSearches(JSON.parse(saved))
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [])
+
+  const saveRecentSearch = (term: string) => {
+    try {
+      const trimmed = term.trim()
+      if (!trimmed) return
+      setRecentSearches((prev) => {
+        const filtered = prev.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())
+        const next = [trimmed, ...filtered].slice(0, 6)
+        localStorage.setItem("ludio_recent_searches", JSON.stringify(next))
+        return next
+      })
+    } catch {
+      // Ignore
+    }
+  }
+
+  const clearRecentSearches = () => {
+    try {
+      localStorage.removeItem("ludio_recent_searches")
+      setRecentSearches([])
+    } catch {
+      // Ignore
+    }
+  }
 
   const performSearch = (searchTerm: string) => {
     const trimmed = searchTerm.trim()
     if (trimmed.length < 2) return
 
+    saveRecentSearch(trimmed)
     setState((prev) => ({ ...prev, error: null }))
 
     startTransition(async () => {
@@ -282,23 +320,59 @@ function SearchContent() {
 
       {/* Search Hints & Popular Suggestions */}
       {!state.hasSearched && !isPending && (
-        <div className="text-center py-12 text-zinc-500 font-sans text-sm max-w-md">
-          <p>{t("search_hint")}</p>
-          <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {["Pokémon", "The Legend of Zelda", "Final Fantasy", "Metroid", "Elden Ring", "Chrono Trigger"].map(
-              (popular) => (
+        <div className="text-center py-12 text-zinc-500 font-sans text-sm max-w-lg flex flex-col items-center gap-6">
+          {recentSearches.length > 0 && (
+            <div className="w-full flex flex-col items-center gap-2">
+              <div className="flex items-center justify-between w-full px-2 text-xs font-mono text-zinc-400">
+                <span>🕒 Buscas recentes</span>
                 <button
-                  key={popular}
-                  onClick={() => {
-                    setQuery(popular)
-                    performSearch(popular)
-                  }}
-                  className="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 hover:text-white transition-colors text-zinc-400"
+                  onClick={clearRecentSearches}
+                  className="text-zinc-500 hover:text-rose-400 transition-colors"
                 >
-                  {popular}
+                  Limpar
                 </button>
-              )
-            )}
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 w-full">
+                {recentSearches.map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => {
+                      setQuery(term)
+                      const params = new URLSearchParams()
+                      params.set("q", term)
+                      router.replace(`/search?${params.toString()}`)
+                      performSearch(term)
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/30 text-purple-200 hover:bg-primary/20 transition-all font-sans"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-3">{t("search_hint")}</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {["Pokémon", "The Legend of Zelda", "Final Fantasy", "Metroid", "Elden Ring", "Chrono Trigger"].map(
+                (popular) => (
+                  <button
+                    key={popular}
+                    onClick={() => {
+                      setQuery(popular)
+                      const params = new URLSearchParams()
+                      params.set("q", popular)
+                      router.replace(`/search?${params.toString()}`)
+                      performSearch(popular)
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 hover:text-white transition-colors text-zinc-400"
+                  >
+                    {popular}
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
       )}
