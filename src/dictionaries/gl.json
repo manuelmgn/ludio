@@ -140,5 +140,10 @@
   "sort_price_desc": "💶 Prezo (Maior)",
   "sort_price_asc": "💶 Prezo (Menor)",
   "sort_title_desc": "🔤 Título (Z-A)",
-  "sort_updated_desc": "🕒 Actualizados recentemente"
+  "sort_updated_desc": "🕒 Actualizados recentemente",
+  "canvas_preview": "Vista previa",
+  "canvas_edit": "Editar",
+  "canvas_unsaved": "Cambios sen gardar",
+  "canvas_saved": "Todo gardado",
+  "canvas_words": "palabras"
 }

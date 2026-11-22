@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { GlassPanel } from "@/components/ui/GlassPanel"
@@ -32,6 +32,10 @@ export function CanvasEditor({
 }: CanvasEditorProps) {
   const { t } = useLanguage()
   const [content, setContent] = useState(initialContent)
+  const [lastSavedContent, setLastSavedContent] = useState(initialContent)
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit")
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
   const [file, setFile] = useState<File | null>(null)
   const [privacy, setPrivacy] = useState<PrivacyLevel>(PrivacyLevel.PRIVATE)
   const [images, setImages] = useState<CanvasImage[]>(initialImages)
@@ -44,11 +48,14 @@ export function CanvasEditor({
   const [textMessage, setTextMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [imgMessage, setImgMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
+  const hasUnsavedChanges = content !== lastSavedContent
+
   const handleSaveText = () => {
     setTextMessage(null)
     startTransitionText(async () => {
       const result = await saveCanvasText(libraryEntryId, content)
       if (result.success) {
+        setLastSavedContent(content)
         setTextMessage({ type: "success", text: t("save") + " ✓" })
         setTimeout(() => setTextMessage(null), 3000)
       } else {
@@ -56,6 +63,41 @@ export function CanvasEditor({
       }
     })
   }
+
+  // Keyboard shortcut Ctrl+S / Cmd+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault()
+        handleSaveText()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [content, libraryEntryId])
+
+  // Formatting helpers
+  const insertFormatting = (prefix: string, suffix: string = "") => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selected = content.substring(start, end)
+    const replacement = `${prefix}${selected || "texto"}${suffix}`
+
+    const newContent = content.substring(0, start) + replacement + content.substring(end)
+    setContent(newContent)
+
+    // Focus & reselect
+    setTimeout(() => {
+      textarea.focus()
+      textarea.setSelectionRange(start + prefix.length, start + prefix.length + (selected ? selected.length : 5))
+    }, 0)
+  }
+
+  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
+  const charCount = content.length
 
   const handleUploadImage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,10 +118,8 @@ export function CanvasEditor({
       if (dbResult.success && dbResult.data) {
         setImgMessage({ type: "success", text: "Imaxe subida con éxito ✓" })
         setFile(null)
-        // Reset file input
         const fileInput = document.getElementById("canvas-file-input") as HTMLInputElement | null
         if (fileInput) fileInput.value = ""
-        // Append to state
         setImages((prev) => [dbResult.data as CanvasImage, ...prev])
         setTimeout(() => setImgMessage(null), 3000)
       } else {
@@ -127,23 +167,130 @@ export function CanvasEditor({
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
-        {/* Panel Izquierdo: Notas */}
-        <GlassPanel className="flex-1 flex flex-col min-h-[420px]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-medium text-white font-sans flex items-center gap-2">
-              <span>📝</span>
-              <span>{t("canvas_notes_title")}</span>
-            </h2>
-            <span className="text-xs text-zinc-500 font-mono">Markdown & Texto</span>
+        {/* Panel Izquierdo: Notas Canvas */}
+        <GlassPanel className="flex-1 flex flex-col min-h-[440px]">
+          <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-medium text-white font-sans flex items-center gap-2">
+                <span>📝</span>
+                <span>{t("canvas_notes_title")}</span>
+              </h2>
+
+              {/* Edit / Preview Tabs */}
+              <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("edit")}
+                  className={`px-2.5 py-1 text-xs rounded-md font-sans transition-colors ${
+                    activeTab === "edit"
+                      ? "bg-primary text-white font-medium shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {t("canvas_edit") || "Editar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("preview")}
+                  className={`px-2.5 py-1 text-xs rounded-md font-sans transition-colors ${
+                    activeTab === "preview"
+                      ? "bg-primary text-white font-medium shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {t("canvas_preview") || "Vista previa"}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className={`flex items-center gap-1 ${hasUnsavedChanges ? "text-amber-400" : "text-emerald-400"}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                {hasUnsavedChanges ? t("canvas_unsaved") || "Non gardado" : t("canvas_saved") || "Gardado"}
+              </span>
+              <span className="text-zinc-600">|</span>
+              <span className="text-zinc-500">
+                {wordCount} {t("canvas_words") || "palabras"}
+              </span>
+            </div>
           </div>
 
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder={t("canvas_notes_placeholder")}
-            className="flex-1 min-h-[280px] w-full rounded-xl border border-white/10 bg-black/40 p-4 text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans leading-relaxed resize-y"
-            disabled={isPendingText}
-          />
+          {/* Markdown Formatting Toolbar */}
+          {activeTab === "edit" && (
+            <div className="flex flex-wrap items-center gap-1 mb-3 bg-black/30 border border-white/5 p-1.5 rounded-xl">
+              <button
+                type="button"
+                onClick={() => insertFormatting("**", "**")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors font-bold"
+                title="Negrita (**)"
+              >
+                B
+              </button>
+              <button
+                type="button"
+                onClick={() => insertFormatting("*", "*")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors italic"
+                title="Cursiva (*)"
+              >
+                I
+              </button>
+              <button
+                type="button"
+                onClick={() => insertFormatting("### ")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                title="Título (###)"
+              >
+                H3
+              </button>
+              <span className="w-px h-4 bg-white/10 mx-1" />
+              <button
+                type="button"
+                onClick={() => insertFormatting("- ")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                title="Lista (- )"
+              >
+                • Lista
+              </button>
+              <button
+                type="button"
+                onClick={() => insertFormatting("- [ ] ")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                title="Checklist (- [ ] )"
+              >
+                ☑ Checklist
+              </button>
+              <button
+                type="button"
+                onClick={() => insertFormatting("`", "`")}
+                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                title="Código (`)"
+              >
+                &lt;/&gt;
+              </button>
+              <span className="ml-auto text-[11px] font-mono text-zinc-500 hidden sm:inline">
+                Cmd+S para gardar
+              </span>
+            </div>
+          )}
+
+          {activeTab === "edit" ? (
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={t("canvas_notes_placeholder")}
+              className="flex-1 min-h-[300px] w-full rounded-xl border border-white/10 bg-black/40 p-4 text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans leading-relaxed resize-y font-mono text-sm"
+              disabled={isPendingText}
+            />
+          ) : (
+            <div className="flex-1 min-h-[300px] w-full rounded-xl border border-white/10 bg-black/30 p-5 text-zinc-200 font-sans leading-relaxed overflow-y-auto whitespace-pre-wrap text-sm">
+              {content ? (
+                content
+              ) : (
+                <span className="text-zinc-500 italic">Sen contido aínda. Escribe notas no modo editor.</span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
             <div>
@@ -155,10 +302,11 @@ export function CanvasEditor({
             </div>
             <button
               onClick={handleSaveText}
-              disabled={isPendingText}
-              className="rounded-xl bg-primary px-6 py-2.5 text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none text-sm"
+              disabled={isPendingText || !hasUnsavedChanges}
+              className="rounded-xl bg-primary px-6 py-2.5 text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none text-sm flex items-center gap-1.5"
             >
-              {isPendingText ? t("saving") : t("save")}
+              <span>💾</span>
+              <span>{isPendingText ? t("saving") : t("save")}</span>
             </button>
           </div>
         </GlassPanel>
@@ -192,7 +340,7 @@ export function CanvasEditor({
               <select
                 value={privacy}
                 onChange={(e) => setPrivacy(e.target.value as PrivacyLevel)}
-                className="rounded-lg border border-white/10 bg-black/50 p-2.5 text-white outline-none focus:border-primary/50 font-sans text-xs"
+                className="rounded-lg border border-white/10 bg-black/50 p-2.5 text-white outline-none focus:border-primary/50 font-sans text-xs cursor-pointer"
                 disabled={isPendingImage}
               >
                 <option value={PrivacyLevel.PRIVATE}>🔒 {t("privacy_private")}</option>
