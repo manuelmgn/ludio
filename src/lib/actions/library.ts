@@ -97,3 +97,35 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
     return { success: false, error: "Non se puido engadir á biblioteca. Téntao de novo." }
   }
 }
+
+export async function removeGameFromLibrary(gameId: string): Promise<ActionResponse> {
+  try {
+    const user = await getAuthenticatedOrDemoUser()
+
+    const libraryEntry = await prisma.libraryEntry.findUnique({
+      where: {
+        userId_gameId: {
+          userId: user.id,
+          gameId,
+        },
+      },
+    })
+
+    if (!libraryEntry) {
+      return { success: false, error: "O xogo non está na biblioteca." }
+    }
+
+    await prisma.libraryEntry.delete({
+      where: { id: libraryEntry.id },
+    })
+
+    revalidatePath("/library")
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath("/")
+
+    return { success: true }
+  } catch (error) {
+    console.error("[removeGameFromLibrary] Error:", error)
+    return { success: false, error: "Non se puido eliminar da biblioteca." }
+  }
+}

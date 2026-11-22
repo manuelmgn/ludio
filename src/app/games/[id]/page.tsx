@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { AddGameForm } from "@/components/library/AddGameForm"
+import { RemoveGameButton } from "@/components/library/RemoveGameButton"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import Image from "next/image"
 import Link from "next/link"
@@ -133,6 +134,9 @@ export default async function GamePage({ params }: GamePageProps) {
                     <span className="text-zinc-400 text-xs ml-1">({libraryEntry.rating}/5)</span>
                   </div>
                 )}
+                <div className="mt-2">
+                  <RemoveGameButton gameId={game.id} gameTitle={game.title} />
+                </div>
               </div>
             )}
           </GlassPanel>

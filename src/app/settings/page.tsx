@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { Input } from "@/components/ui/Input"
 import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform } from "@/lib/actions/settings"
 
 interface CustomPlatform {
@@ -121,19 +122,19 @@ export default function SettingsPage() {
             {t("custom_platforms_desc")}
           </p>
 
-          <form onSubmit={handleAddPlatform} className="flex gap-2 mb-6">
-            <input
-              type="text"
-              value={platformName}
-              onChange={(e) => setPlatformName(e.target.value)}
-              placeholder={t("platform_name_placeholder")}
-              className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans"
-              disabled={isPending}
-            />
+          <form onSubmit={handleAddPlatform} className="flex gap-2 mb-6 items-end">
+            <div className="flex-1">
+              <Input
+                value={platformName}
+                onChange={(e) => setPlatformName(e.target.value)}
+                placeholder={t("platform_name_placeholder")}
+                disabled={isPending}
+              />
+            </div>
             <button
               type="submit"
               disabled={isPending || platformName.trim().length === 0}
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none"
+              className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
             >
               {isPending ? t("saving") : t("add_platform_btn")}
             </button>

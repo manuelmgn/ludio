@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { Input } from "@/components/ui/Input"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 type PlaythroughStatus = "PLAYING" | "COMPLETED" | "ABANDONED" | "ON_HOLD"
@@ -90,12 +91,11 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
 
         {/* Search within library */}
         <div className="w-full sm:w-72">
-          <input
-            type="text"
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("library_search")}
-            className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans"
+            icon={<span className="text-xs">🔍</span>}
           />
         </div>
       </div>

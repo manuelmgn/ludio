@@ -5,6 +5,7 @@ import { registerUser } from "../actions/register"
 import Link from "next/link"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function RegisterPage() {
@@ -26,7 +27,7 @@ export default function RegisterPage() {
             {t("register")}
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            Crea o teu perfil de xogador e comeza a túa colección
+            {t("register_subtitle")}
           </p>
         </div>
 
@@ -37,55 +38,40 @@ export default function RegisterPage() {
         )}
 
         <form action={formAction} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
-              Correo Electrónico
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="gamer@ludio.app"
-              disabled={isPending}
-              className="p-3 rounded-xl bg-black/40 text-white border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none font-sans text-sm placeholder-zinc-500 transition-all"
-            />
-          </div>
+          <Input
+            label={t("email_label")}
+            name="email"
+            type="email"
+            required
+            placeholder="gamer@ludio.app"
+            disabled={isPending}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
-              Nome de Usuario
-            </label>
-            <input
-              name="username"
-              type="text"
-              required
-              placeholder="pixel_warrior"
-              disabled={isPending}
-              className="p-3 rounded-xl bg-black/40 text-white border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none font-sans text-sm placeholder-zinc-500 transition-all"
-            />
-          </div>
+          <Input
+            label={t("username_label")}
+            name="username"
+            type="text"
+            required
+            placeholder="pixel_warrior"
+            disabled={isPending}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
-              Contrasinal
-            </label>
-            <input
-              name="password"
-              type="password"
-              required
-              placeholder="Mínimo 6 caracteres"
-              disabled={isPending}
-              className="p-3 rounded-xl bg-black/40 text-white border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none font-sans text-sm placeholder-zinc-500 transition-all"
-            />
-          </div>
+          <Input
+            label={t("password_label")}
+            name="password"
+            type="password"
+            required
+            placeholder="••••••••"
+            disabled={isPending}
+          />
 
           <Button type="submit" disabled={isPending} className="mt-2 w-full">
-            {isPending ? "Creando conta..." : t("register")}
+            {isPending ? t("register_pending") : t("register")}
           </Button>
         </form>
 
         <p className="text-center text-xs text-zinc-400 font-sans">
-          ¿Xa tes unha conta?{" "}
+          {t("have_account")}{" "}
           <Link href="/login" className="text-primary hover:underline font-medium">
             {t("login")}
           </Link>

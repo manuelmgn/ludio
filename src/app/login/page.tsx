@@ -5,6 +5,7 @@ import { authenticate } from "../actions/login"
 import Link from "next/link"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function LoginPage() {
@@ -26,7 +27,7 @@ export default function LoginPage() {
             {t("login")}
           </h1>
           <p className="text-xs text-zinc-400 mt-1">
-            Entra no teu santuario persoal de videoxogos
+            {t("login_subtitle")}
           </p>
         </div>
 
@@ -37,43 +38,33 @@ export default function LoginPage() {
         )}
 
         <form action={formAction} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
-              Correo Electrónico
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="gamer@ludio.app"
-              disabled={isPending}
-              className="p-3 rounded-xl bg-black/40 text-white border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none font-sans text-sm placeholder-zinc-500 transition-all"
-            />
-          </div>
+          <Input
+            label={t("email_label")}
+            name="email"
+            type="email"
+            required
+            placeholder="gamer@ludio.app"
+            disabled={isPending}
+          />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
-              Contrasinal
-            </label>
-            <input
-              name="password"
-              type="password"
-              required
-              placeholder="••••••••"
-              disabled={isPending}
-              className="p-3 rounded-xl bg-black/40 text-white border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/30 outline-none font-sans text-sm placeholder-zinc-500 transition-all"
-            />
-          </div>
+          <Input
+            label={t("password_label")}
+            name="password"
+            type="password"
+            required
+            placeholder="••••••••"
+            disabled={isPending}
+          />
 
           <input type="hidden" name="redirectTo" value="/dashboard" />
 
           <Button type="submit" disabled={isPending} className="mt-2 w-full">
-            {isPending ? "Iniciando sesión..." : t("login")}
+            {isPending ? t("login_pending") : t("login")}
           </Button>
         </form>
 
         <p className="text-center text-xs text-zinc-400 font-sans">
-          ¿Aínda non tes conta?{" "}
+          {t("no_account")}{" "}
           <Link href="/register" className="text-primary hover:underline font-medium">
             {t("register")}
           </Link>

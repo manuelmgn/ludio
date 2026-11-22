@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { Input } from "@/components/ui/Input"
 import { searchGames } from "@/lib/api/games"
 import type { Game } from "@generated/prisma/browser"
 import { GameCard } from "@/components/ui/GameCard"
@@ -87,22 +88,23 @@ function SearchContent() {
 
       {/* Search Input */}
       <GlassPanel className="w-full max-w-2xl mb-8 p-3">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t("search_placeholder")}
-            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans text-sm"
-            aria-label={t("search_placeholder")}
-            disabled={isPending}
-            autoFocus
-          />
+        <div className="flex gap-2 items-center">
+          <div className="flex-1">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={t("search_placeholder")}
+              aria-label={t("search_placeholder")}
+              disabled={isPending}
+              autoFocus
+              icon={<span className="text-sm">🔍</span>}
+            />
+          </div>
           <button
             onClick={handleSearch}
             disabled={isPending || query.trim().length < 2}
-            className="rounded-xl bg-primary px-6 py-3 text-white text-sm font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none"
+            className="rounded-xl bg-primary px-6 py-2.5 text-white text-sm font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
           >
             {isPending ? t("search_loading") : t("search")}
           </button>

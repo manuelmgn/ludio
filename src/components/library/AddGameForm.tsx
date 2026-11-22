@@ -127,7 +127,7 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
                 disabled={isPending}
                 className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
               >
-                <option value="">Selecciona Plataforma...</option>
+                <option value="">{t("select_platform") || "Selecciona Plataforma..."}</option>
                 {allPlatforms.map((p) => (
                   <option key={p} value={p}>
                     {p}
@@ -139,7 +139,7 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 flex flex-col gap-2">
                 <label htmlFor="startDate" className="text-white/70 font-sans text-sm">
-                  Data de inicio (opcional)
+                  {t("start_date") || "Data de inicio (opcional)"}
                 </label>
                 <input 
                   type="date" 
@@ -151,7 +151,7 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
               </div>
               <div className="flex-1 flex flex-col gap-2">
                 <label htmlFor="endDate" className="text-white/70 font-sans text-sm">
-                  Data de fin (opcional)
+                  {t("end_date") || "Data de fin (opcional)"}
                 </label>
                 <input 
                   type="date" 
@@ -178,7 +178,7 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
                 required
                 className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
               >
-                <option value="">Selecciona estrelas...</option>
+                <option value="">{t("select_rating") || "Selecciona estrelas..."}</option>
                 <option value="5">⭐⭐⭐⭐⭐ (5) - Obra Mestra</option>
                 <option value="4">⭐⭐⭐⭐ (4) - Moi Bo</option>
                 <option value="3">⭐⭐⭐ (3) - Bo</option>
@@ -189,14 +189,14 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
 
             <div className="flex flex-col gap-2">
               <label htmlFor="publicReview" className="text-white/70 font-sans text-sm">
-                Crítica / Reseña rápida (opcional)
+                {t("review_label") || "Crítica / Reseña rápida (opcional)"}
               </label>
               <textarea 
                 name="publicReview" 
                 id="publicReview"
                 rows={3}
                 disabled={isPending}
-                placeholder="Que che pareceu a experiencia? Que destacarías?..."
+                placeholder={t("review_placeholder") || "Que che pareceu a experiencia? Que destacarías?..."}
                 className="rounded-lg border border-white/10 bg-black/40 p-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans resize-none text-sm placeholder-zinc-500"
               />
             </div>
