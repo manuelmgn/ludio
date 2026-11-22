@@ -27,6 +27,7 @@ export function AddGameForm({ gameId, customPlatforms = [] }: AddGameFormProps) 
   const standardPlatforms = [
     "PC",
     "Steam Deck",
+    "Nintendo Switch 2",
     "Nintendo Switch",
     "PlayStation 5",
     "PlayStation 4",

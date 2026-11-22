@@ -1387,6 +1387,7 @@ export const GameScalarFieldEnum = {
   id: 'id',
   title: 'title',
   coverUrl: 'coverUrl',
+  firstReleaseDate: 'firstReleaseDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

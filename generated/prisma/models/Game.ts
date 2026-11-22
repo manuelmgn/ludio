@@ -28,6 +28,7 @@ export type GameMinAggregateOutputType = {
   id: string | null
   title: string | null
   coverUrl: string | null
+  firstReleaseDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -36,6 +37,7 @@ export type GameMaxAggregateOutputType = {
   id: string | null
   title: string | null
   coverUrl: string | null
+  firstReleaseDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,7 @@ export type GameCountAggregateOutputType = {
   id: number
   title: number
   coverUrl: number
+  firstReleaseDate: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -54,6 +57,7 @@ export type GameMinAggregateInputType = {
   id?: true
   title?: true
   coverUrl?: true
+  firstReleaseDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -62,6 +66,7 @@ export type GameMaxAggregateInputType = {
   id?: true
   title?: true
   coverUrl?: true
+  firstReleaseDate?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -70,6 +75,7 @@ export type GameCountAggregateInputType = {
   id?: true
   title?: true
   coverUrl?: true
+  firstReleaseDate?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -151,6 +157,7 @@ export type GameGroupByOutputType = {
   id: string
   title: string
   coverUrl: string | null
+  firstReleaseDate: Date | null
   createdAt: Date
   updatedAt: Date
   _count: GameCountAggregateOutputType | null
@@ -180,6 +187,7 @@ export type GameWhereInput = {
   id?: Prisma.StringFilter<"Game"> | string
   title?: Prisma.StringFilter<"Game"> | string
   coverUrl?: Prisma.StringNullableFilter<"Game"> | string | null
+  firstReleaseDate?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
@@ -190,6 +198,7 @@ export type GameOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  firstReleaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   libraryEntries?: Prisma.LibraryEntryOrderByRelationAggregateInput
@@ -203,6 +212,7 @@ export type GameWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.GameWhereInput | Prisma.GameWhereInput[]
   title?: Prisma.StringFilter<"Game"> | string
   coverUrl?: Prisma.StringNullableFilter<"Game"> | string | null
+  firstReleaseDate?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
@@ -213,6 +223,7 @@ export type GameOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  firstReleaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.GameCountOrderByAggregateInput
@@ -227,6 +238,7 @@ export type GameScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Game"> | string
   title?: Prisma.StringWithAggregatesFilter<"Game"> | string
   coverUrl?: Prisma.StringNullableWithAggregatesFilter<"Game"> | string | null
+  firstReleaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Game"> | Date | string
 }
@@ -235,6 +247,7 @@ export type GameCreateInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutGameInput
@@ -245,6 +258,7 @@ export type GameUncheckedCreateInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutGameInput
@@ -255,6 +269,7 @@ export type GameUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutGameNestedInput
@@ -265,6 +280,7 @@ export type GameUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutGameNestedInput
@@ -275,6 +291,7 @@ export type GameCreateManyInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -283,6 +300,7 @@ export type GameUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -291,6 +309,7 @@ export type GameUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -299,6 +318,7 @@ export type GameCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  firstReleaseDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -307,6 +327,7 @@ export type GameMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  firstReleaseDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -315,6 +336,7 @@ export type GameMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverUrl?: Prisma.SortOrder
+  firstReleaseDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -322,6 +344,10 @@ export type GameMinOrderByAggregateInput = {
 export type GameScalarRelationFilter = {
   is?: Prisma.GameWhereInput
   isNot?: Prisma.GameWhereInput
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type GameCreateNestedOneWithoutLibraryEntriesInput = {
@@ -356,6 +382,7 @@ export type GameCreateWithoutLibraryEntriesInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listItems?: Prisma.ListItemCreateNestedManyWithoutGameInput
@@ -365,6 +392,7 @@ export type GameUncheckedCreateWithoutLibraryEntriesInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listItems?: Prisma.ListItemUncheckedCreateNestedManyWithoutGameInput
@@ -390,6 +418,7 @@ export type GameUpdateWithoutLibraryEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listItems?: Prisma.ListItemUpdateManyWithoutGameNestedInput
@@ -399,6 +428,7 @@ export type GameUncheckedUpdateWithoutLibraryEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listItems?: Prisma.ListItemUncheckedUpdateManyWithoutGameNestedInput
@@ -408,6 +438,7 @@ export type GameCreateWithoutListItemsInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutGameInput
@@ -417,6 +448,7 @@ export type GameUncheckedCreateWithoutListItemsInput = {
   id: string
   title: string
   coverUrl?: string | null
+  firstReleaseDate?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutGameInput
@@ -442,6 +474,7 @@ export type GameUpdateWithoutListItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutGameNestedInput
@@ -451,6 +484,7 @@ export type GameUncheckedUpdateWithoutListItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutGameNestedInput
@@ -500,6 +534,7 @@ export type GameSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   id?: boolean
   title?: boolean
   coverUrl?: boolean
+  firstReleaseDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   libraryEntries?: boolean | Prisma.Game$libraryEntriesArgs<ExtArgs>
@@ -511,6 +546,7 @@ export type GameSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   title?: boolean
   coverUrl?: boolean
+  firstReleaseDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["game"]>
@@ -519,6 +555,7 @@ export type GameSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   title?: boolean
   coverUrl?: boolean
+  firstReleaseDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["game"]>
@@ -527,11 +564,12 @@ export type GameSelectScalar = {
   id?: boolean
   title?: boolean
   coverUrl?: boolean
+  firstReleaseDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type GameOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["game"]>
+export type GameOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverUrl" | "firstReleaseDate" | "createdAt" | "updatedAt", ExtArgs["result"]["game"]>
 export type GameInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   libraryEntries?: boolean | Prisma.Game$libraryEntriesArgs<ExtArgs>
   listItems?: boolean | Prisma.Game$listItemsArgs<ExtArgs>
@@ -550,6 +588,7 @@ export type $GamePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     id: string
     title: string
     coverUrl: string | null
+    firstReleaseDate: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["game"]>
@@ -980,6 +1019,7 @@ export interface GameFieldRefs {
   readonly id: Prisma.FieldRef<"Game", 'String'>
   readonly title: Prisma.FieldRef<"Game", 'String'>
   readonly coverUrl: Prisma.FieldRef<"Game", 'String'>
+  readonly firstReleaseDate: Prisma.FieldRef<"Game", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Game", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Game", 'DateTime'>
 }
