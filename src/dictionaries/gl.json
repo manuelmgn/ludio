@@ -145,5 +145,9 @@
   "canvas_edit": "Editar",
   "canvas_unsaved": "Cambios sen gardar",
   "canvas_saved": "Todo gardado",
-  "canvas_words": "palabras"
+  "canvas_words": "palabras",
+  "backup_title": "Copia de Seguridade & Exportación",
+  "backup_desc": "Exporta toda a túa biblioteca, partidas, prezos e notas nun ficheiro JSON estándar.",
+  "backup_btn": "Descargar Copia de Seguridade (JSON)",
+  "backup_exporting": "Xerando ficheiro..."
 }

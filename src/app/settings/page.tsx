@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect } from "react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
-import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform, getStores, addStore, deleteStore } from "@/lib/actions/settings"
+import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform, getStores, addStore, deleteStore, exportUserData } from "@/lib/actions/settings"
 
 interface CustomPlatform {
   id: string
@@ -33,6 +33,34 @@ export default function SettingsPage() {
   const [isStorePending, startStoreTransition] = useTransition()
   const [deletingStoreId, setDeletingStoreId] = useState<string | null>(null)
   const [storeMessage, setStoreMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  // Export state
+  const [isExporting, setIsExporting] = useState(false)
+
+  const handleExportData = async () => {
+    setIsExporting(true)
+    try {
+      const res = await exportUserData()
+      if (res.success && res.data) {
+        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+          JSON.stringify(res.data, null, 2)
+        )}`
+        const downloadAnchor = document.createElement("a")
+        downloadAnchor.setAttribute("href", jsonString)
+        const dateStr = new Date().toISOString().split("T")[0]
+        downloadAnchor.setAttribute("download", `ludio-backup-${dateStr}.json`)
+        document.body.appendChild(downloadAnchor)
+        downloadAnchor.click()
+        downloadAnchor.remove()
+      } else {
+        alert(res.error || "Erro ao exportar datos")
+      }
+    } catch {
+      alert("Erro ao xerar a copia de seguridade")
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -316,6 +344,26 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
+        </GlassPanel>
+
+        {/* Section 4: Data Export / Backup */}
+        <GlassPanel>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">💾</span>
+            <h2 className="text-xl font-medium text-white font-sans">{t("backup_title") || "Copia de Seguridade"}</h2>
+          </div>
+          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
+            {t("backup_desc") || "Exporta toda a túa biblioteca, partidas, prezos e notas nun ficheiro JSON estándar."}
+          </p>
+
+          <button
+            onClick={handleExportData}
+            disabled={isExporting}
+            className="flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-3 text-sm text-white font-medium transition-all disabled:opacity-50"
+          >
+            <span>📥</span>
+            <span>{isExporting ? (t("backup_exporting") || "Xerando...") : (t("backup_btn") || "Descargar Copia de Seguridade (JSON)")}</span>
+          </button>
         </GlassPanel>
 
       </div>

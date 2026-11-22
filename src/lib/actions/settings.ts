@@ -234,3 +234,64 @@ export async function deleteStore(storeId: string) {
     return { success: false, error: "Erro ao eliminar a tenda." }
   }
 }
+
+// ==================== Export Data ====================
+
+export async function exportUserData() {
+  try {
+    const user = await getOrCreateCurrentUser()
+    const data = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        username: true,
+        email: true,
+        createdAt: true,
+        customPlatforms: { select: { name: true } },
+        stores: { select: { name: true } },
+        libraryEntries: {
+          select: {
+            rating: true,
+            publicReview: true,
+            createdAt: true,
+            game: {
+              select: {
+                id: true,
+                title: true,
+                coverUrl: true,
+              },
+            },
+            playthroughs: {
+              select: {
+                status: true,
+                platform: true,
+                startDate: true,
+                endDate: true,
+                purchasePrice: true,
+                purchaseDate: true,
+                purchaseStore: { select: { name: true } },
+                salePrice: true,
+                saleDate: true,
+                saleStore: { select: { name: true } },
+              },
+            },
+            gameCanvas: {
+              select: {
+                content: true,
+              },
+            },
+            journalEntry: {
+              select: {
+                content: true,
+                createdAt: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    return { success: true, data }
+  } catch (error) {
+    console.error("Error exporting user data:", error)
+    return { success: false, error: "Erro ao exportar datos." }
+  }
+}
