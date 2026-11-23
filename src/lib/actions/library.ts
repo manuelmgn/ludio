@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { getAuthenticatedOrDemoUser } from "@/lib/auth-user"
+import { getAuthenticatedUser } from "@/lib/auth-user"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { revalidatePath } from "next/cache"
 
@@ -38,7 +38,10 @@ function toNullableFiniteNumber(value: number | null | undefined): number | null
 
 export async function addGameToLibrary(gameId: string, data: AddGameData): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const normalizedReview = toNullableString(data.publicReview)
     const normalizedRating = toNullableFiniteNumber(data.rating)
 
@@ -113,7 +116,10 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
 
 export async function removeGameFromLibrary(gameId: string): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
 
     const libraryEntry = await prisma.libraryEntry.findUnique({
       where: {
@@ -149,7 +155,10 @@ export async function updateLibraryReview(
   publicReview: string | null
 ): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
 
     const libraryEntry = await prisma.libraryEntry.findUnique({
       where: {
@@ -204,7 +213,10 @@ export async function updatePlaythrough(
   data: UpdatePlaythroughData
 ): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
 
     const playthrough = await prisma.playthrough.findUnique({
       where: { id: playthroughId },
@@ -271,7 +283,10 @@ export async function updatePlaythroughRating(
   review?: string | null
 ): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
 
     const playthrough = await prisma.playthrough.findUnique({
       where: { id: playthroughId },
@@ -315,7 +330,10 @@ export async function deletePlaythrough(
   gameId: string
 ): Promise<ActionResponse> {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
 
     const playthrough = await prisma.playthrough.findUnique({
       where: { id: playthroughId },

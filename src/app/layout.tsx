@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { auth } from "@/auth"
 import { LanguageProvider } from "@/contexts/LanguageContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { BottomNav } from "@/components/layout/BottomNav"
@@ -9,11 +10,19 @@ export const metadata: Metadata = {
   description: "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  let isAuthenticated = false
+  try {
+    const session = await auth()
+    isAuthenticated = Boolean(session?.user)
+  } catch {
+    isAuthenticated = false
+  }
+
   return (
     <html lang="gl" className="dark">
       <head>
@@ -41,11 +50,17 @@ export default function RootLayout({
         </div>
 
         <LanguageProvider>
-          <Navbar />
-          <main className="pt-22 sm:pt-24 pb-28 md:pb-8 min-h-screen flex-1 flex flex-col">
+          {isAuthenticated && <Navbar />}
+          <main
+            className={
+              isAuthenticated
+                ? "pt-22 sm:pt-24 pb-28 md:pb-8 min-h-screen flex-1 flex flex-col"
+                : "min-h-screen flex-1 flex flex-col"
+            }
+          >
             <div className="flex-1 flex flex-col animate-page-enter">{children}</div>
           </main>
-          <BottomNav />
+          {isAuthenticated && <BottomNav />}
         </LanguageProvider>
       </body>
     </html>

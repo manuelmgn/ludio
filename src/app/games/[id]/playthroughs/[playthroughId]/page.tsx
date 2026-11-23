@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Palette, ChevronRight, Gamepad2 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { ensureDefaultStores } from "@/lib/actions/settings"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { PlaythroughJournalSection } from "@/components/game/PlaythroughJournalSection"
@@ -31,20 +31,7 @@ interface PlaythroughPageProps {
 export default async function PlaythroughPage({ params }: PlaythroughPageProps) {
   const { id, playthroughId } = await params
 
-  const session = await auth()
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
-
-  if (!user) {
-    notFound()
-  }
+  const user = await requireAuthenticatedUser()
 
   const game = await prisma.game.findUnique({
     where: { id },

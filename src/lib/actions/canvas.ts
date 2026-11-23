@@ -1,6 +1,6 @@
 "use server"
 
-import { getAuthenticatedOrDemoUser } from "@/lib/auth-user"
+import { getAuthenticatedUser } from "@/lib/auth-user"
 import { prisma } from "@/lib/prisma"
 import { deleteLocalUpload } from "@/lib/storage"
 import { PrivacyLevel } from "@generated/prisma/enums"
@@ -8,7 +8,10 @@ import { revalidatePath } from "next/cache"
 
 export async function saveCanvasText(libraryEntryId: string, content: string) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const libraryEntry = await prisma.libraryEntry.findUnique({
       where: { id: libraryEntryId },
       select: { userId: true, gameId: true },
@@ -42,7 +45,10 @@ export async function saveCanvasImageRecord(
   privacy: PrivacyLevel
 ) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const libraryEntry = await prisma.libraryEntry.findUnique({
       where: { id: libraryEntryId },
       select: { userId: true, gameId: true },
@@ -79,7 +85,10 @@ export async function saveCanvasImageRecord(
 
 export async function deleteCanvasImage(imageId: string, libraryEntryId: string) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const image = await prisma.canvasImage.findUnique({
       where: { id: imageId },
       include: {

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Palette, Star, ArrowRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { CanvasEditor } from "./CanvasEditor"
 
@@ -17,36 +17,7 @@ interface CanvasPageProps {
 export default async function CanvasPage({ params }: CanvasPageProps) {
   const { id: gameId } = await params
 
-  const session = await auth()
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
-
-  if (!user) {
-    return (
-      <div className="flex flex-1 items-center justify-center p-8">
-        <GlassPanel className="text-center max-w-md flex flex-col items-center gap-4">
-          <p className="text-zinc-200 font-sans text-sm">
-            Debes iniciar sesión para acceder ao Canvas.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white text-xs font-medium font-sans"
-          >
-            <span>Iniciar sesión</span>
-            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-          </Link>
-        </GlassPanel>
-      </div>
-    )
-  }
+  const user = await requireAuthenticatedUser()
 
   const game = await prisma.game.findUnique({
     where: { id: gameId },

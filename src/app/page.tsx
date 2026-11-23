@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 
 export const dynamic = "force-dynamic"
@@ -42,17 +42,7 @@ const statusStyles: Record<string, { label: string; dot: string; badge: string }
 }
 
 export default async function HomePage() {
-  const session = await auth()
-
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
+  const user = await requireAuthenticatedUser()
 
   const [libraryCount, recentEntries, totalGamesCount] = await Promise.all([
     user ? prisma.libraryEntry.count({ where: { userId: user.id } }) : 0,

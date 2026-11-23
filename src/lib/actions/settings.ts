@@ -1,14 +1,15 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { getAuthenticatedOrDemoUser as getOrCreateCurrentUser } from "@/lib/auth-user"
+import { getAuthenticatedUser } from "@/lib/auth-user"
 import { revalidatePath } from "next/cache"
 
 // ==================== Custom Platforms ====================
 
 export async function getCustomPlatforms() {
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, data: [] }
     const platforms = await prisma.customPlatform.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" }
@@ -26,7 +27,8 @@ export async function addCustomPlatform(name: string) {
   }
 
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
 
     // Comprobar si ya existe una plataforma con ese nombre para este usuario
     const existing = await prisma.customPlatform.findFirst({
@@ -62,7 +64,8 @@ export async function addCustomPlatform(name: string) {
 
 export async function deleteCustomPlatform(platformId: string) {
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
     await prisma.customPlatform.deleteMany({
       where: {
         id: platformId,
@@ -121,7 +124,8 @@ export async function ensureDefaultStores() {
 
 export async function getStores() {
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, data: [] }
 
     // Ensure default stores exist
     await ensureDefaultStores()
@@ -148,7 +152,8 @@ export async function addStore(name: string) {
   }
 
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
 
     // Check if store already exists (default or user-created)
     const existing = await prisma.store.findFirst({
@@ -186,7 +191,8 @@ export async function addStore(name: string) {
 
 export async function deleteStore(storeId: string) {
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
 
     // Only allow deleting non-default (user-created) stores
     const store = await prisma.store.findFirst({
@@ -217,7 +223,8 @@ export async function deleteStore(storeId: string) {
 
 export async function exportUserData() {
   try {
-    const user = await getOrCreateCurrentUser()
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
     const data = await prisma.user.findUnique({
       where: { id: user.id },
       select: {

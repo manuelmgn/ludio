@@ -1,6 +1,6 @@
 "use server"
 
-import { getAuthenticatedOrDemoUser } from "@/lib/auth-user"
+import { getAuthenticatedUser } from "@/lib/auth-user"
 import { prisma } from "@/lib/prisma"
 import { deleteLocalUpload, uploadImage } from "@/lib/storage"
 import type { PrivacyLevel } from "@generated/prisma/enums"
@@ -8,7 +8,10 @@ import { revalidatePath } from "next/cache"
 
 export async function addJournalEntry(libraryEntryId: string, formData: FormData) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const libraryEntry = await prisma.libraryEntry.findUnique({
       where: { id: libraryEntryId },
       select: { userId: true, gameId: true },
@@ -84,7 +87,10 @@ export async function addPlaythroughJournalEntry(
   formData: FormData
 ) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const playthrough = await prisma.playthrough.findUnique({
       where: { id: playthroughId },
       include: { libraryEntry: { select: { userId: true } } },
@@ -132,7 +138,10 @@ export async function deletePlaythroughJournalEntry(
   gameId: string
 ) {
   try {
-    const user = await getAuthenticatedOrDemoUser()
+    const user = await getAuthenticatedUser()
+    if (!user) {
+      return { success: false, error: "Debes iniciar sesión." }
+    }
     const entry = await prisma.playthroughJournalEntry.findUnique({
       where: { id: entryId },
       include: {

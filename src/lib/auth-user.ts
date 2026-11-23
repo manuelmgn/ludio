@@ -1,28 +1,29 @@
+import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 
 /**
- * Returns the currently authenticated user, or falls back to a local demo user
- * when running without an active session.
+ * Returns the currently authenticated database user, or null if not logged in.
+ * Never falls back to another user or creates demo accounts.
  */
-export async function getAuthenticatedOrDemoUser() {
+export async function getAuthenticatedUser() {
   const session = await auth()
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-    if (user) return user
+  if (!session?.user?.email) {
+    return null
   }
 
-  let user = await prisma.user.findFirst()
+  return prisma.user.findUnique({
+    where: { email: session.user.email },
+  })
+}
+
+/**
+ * Requires an authenticated user in Server Components; redirects to `/login` otherwise.
+ */
+export async function requireAuthenticatedUser() {
+  const user = await getAuthenticatedUser()
   if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: "demo@ludio.app",
-        username: "demo_user",
-        passwordHash: "mock_hash",
-      },
-    })
+    redirect("/login")
   }
   return user
 }

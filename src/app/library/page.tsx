@@ -1,31 +1,11 @@
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { LibraryFilter, type LibraryEntryWithDetails } from "./LibraryFilter"
 
 export const dynamic = "force-dynamic"
 
 export default async function LibraryPage() {
-  const session = await auth()
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: "admin@ludio.app",
-        username: "admin",
-        passwordHash: "dummy_hash",
-      },
-    })
-  }
+  const user = await requireAuthenticatedUser()
 
   const entries: LibraryEntryWithDetails[] = await prisma.libraryEntry.findMany({
     where: { userId: user.id },

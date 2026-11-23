@@ -9,6 +9,8 @@ export function BottomNav() {
   const pathname = usePathname()
   const { t } = useLanguage()
 
+  if (pathname === "/login" || pathname === "/register") return null
+
   const items = [
     { href: "/", label: t("home"), icon: Home },
     { href: "/search", label: t("search"), icon: Search },

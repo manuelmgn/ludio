@@ -11,7 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { ReviewEditor } from "@/components/library/LibraryEntryControls"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { GameHeroActions } from "@/components/game/AddToLibraryModal"
@@ -61,16 +61,7 @@ export default async function GamePage({ params }: GamePageProps) {
       })
     : null
 
-  const session = await auth()
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
+  const user = await requireAuthenticatedUser()
 
   const libraryEntry = user
     ? await prisma.libraryEntry.findUnique({

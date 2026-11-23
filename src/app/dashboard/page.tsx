@@ -1,5 +1,6 @@
 import { auth, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { DashboardClient } from "./DashboardClient"
 
 export const dynamic = "force-dynamic"
@@ -35,17 +36,7 @@ export interface UserStats {
 
 export default async function DashboardPage() {
   const session = await auth()
-  
-  let user = null
-  if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-  }
-
-  if (!user) {
-    user = await prisma.user.findFirst()
-  }
+  const user = await requireAuthenticatedUser()
 
   let stats: UserStats = {
     totalGames: 0,

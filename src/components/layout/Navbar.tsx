@@ -21,9 +21,11 @@ export function Navbar() {
   const [quickQuery, setQuickQuery] = useState("")
   const searchInputRef = useRef<HTMLInputElement>(null)
 
+  const isAuthPage = pathname === "/login" || pathname === "/register"
   const pageHasHeroSearch = pathname === "/" || pathname === "/search"
 
   useEffect(() => {
+    if (isAuthPage) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault()
@@ -44,7 +46,9 @@ export function Navbar() {
       window.removeEventListener("keydown", handleKeyDown)
       window.removeEventListener("scroll", handleScroll)
     }
-  }, [router, pageHasHeroSearch])
+  }, [router, pageHasHeroSearch, isAuthPage])
+
+  if (isAuthPage) return null
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault()
