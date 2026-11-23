@@ -1,13 +1,54 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { auth } from "@/auth"
 import { LanguageProvider } from "@/contexts/LanguageContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { BottomNav } from "@/components/layout/BottomNav"
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#08080d",
+  colorScheme: "dark",
+}
+
 export const metadata: Metadata = {
-  title: "Ludio — Diario e Colección de Videoxogos",
-  description: "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
+  title: {
+    default: "Ludio — Diario e Colección de Videoxogos",
+    template: "%s · Ludio",
+  },
+  applicationName: "Ludio",
+  description:
+    "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
+  keywords: [
+    "Ludio",
+    "videoxogos",
+    "diario gamer",
+    "colección de videoxogos",
+    "biblioteca",
+    "partidas",
+    "canvas",
+  ],
+  appleWebApp: {
+    capable: true,
+    title: "Ludio",
+    statusBarStyle: "black-translucent",
+  },
+  openGraph: {
+    type: "website",
+    locale: "gl_ES",
+    siteName: "Ludio",
+    title: "Ludio — Diario e Colección de Videoxogos",
+    description:
+      "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ludio — Diario e Colección de Videoxogos",
+    description:
+      "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
+  },
 }
 
 export default async function RootLayout({
@@ -26,8 +67,6 @@ export default async function RootLayout({
   return (
     <html lang="gl" className="dark">
       <head>
-        <meta name="color-scheme" content="dark" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
