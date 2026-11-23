@@ -131,7 +131,7 @@ export default async function HomePage() {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white text-sm font-medium border border-purple-400/30 shadow-[0_8px_24px_-4px_rgba(168,85,247,0.5)] transition-all font-sans"
           >
             <Library className="w-4 h-4" aria-hidden="true" />
-            <span>A Miña Biblioteca</span>
+            <span>Biblioteca</span>
             {libraryCount > 0 && (
               <span className="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-mono bg-black/25 text-purple-100">
                 {libraryCount}
