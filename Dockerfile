@@ -12,9 +12,9 @@ COPY prisma.config.ts ./
 RUN npm ci --ignore-scripts
 RUN npx prisma generate
 
-# 2. Contenedor -init para ejecutar migraciones en producción
+# 2. Contenedor -init para ejecutar migraciones y datos iniciales en producción
 FROM deps AS init
-CMD ["npx", "prisma", "migrate", "deploy"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
 
 # 3. Build de Next.js (standalone)
 FROM base AS builder
