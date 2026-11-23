@@ -25,7 +25,7 @@ CMD ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
 # 4. Build de Next.js (standalone) reutilizando node_modules sin copiarlos
 FROM prisma-gen AS builder
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY next.config.ts tsconfig.json postcss.config.mjs next-env.d.ts ./
+COPY next.config.ts tsconfig.json postcss.config.mjs ./
 COPY public ./public
 COPY src ./src
 RUN --mount=type=cache,target=/app/.next/cache \
