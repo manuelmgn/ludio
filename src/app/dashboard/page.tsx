@@ -25,6 +25,8 @@ export interface UserStats {
       id: string
       title: string
       coverUrl: string | null
+      firstReleaseDate: Date | null
+      igdbRating: number | null
     }
     latestStatus?: string | null
     platform?: string | null
@@ -70,6 +72,8 @@ export default async function DashboardPage() {
             id: true,
             title: true,
             coverUrl: true,
+            firstReleaseDate: true,
+            igdbRating: true,
           },
         },
         playthroughs: {

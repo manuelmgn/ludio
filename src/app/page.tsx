@@ -156,6 +156,16 @@ export default async function HomePage() {
                         {entry.playthroughs[0].status === "PLAYING" ? "Xogando" : entry.playthroughs[0].status === "COMPLETED" ? "Completado" : entry.playthroughs[0].status}
                       </div>
                     )}
+                    {entry.game.firstReleaseDate && (
+                      <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/10">
+                        {entry.game.firstReleaseDate.getFullYear()}
+                      </div>
+                    )}
+                    {entry.game.igdbRating !== null && (
+                      <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-amber-400 border border-white/10">
+                        ⭐ {entry.game.igdbRating}
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-xs font-medium text-white line-clamp-1 hover:text-primary transition-colors">
                     {entry.game.title}
@@ -200,6 +210,16 @@ export default async function HomePage() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-[#3c006b] p-2 text-center text-xs text-purple-200">
                         {game.title}
+                      </div>
+                    )}
+                    {game.firstReleaseDate && (
+                      <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/10">
+                        {game.firstReleaseDate.getFullYear()}
+                      </div>
+                    )}
+                    {game.igdbRating !== null && (
+                      <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-amber-400 border border-white/10">
+                        ⭐ {game.igdbRating}
                       </div>
                     )}
                   </div>

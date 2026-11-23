@@ -80,6 +80,7 @@ model Game {
   title            String
   coverUrl         String?
   firstReleaseDate DateTime?
+  igdbRating       Int?
 
   libraryEntries LibraryEntry[]
   listItems      ListItem[]

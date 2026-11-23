@@ -34,7 +34,9 @@ export default async function LibraryPage() {
         select: {
           id: true,
           title: true,
-          coverUrl: true
+          coverUrl: true,
+          firstReleaseDate: true,
+          igdbRating: true
         }
       },
       playthroughs: {

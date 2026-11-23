@@ -9,7 +9,16 @@ import { useLanguage } from "@/contexts/LanguageContext"
 
 type PlaythroughStatus = "PLAYING" | "COMPLETED" | "ABANDONED" | "ON_HOLD"
 type FilterTab = PlaythroughStatus | "WISH" | "ALL"
-type SortOption = "updated_desc" | "title_asc" | "title_desc" | "rating_desc" | "price_desc" | "price_asc"
+type SortOption =
+  | "updated_desc"
+  | "title_asc"
+  | "title_desc"
+  | "rating_desc"
+  | "igdb_desc"
+  | "release_desc"
+  | "release_asc"
+  | "price_desc"
+  | "price_asc"
 
 export interface LibraryEntryWithDetails {
   id: string
@@ -18,6 +27,8 @@ export interface LibraryEntryWithDetails {
     id: string
     title: string
     coverUrl: string | null
+    firstReleaseDate?: Date | string | null
+    igdbRating?: number | null
   }
   playthroughs: { 
     status: PlaythroughStatus
@@ -154,6 +165,21 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
           const rA = a.rating ?? -1
           const rB = b.rating ?? -1
           return rB - rA
+        }
+        case "igdb_desc": {
+          const rA = a.game.igdbRating ?? -1
+          const rB = b.game.igdbRating ?? -1
+          return rB - rA
+        }
+        case "release_desc": {
+          const dA = a.game.firstReleaseDate ? new Date(a.game.firstReleaseDate).getTime() : -Infinity
+          const dB = b.game.firstReleaseDate ? new Date(b.game.firstReleaseDate).getTime() : -Infinity
+          return dB - dA
+        }
+        case "release_asc": {
+          const dA = a.game.firstReleaseDate ? new Date(a.game.firstReleaseDate).getTime() : Infinity
+          const dB = b.game.firstReleaseDate ? new Date(b.game.firstReleaseDate).getTime() : Infinity
+          return dA - dB
         }
         case "price_desc": {
           const pA = Math.max(...a.playthroughs.map((p) => p.purchasePrice ?? -1), -1)
@@ -303,7 +329,10 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
             <option value="updated_desc">{t("sort_updated_desc") || "🕒 Actualizados recentemente"}</option>
             <option value="title_asc">{t("sort_title") || "🔤 Título (A-Z)"}</option>
             <option value="title_desc">{t("sort_title_desc") || "🔤 Título (Z-A)"}</option>
-            <option value="rating_desc">{t("sort_rating") || "⭐ Mellor valorados"}</option>
+            <option value="rating_desc">{t("sort_rating") || "⭐ A miña valoración"}</option>
+            <option value="igdb_desc">🌐 Valoración IGDB</option>
+            <option value="release_desc">📅 Máis recentes (Ano)</option>
+            <option value="release_asc">⏳ Máis antigos (Ano)</option>
             <option value="price_desc">{t("sort_price_desc") || "💶 Prezo (Maior)"}</option>
             <option value="price_asc">{t("sort_price_asc") || "💶 Prezo (Menor)"}</option>
           </select>
@@ -354,6 +383,20 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                   >
                     {statusBadge.label}
                   </div>
+
+                  {/* Release Year Badge */}
+                  {entry.game.firstReleaseDate && (
+                    <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/10">
+                      {new Date(entry.game.firstReleaseDate).getFullYear()}
+                    </div>
+                  )}
+
+                  {/* IGDB Rating Badge */}
+                  {entry.game.igdbRating !== null && entry.game.igdbRating !== undefined && (
+                    <div className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/10">
+                      IGDB {entry.game.igdbRating}
+                    </div>
+                  )}
 
                   {/* Rating Stars Overlay */}
                   {entry.rating && (

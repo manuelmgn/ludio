@@ -100,8 +100,18 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
       <div className="fixed top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
       <div className="fixed bottom-1/3 left-1/4 w-[500px] h-[500px] bg-blue-900/15 rounded-full blur-[140px] -z-10" />
 
-      <h1 className="text-4xl font-pixel text-white mb-2 tracking-wider mt-4">
-        Canvas: {libraryEntry.game.title}
+      <h1 className="text-4xl font-pixel text-white mb-2 tracking-wider mt-4 flex items-center gap-3 flex-wrap justify-center">
+        <span>Canvas: {libraryEntry.game.title}</span>
+        {libraryEntry.game.firstReleaseDate && (
+          <span className="text-sm font-mono text-zinc-300 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
+            {libraryEntry.game.firstReleaseDate.getFullYear()}
+          </span>
+        )}
+        {libraryEntry.game.igdbRating !== null && (
+          <span className="text-sm font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+            ⭐ {libraryEntry.game.igdbRating}
+          </span>
+        )}
       </h1>
       <p className="text-zinc-400 font-sans text-xs mb-8">
         Espazo libre para as túas estratexias, notas e galería de capturas.

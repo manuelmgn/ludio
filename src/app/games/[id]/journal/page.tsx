@@ -114,11 +114,21 @@ export default async function JournalPage({ params }: JournalPageProps) {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
           <span className="text-3xl">📖</span>
           <h1 className="text-3xl font-pixel text-white tracking-wider">
             Diario de Crónicas: {game.title}
           </h1>
+          {game.firstReleaseDate && (
+            <span className="text-xs font-mono text-zinc-300 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
+              {game.firstReleaseDate.getFullYear()}
+            </span>
+          )}
+          {game.igdbRating !== null && (
+            <span className="text-xs font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+              ⭐ {game.igdbRating}
+            </span>
+          )}
         </div>
 
         <JournalEditor libraryEntryId={libraryEntry.id} />

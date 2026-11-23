@@ -143,6 +143,46 @@ export async function removeGameFromLibrary(gameId: string): Promise<ActionRespo
   }
 }
 
+export async function updateLibraryReview(
+  gameId: string,
+  rating: number | null,
+  publicReview: string | null
+): Promise<ActionResponse> {
+  try {
+    const user = await getAuthenticatedOrDemoUser()
+
+    const libraryEntry = await prisma.libraryEntry.findUnique({
+      where: {
+        userId_gameId: {
+          userId: user.id,
+          gameId,
+        },
+      },
+    })
+
+    if (!libraryEntry) {
+      return { success: false, error: "O xogo non está na biblioteca." }
+    }
+
+    await prisma.libraryEntry.update({
+      where: { id: libraryEntry.id },
+      data: {
+        rating,
+        publicReview: publicReview?.trim() || null,
+      },
+    })
+
+    revalidatePath("/library")
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath("/dashboard")
+
+    return { success: true }
+  } catch (error) {
+    console.error("[updateLibraryReview] Error:", error)
+    return { success: false, error: "Non se puido actualizar a valoración." }
+  }
+}
+
 export interface UpdatePlaythroughData {
   status: PlaythroughStatus
   platform: string

@@ -221,7 +221,7 @@ export async function searchGames(query: string): Promise<SearchResult> {
         coverUrl: g.coverUrl,
         firstReleaseDate: g.firstReleaseDate ? g.firstReleaseDate.toISOString() : null,
         releaseYear: g.firstReleaseDate ? g.firstReleaseDate.getFullYear() : null,
-        rating: null,
+        rating: g.igdbRating ?? null,
         totalRatingCount: null,
         relevanceScore: 100,
       }))
@@ -264,12 +264,14 @@ export async function searchGames(query: string): Promise<SearchResult> {
             title: g.title,
             coverUrl: g.coverUrl,
             firstReleaseDate: releaseDateObj,
+            igdbRating: g.rating,
           },
           create: {
             id: g.id,
             title: g.title,
             coverUrl: g.coverUrl,
             firstReleaseDate: releaseDateObj,
+            igdbRating: g.rating,
           },
         })
       })
@@ -297,7 +299,7 @@ export async function searchGames(query: string): Promise<SearchResult> {
         coverUrl: g.coverUrl,
         firstReleaseDate: g.firstReleaseDate ? g.firstReleaseDate.toISOString() : null,
         releaseYear: g.firstReleaseDate ? g.firstReleaseDate.getFullYear() : null,
-        rating: null,
+        rating: g.igdbRating ?? null,
         totalRatingCount: null,
         relevanceScore: 100,
       }))
@@ -306,5 +308,46 @@ export async function searchGames(query: string): Promise<SearchResult> {
     } catch {
       return { success: false, error: "Erro ao buscar xogos. Téntao de novo." }
     }
+  }
+}
+
+export async function syncGameMetadataIfMissing(gameId: string) {
+  try {
+    const numericId = Number(gameId)
+    if (!Number.isFinite(numericId)) return null
+
+    const token = await getIGDBToken()
+    const res = await fetch("https://api.igdb.com/v4/games", {
+      method: "POST",
+      headers: {
+        "Client-ID": process.env.IGDB_CLIENT_ID as string,
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: `fields name, cover.url, rating, first_release_date; where id = ${numericId}; limit 1;`,
+    })
+    if (!res.ok) return null
+    const items = (await res.json()) as IGDBGame[]
+    const igdbGame = items[0]
+    if (!igdbGame) return null
+
+    const releaseDate = igdbGame.first_release_date
+      ? new Date(igdbGame.first_release_date * 1000)
+      : null
+    const igdbRating = igdbGame.rating ? Math.round(igdbGame.rating) : null
+    const coverUrl = igdbGame.cover?.url
+      ? `https:${igdbGame.cover.url.replace("t_thumb", "t_cover_big")}`
+      : undefined
+
+    return await prisma.game.update({
+      where: { id: gameId },
+      data: {
+        firstReleaseDate: releaseDate,
+        igdbRating,
+        ...(coverUrl ? { coverUrl } : {}),
+      },
+    })
+  } catch {
+    return null
   }
 }

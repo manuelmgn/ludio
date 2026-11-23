@@ -545,14 +545,6 @@ export type LibraryEntryUncheckedUpdateManyWithoutGameNestedInput = {
   deleteMany?: Prisma.LibraryEntryScalarWhereInput | Prisma.LibraryEntryScalarWhereInput[]
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type LibraryEntryCreateNestedOneWithoutPlaythroughsInput = {
   create?: Prisma.XOR<Prisma.LibraryEntryCreateWithoutPlaythroughsInput, Prisma.LibraryEntryUncheckedCreateWithoutPlaythroughsInput>
   connectOrCreate?: Prisma.LibraryEntryCreateOrConnectWithoutPlaythroughsInput

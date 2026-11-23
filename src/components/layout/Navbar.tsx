@@ -1,14 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { language, setLanguage, t } = useLanguage()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        router.push("/search")
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [router])
 
   const links = [
     { href: "/", label: t("home") },
@@ -60,8 +72,17 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Right side: Language Selector & Auth */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Right side: Quick Search, Language Selector & Auth */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            href="/search"
+            className="flex items-center gap-2 text-xs text-zinc-400 hover:text-white bg-black/40 hover:bg-white/10 border border-white/10 px-2.5 py-1.5 rounded-lg transition-colors font-mono"
+            title="Busca rápida (⌘K)"
+          >
+            <span>🔍</span>
+            <kbd className="text-[10px] text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">⌘K</kbd>
+          </Link>
+
           {/* Language Switcher */}
           <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-0.5 backdrop-blur-md">
             <button

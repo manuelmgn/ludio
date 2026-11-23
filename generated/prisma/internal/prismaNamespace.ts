@@ -1463,6 +1463,7 @@ export const GameScalarFieldEnum = {
   title: 'title',
   coverUrl: 'coverUrl',
   firstReleaseDate: 'firstReleaseDate',
+  igdbRating: 'igdbRating',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { AddGameForm } from "@/components/library/AddGameForm"
 import { RemoveGameButton } from "@/components/library/RemoveGameButton"
+import { ReviewEditor } from "@/components/library/LibraryEntryControls"
 import { PlaythroughList } from "@/components/library/PlaythroughList"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { ensureDefaultStores } from "@/lib/actions/settings"
+import { syncGameMetadataIfMissing } from "@/lib/api/games"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -20,13 +22,22 @@ interface GamePageProps {
 export default async function GamePage({ params }: GamePageProps) {
   const { id } = await params
 
-  const game = await prisma.game.findUnique({
+  let game = await prisma.game.findUnique({
     where: { id },
   })
 
   if (!game) {
     notFound()
   }
+
+  if (game.firstReleaseDate === null || game.igdbRating === null) {
+    const synced = await syncGameMetadataIfMissing(id)
+    if (synced) {
+      game = synced
+    }
+  }
+
+  const releaseYear = game.firstReleaseDate ? game.firstReleaseDate.getFullYear() : null
 
   // Get current user or demo user
   const session = await auth()
@@ -137,11 +148,33 @@ export default async function GamePage({ params }: GamePageProps) {
                   </span>
                 </div>
               )}
+
+              {releaseYear && (
+                <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-mono text-zinc-200 border border-white/15">
+                  📅 {releaseYear}
+                </div>
+              )}
+
+              {game.igdbRating !== null && (
+                <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-mono text-amber-400 border border-white/15">
+                  ⭐ {game.igdbRating}
+                </div>
+              )}
             </div>
 
-            <h1 className="text-2xl font-pixel text-white text-center leading-tight tracking-wider mb-2">
+            <h1 className="text-2xl font-pixel text-white text-center leading-tight tracking-wider mb-1">
               {game.title}
             </h1>
+
+            {(releaseYear || game.igdbRating !== null) && (
+              <div className="flex items-center justify-center gap-2 text-xs font-mono text-zinc-400 mb-2">
+                {releaseYear && <span>{releaseYear}</span>}
+                {releaseYear && game.igdbRating !== null && <span>•</span>}
+                {game.igdbRating !== null && (
+                  <span className="text-amber-400">IGDB: {game.igdbRating}/100</span>
+                )}
+              </div>
+            )}
 
             {libraryEntry && (
               <div className="w-full mt-2 pt-3 border-t border-white/10 flex flex-col items-center gap-2">
@@ -205,16 +238,11 @@ export default async function GamePage({ params }: GamePageProps) {
                 </span>
               </div>
 
-              {libraryEntry.publicReview && (
-                <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                  <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider block mb-1">
-                    A túa crítica
-                  </span>
-                  <p className="text-zinc-200 font-sans text-sm italic">
-                    &ldquo;{libraryEntry.publicReview}&rdquo;
-                  </p>
-                </div>
-              )}
+              <ReviewEditor
+                gameId={game.id}
+                initialRating={libraryEntry.rating}
+                initialReview={libraryEntry.publicReview}
+              />
 
               {libraryEntry.playthroughs.length > 0 ? (
                 <PlaythroughList

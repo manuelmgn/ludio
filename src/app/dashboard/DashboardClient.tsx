@@ -275,11 +275,20 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                             {badge.label}
                           </span>
                         )}
-                        {entry.rating && (
+                        {entry.game.firstReleaseDate && (
+                          <span className="text-zinc-400 text-[10px] font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                            {new Date(entry.game.firstReleaseDate).getFullYear()}
+                          </span>
+                        )}
+                        {entry.rating ? (
                           <span className="text-amber-400 text-xs font-mono">
                             ⭐ {entry.rating}
                           </span>
-                        )}
+                        ) : entry.game.igdbRating !== null ? (
+                          <span className="text-zinc-400 text-[10px] font-mono">
+                            IGDB {entry.game.igdbRating}
+                          </span>
+                        ) : null}
                       </div>
 
                       <div className="flex items-center gap-3 mt-3 pt-2 border-t border-white/5 text-[11px] font-mono">
