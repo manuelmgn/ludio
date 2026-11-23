@@ -15,7 +15,13 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 }
 
+const appBaseUrl =
+  process.env.AUTH_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  "http://localhost:5020"
+
 export const metadata: Metadata = {
+  metadataBase: new URL(appBaseUrl),
   title: {
     default: "Ludio — Diario e Colección de Videoxogos",
     template: "%s · Ludio",
@@ -71,6 +77,26 @@ export const metadata: Metadata = {
         url: "/pwa/splash?w=1125&h=2436",
         media:
           "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1284&h=2778",
+        media:
+          "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1242&h=2688",
+        media:
+          "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=828&h=1792",
+        media:
+          "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=750&h=1334",
+        media:
+          "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
       },
       {
         url: "/pwa/splash?w=1668&h=2388",

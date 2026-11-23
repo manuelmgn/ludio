@@ -109,8 +109,11 @@ export function ReviewEditor({ gameId, initialRating, initialReview }: ReviewEdi
             key={star}
             type="button"
             onMouseEnter={() => setHoveredStar(star)}
-            onClick={() => setRating(rating === star ? 0 : star)}
-            className="p-1 transition-transform hover:scale-115 cursor-pointer"
+            onClick={() => {
+              setHoveredStar(0)
+              setRating(rating === star ? 0 : star)
+            }}
+            className="p-1.5 sm:p-1 transition-transform hover:scale-115 cursor-pointer"
             title={`${star} estrela(s)`}
             aria-label={`${star} estrela(s)`}
           >

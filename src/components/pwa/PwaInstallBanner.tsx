@@ -21,13 +21,16 @@ export function PwaInstallBanner() {
   } = usePwa()
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
-  const isAuthPage =
-    pathname === "/login" || pathname === "/register" || pathname === "/offline"
+  const isHiddenRoute =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/offline" ||
+    pathname === "/settings"
 
   const showInstallBanner =
     !isStandalone &&
     !bannerDismissed &&
-    !isAuthPage &&
+    !isHiddenRoute &&
     (canInstallPrompt || isIOSInstallable)
 
   const handleInstallClick = async () => {

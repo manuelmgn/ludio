@@ -72,16 +72,18 @@ export default function SettingsPage() {
     try {
       const res = await exportUserData()
       if (res.success && res.data) {
-        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-          JSON.stringify(res.data, null, 2)
-        )}`
+        const blob = new Blob([JSON.stringify(res.data, null, 2)], {
+          type: "application/json;charset=utf-8",
+        })
+        const blobUrl = URL.createObjectURL(blob)
         const downloadAnchor = document.createElement("a")
-        downloadAnchor.setAttribute("href", jsonString)
+        downloadAnchor.setAttribute("href", blobUrl)
         const dateStr = new Date().toISOString().split("T")[0]
         downloadAnchor.setAttribute("download", `ludio-backup-${dateStr}.json`)
         document.body.appendChild(downloadAnchor)
         downloadAnchor.click()
         downloadAnchor.remove()
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
       } else {
         alert(res.error || "Erro ao exportar datos")
       }

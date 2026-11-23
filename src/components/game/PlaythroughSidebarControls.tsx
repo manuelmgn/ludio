@@ -41,6 +41,7 @@ export function PlaythroughRatingCard({
   const handleStarClick = (star: number) => {
     const prevRating = rating
     const nextRating = rating === star ? 0 : star
+    setHovered(0)
     setErrorMsg(null)
     setRating(nextRating)
     startTransition(async () => {
@@ -102,7 +103,7 @@ export function PlaythroughRatingCard({
             disabled={isPending}
             onMouseEnter={() => setHovered(star)}
             onClick={() => handleStarClick(star)}
-            className="p-0.5 transition-transform hover:scale-110 cursor-pointer"
+            className="p-1.5 sm:p-0.5 transition-transform hover:scale-110 cursor-pointer"
             title={`${star} estrela(s)`}
             aria-label={`${star} estrela(s)`}
           >

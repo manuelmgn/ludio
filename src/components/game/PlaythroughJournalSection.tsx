@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useRef } from "react"
+import { useState, useTransition, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import {
@@ -47,6 +47,20 @@ export function PlaythroughJournalSection({
   const [error, setError] = useState<string | null>(null)
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null)
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!lightboxUrl) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxUrl(null)
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener("keydown", handleKey)
+    }
+  }, [lightboxUrl])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -249,7 +263,7 @@ export function PlaythroughJournalSection({
       {/* Simple Lightbox */}
       {lightboxUrl && (
         <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
           onClick={() => setLightboxUrl(null)}
           role="dialog"
           aria-modal="true"
@@ -259,7 +273,7 @@ export function PlaythroughJournalSection({
               <button
                 type="button"
                 onClick={() => setLightboxUrl(null)}
-                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer"
                 aria-label="Pechar"
               >
                 <X className="w-4 h-4" aria-hidden="true" />

@@ -112,11 +112,15 @@ self.addEventListener("fetch", (event) => {
       caches.open(STATIC_CACHE).then(async (cache) => {
         const cached = await cache.match(request)
         if (cached) return cached
-        const response = await fetch(request)
-        if (response.ok) {
-          cache.put(request, response.clone())
+        try {
+          const response = await fetch(request)
+          if (response.ok && !response.redirected) {
+            event.waitUntil(cache.put(request, response.clone()))
+          }
+          return response
+        } catch {
+          return Response.error()
         }
-        return response
       })
     )
     return
@@ -133,11 +137,11 @@ self.addEventListener("fetch", (event) => {
         const networkPromise = fetch(request)
           .then((response) => {
             if (response.ok || response.type === "opaque") {
-              cache.put(request, response.clone())
+              event.waitUntil(cache.put(request, response.clone()))
             }
             return response
           })
-          .catch(() => cached)
+          .catch(() => cached || Response.error())
         return cached || networkPromise
       })
     )
@@ -158,13 +162,19 @@ self.addEventListener("fetch", (event) => {
         const cached = await cache.match(request)
         const networkPromise = fetch(request)
           .then((response) => {
-            if (response.ok || response.type === "opaque") {
-              cache.put(request, response.clone())
-              trimCache(IMAGE_CACHE, MAX_IMAGE_ENTRIES)
+            if (
+              (response.ok && !response.redirected) ||
+              response.type === "opaque"
+            ) {
+              event.waitUntil(
+                cache
+                  .put(request, response.clone())
+                  .then(() => trimCache(IMAGE_CACHE, MAX_IMAGE_ENTRIES))
+              )
             }
             return response
           })
-          .catch(() => cached)
+          .catch(() => cached || Response.error())
         return cached || networkPromise
       })
     )

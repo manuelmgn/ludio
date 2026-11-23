@@ -146,7 +146,16 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                 <span>{t("settings")}</span>
               </Link>
 
-              <form action={signOutAction}>
+              <form
+                action={signOutAction}
+                onSubmit={() => {
+                  if ("serviceWorker" in navigator) {
+                    navigator.serviceWorker.controller?.postMessage({
+                      type: "CLEAR_USER_CACHE",
+                    })
+                  }
+                }}
+              >
                 <Button type="submit" variant="glass" size="sm" className="py-2">
                   <LogOut className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                   <span>{t("logout")}</span>
