@@ -12,3 +12,12 @@ public/uploads/*
 npm-debug.log*
 .DS_Store
 README.md
+AGENTS.md
+CLAUDE.md
+.agents
+.claude
+.windsurf
+skills-lock.json
+test-db.ts
+docker-compose*.yml
+Dockerfile

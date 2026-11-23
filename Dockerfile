@@ -4,27 +4,34 @@ FROM node:22-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 
-# 1. Dependencias y generación del cliente de Prisma
+# 1. Dependencias (solo se invalida si cambian package.json o package-lock.json)
 FROM base AS deps
 COPY package.json package-lock.json ./
-COPY prisma ./prisma
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
+
+# 2. Cliente de Prisma (solo se invalida si cambian schema.prisma o prisma.config.ts)
+FROM deps AS prisma-gen
+COPY prisma/schema.prisma ./prisma/schema.prisma
 COPY prisma.config.ts ./
-RUN npm ci --ignore-scripts
 RUN npx prisma generate
 
-# 2. Contenedor -init para ejecutar migraciones y datos iniciales en producción
-FROM deps AS init
+# 3. Contenedor -init para ejecutar migraciones y datos iniciales en producción
+FROM prisma-gen AS init
+COPY prisma/migrations ./prisma/migrations
+COPY prisma/seed.ts ./prisma/seed.ts
 CMD ["sh", "-c", "npx prisma migrate deploy && npm run db:seed"]
 
-# 3. Build de Next.js (standalone)
-FROM base AS builder
+# 4. Build de Next.js (standalone) reutilizando node_modules sin copiarlos
+FROM prisma-gen AS builder
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/generated ./generated
-COPY . .
-RUN npm run build
+COPY next.config.ts tsconfig.json postcss.config.mjs next-env.d.ts ./
+COPY public ./public
+COPY src ./src
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
 
-# 4. Imagen final de producción
+# 5. Imagen final de producción
 FROM node:22-alpine AS runner
 WORKDIR /app
 
