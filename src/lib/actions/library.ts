@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache"
 export interface ActionResponse {
   success: boolean
   error?: string
+  playthroughId?: string
 }
 
 export interface AddGameData {
@@ -82,14 +83,17 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
     }
 
     // 2. Create the Playthrough only if status is NOT "WISHED"
+    let createdPlaythroughId: string | undefined
     if (data.status !== "WISHED") {
-      await prisma.playthrough.create({
+      const created = await prisma.playthrough.create({
         data: {
           libraryEntryId: libraryEntry.id,
           status: data.status,
           platform: data.platform || "PC",
           startDate: data.startDate || null,
           endDate: data.endDate || null,
+          rating: data.rating ?? null,
+          review: data.publicReview?.trim() || null,
           purchasePrice: data.purchasePrice ?? null,
           purchaseStoreId: data.purchaseStoreId || null,
           purchaseDate: data.purchaseDate || null,
@@ -98,13 +102,15 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
           saleDate: data.saleDate || null,
         },
       })
+      createdPlaythroughId = created.id
     }
 
     revalidatePath("/library")
     revalidatePath(`/games/${gameId}`)
+    revalidatePath("/dashboard")
     revalidatePath("/")
 
-    return { success: true }
+    return { success: true, playthroughId: createdPlaythroughId }
   } catch (error) {
     console.error("[addGameToLibrary] Error:", error)
     return { success: false, error: "Non se puido engadir á biblioteca. Téntao de novo." }
@@ -188,6 +194,8 @@ export interface UpdatePlaythroughData {
   platform: string
   startDate?: string | null
   endDate?: string | null
+  rating?: number | null
+  review?: string | null
   purchasePrice?: number | null
   purchaseStoreId?: string | null
   purchaseDate?: string | null
@@ -220,6 +228,8 @@ export async function updatePlaythrough(
         platform: data.platform,
         startDate: data.startDate !== undefined ? data.startDate : playthrough.startDate,
         endDate: data.endDate !== undefined ? data.endDate : playthrough.endDate,
+        rating: data.rating !== undefined ? data.rating : playthrough.rating,
+        review: data.review !== undefined ? data.review : playthrough.review,
         purchasePrice: data.purchasePrice !== undefined ? data.purchasePrice : playthrough.purchasePrice,
         purchaseStoreId: data.purchaseStoreId !== undefined ? data.purchaseStoreId : playthrough.purchaseStoreId,
         purchaseDate: data.purchaseDate !== undefined ? data.purchaseDate : playthrough.purchaseDate,
@@ -230,6 +240,7 @@ export async function updatePlaythrough(
     })
 
     revalidatePath(`/games/${gameId}`)
+    revalidatePath(`/games/${gameId}/playthroughs/${playthroughId}`)
     revalidatePath("/library")
     revalidatePath("/dashboard")
     revalidatePath("/")
@@ -238,6 +249,52 @@ export async function updatePlaythrough(
   } catch (error) {
     console.error("[updatePlaythrough] Error:", error)
     return { success: false, error: "Erro ao actualizar a partida." }
+  }
+}
+
+export async function updatePlaythroughRating(
+  playthroughId: string,
+  gameId: string,
+  rating: number | null,
+  review?: string | null
+): Promise<ActionResponse> {
+  try {
+    const user = await getAuthenticatedOrDemoUser()
+
+    const playthrough = await prisma.playthrough.findUnique({
+      where: { id: playthroughId },
+      include: { libraryEntry: true },
+    })
+
+    if (!playthrough || playthrough.libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para valorar esta partida." }
+    }
+
+    await prisma.playthrough.update({
+      where: { id: playthroughId },
+      data: {
+        rating,
+        ...(review !== undefined ? { review: review?.trim() || null } : {}),
+      },
+    })
+
+    // If the parent libraryEntry has no overall rating yet, sync it cleanly
+    if (rating !== null && playthrough.libraryEntry.rating === null) {
+      await prisma.libraryEntry.update({
+        where: { id: playthrough.libraryEntryId },
+        data: { rating },
+      })
+    }
+
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath(`/games/${gameId}/playthroughs/${playthroughId}`)
+    revalidatePath("/library")
+    revalidatePath("/dashboard")
+
+    return { success: true }
+  } catch (error) {
+    console.error("[updatePlaythroughRating] Error:", error)
+    return { success: false, error: "Non se puido gardar a valoración da partida." }
   }
 }
 

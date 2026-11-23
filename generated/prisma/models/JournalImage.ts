@@ -381,10 +381,6 @@ export type JournalImageUncheckedUpdateManyWithoutJournalEntryNestedInput = {
   deleteMany?: Prisma.JournalImageScalarWhereInput | Prisma.JournalImageScalarWhereInput[]
 }
 
-export type EnumPrivacyLevelFieldUpdateOperationsInput = {
-  set?: $Enums.PrivacyLevel
-}
-
 export type JournalImageCreateWithoutJournalEntryInput = {
   id?: string
   localUrl: string

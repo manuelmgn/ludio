@@ -56,6 +56,7 @@ export const ModelName = {
   Game: 'Game',
   LibraryEntry: 'LibraryEntry',
   Playthrough: 'Playthrough',
+  PlaythroughJournalEntry: 'PlaythroughJournalEntry',
   JournalEntry: 'JournalEntry',
   JournalImage: 'JournalImage',
   List: 'List',
@@ -116,6 +117,17 @@ export const GameScalarFieldEnum = {
   coverUrl: 'coverUrl',
   firstReleaseDate: 'firstReleaseDate',
   igdbRating: 'igdbRating',
+  igdbRatingCount: 'igdbRatingCount',
+  summary: 'summary',
+  storyline: 'storyline',
+  screenshots: 'screenshots',
+  artworks: 'artworks',
+  platforms: 'platforms',
+  genres: 'genres',
+  gameModes: 'gameModes',
+  developers: 'developers',
+  publishers: 'publishers',
+  detailsSyncedAt: 'detailsSyncedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -144,6 +156,8 @@ export const PlaythroughScalarFieldEnum = {
   platform: 'platform',
   startDate: 'startDate',
   endDate: 'endDate',
+  rating: 'rating',
+  review: 'review',
   purchasePrice: 'purchasePrice',
   purchaseStoreId: 'purchaseStoreId',
   purchaseDate: 'purchaseDate',
@@ -155,6 +169,19 @@ export const PlaythroughScalarFieldEnum = {
 } as const
 
 export type PlaythroughScalarFieldEnum = (typeof PlaythroughScalarFieldEnum)[keyof typeof PlaythroughScalarFieldEnum]
+
+
+export const PlaythroughJournalEntryScalarFieldEnum = {
+  id: 'id',
+  playthroughId: 'playthroughId',
+  content: 'content',
+  imageUrl: 'imageUrl',
+  privacyLevel: 'privacyLevel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlaythroughJournalEntryScalarFieldEnum = (typeof PlaythroughJournalEntryScalarFieldEnum)[keyof typeof PlaythroughJournalEntryScalarFieldEnum]
 
 
 export const JournalEntryScalarFieldEnum = {

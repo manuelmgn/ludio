@@ -67,6 +67,11 @@ export type LibraryEntry = Prisma.LibraryEntryModel
  */
 export type Playthrough = Prisma.PlaythroughModel
 /**
+ * Model PlaythroughJournalEntry
+ * 
+ */
+export type PlaythroughJournalEntry = Prisma.PlaythroughJournalEntryModel
+/**
  * Model JournalEntry
  * 
  */

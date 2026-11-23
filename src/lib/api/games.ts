@@ -483,6 +483,21 @@ export async function searchGames(query: string): Promise<SearchResult> {
   }
 }
 
+interface IGDBGameDetails extends IGDBGame {
+  summary?: string
+  storyline?: string
+  platforms?: { id: number; name: string }[]
+  genres?: { id: number; name: string }[]
+  game_modes?: { id: number; name: string }[]
+  screenshots?: { id: number; url: string }[]
+  artworks?: { id: number; url: string }[]
+  involved_companies?: {
+    developer?: boolean
+    publisher?: boolean
+    company?: { id: number; name: string }
+  }[]
+}
+
 export async function syncGameMetadataIfMissing(gameId: string) {
   try {
     const numericId = Number(gameId)
@@ -496,30 +511,79 @@ export async function syncGameMetadataIfMissing(gameId: string) {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
-      body: `fields name, cover.url, rating, first_release_date; where id = ${numericId}; limit 1;`,
+      body: `fields name, cover.url, summary, storyline, total_rating, total_rating_count, rating, first_release_date, platforms.name, genres.name, game_modes.name, screenshots.url, artworks.url, involved_companies.developer, involved_companies.publisher, involved_companies.company.name; where id = ${numericId}; limit 1;`,
     })
     if (!res.ok) return null
-    const items = (await res.json()) as IGDBGame[]
+    const items = (await res.json()) as IGDBGameDetails[]
     const igdbGame = items[0]
     if (!igdbGame) return null
 
     const releaseDate = igdbGame.first_release_date
       ? new Date(igdbGame.first_release_date * 1000)
       : null
-    const igdbRating = igdbGame.rating ? Math.round(igdbGame.rating) : null
+    const rawRating = igdbGame.total_rating ?? igdbGame.rating
+    const igdbRating = rawRating ? Math.round(rawRating) : null
+    const igdbRatingCount = igdbGame.total_rating_count ?? null
     const coverUrl = igdbGame.cover?.url
       ? `https:${igdbGame.cover.url.replace("t_thumb", "t_cover_big")}`
       : undefined
+
+    const screenshots = (igdbGame.screenshots ?? [])
+      .filter((s) => Boolean(s?.url))
+      .slice(0, 12)
+      .map((s) => `https:${s.url.replace("t_thumb", "t_screenshot_big")}`)
+
+    const artworks = (igdbGame.artworks ?? [])
+      .filter((a) => Boolean(a?.url))
+      .slice(0, 6)
+      .map((a) => `https:${a.url.replace("t_thumb", "t_1080p")}`)
+
+    const platforms = Array.from(
+      new Set((igdbGame.platforms ?? []).map((p) => p?.name).filter((n): n is string => Boolean(n)))
+    )
+    const genres = Array.from(
+      new Set((igdbGame.genres ?? []).map((g) => g?.name).filter((n): n is string => Boolean(n)))
+    )
+    const gameModes = Array.from(
+      new Set((igdbGame.game_modes ?? []).map((m) => m?.name).filter((n): n is string => Boolean(n)))
+    )
+
+    const developers = Array.from(
+      new Set(
+        (igdbGame.involved_companies ?? [])
+          .filter((ic) => ic?.developer && ic?.company?.name)
+          .map((ic) => ic.company!.name)
+      )
+    )
+    const publishers = Array.from(
+      new Set(
+        (igdbGame.involved_companies ?? [])
+          .filter((ic) => ic?.publisher && ic?.company?.name)
+          .map((ic) => ic.company!.name)
+      )
+    )
 
     return await prisma.game.update({
       where: { id: gameId },
       data: {
         firstReleaseDate: releaseDate,
         igdbRating,
+        igdbRatingCount,
+        summary: igdbGame.summary?.trim() || null,
+        storyline: igdbGame.storyline?.trim() || null,
+        screenshots,
+        artworks,
+        platforms,
+        genres,
+        gameModes,
+        developers,
+        publishers,
+        detailsSyncedAt: new Date(),
         ...(coverUrl ? { coverUrl } : {}),
       },
     })
-  } catch {
+  } catch (error) {
+    console.error("[syncGameMetadataIfMissing] Error:", error)
     return null
   }
 }

@@ -62,3 +62,61 @@ export async function addJournalEntry(libraryEntryId: string, formData: FormData
     return { success: false, error: "Erro ao gardar no diario." }
   }
 }
+
+export async function addPlaythroughJournalEntry(
+  playthroughId: string,
+  gameId: string,
+  formData: FormData
+) {
+  try {
+    const content = (formData.get("content") as string | null)?.trim() || ""
+    const image = formData.get("image") as File | null
+    const privacyLevel = (formData.get("privacyLevel") as PrivacyLevel) || "PRIVATE"
+
+    if (!content && (!image || image.size === 0)) {
+      return { success: false, error: "A entrada non pode estar baleira." }
+    }
+
+    let imageUrl: string | null = null
+    if (image && image.size > 0) {
+      imageUrl = await uploadImage(image)
+    }
+
+    await prisma.playthroughJournalEntry.create({
+      data: {
+        playthroughId,
+        content,
+        imageUrl,
+        privacyLevel,
+      },
+    })
+
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath(`/games/${gameId}/playthroughs/${playthroughId}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error("[addPlaythroughJournalEntry] Error:", error)
+    return { success: false, error: "Erro ao gardar a entrada do diario." }
+  }
+}
+
+export async function deletePlaythroughJournalEntry(
+  entryId: string,
+  playthroughId: string,
+  gameId: string
+) {
+  try {
+    await prisma.playthroughJournalEntry.delete({
+      where: { id: entryId },
+    })
+
+    revalidatePath(`/games/${gameId}`)
+    revalidatePath(`/games/${gameId}/playthroughs/${playthroughId}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error("[deletePlaythroughJournalEntry] Error:", error)
+    return { success: false, error: "Non se puido eliminar a entrada." }
+  }
+}

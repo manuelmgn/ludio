@@ -402,6 +402,7 @@ export const ModelName = {
   Game: 'Game',
   LibraryEntry: 'LibraryEntry',
   Playthrough: 'Playthrough',
+  PlaythroughJournalEntry: 'PlaythroughJournalEntry',
   JournalEntry: 'JournalEntry',
   JournalImage: 'JournalImage',
   List: 'List',
@@ -425,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "follow" | "game" | "libraryEntry" | "playthrough" | "journalEntry" | "journalImage" | "list" | "listItem" | "customPlatform" | "gameCanvas" | "canvasImage" | "store"
+    modelProps: "user" | "follow" | "game" | "libraryEntry" | "playthrough" | "playthroughJournalEntry" | "journalEntry" | "journalImage" | "list" | "listItem" | "customPlatform" | "gameCanvas" | "canvasImage" | "store"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -796,6 +797,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PlaythroughCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PlaythroughCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlaythroughJournalEntry: {
+      payload: Prisma.$PlaythroughJournalEntryPayload<ExtArgs>
+      fields: Prisma.PlaythroughJournalEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlaythroughJournalEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlaythroughJournalEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.PlaythroughJournalEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlaythroughJournalEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        findMany: {
+          args: Prisma.PlaythroughJournalEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>[]
+        }
+        create: {
+          args: Prisma.PlaythroughJournalEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        createMany: {
+          args: Prisma.PlaythroughJournalEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlaythroughJournalEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.PlaythroughJournalEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        update: {
+          args: Prisma.PlaythroughJournalEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlaythroughJournalEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlaythroughJournalEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlaythroughJournalEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlaythroughJournalEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlaythroughJournalEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.PlaythroughJournalEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlaythroughJournalEntry>
+        }
+        groupBy: {
+          args: Prisma.PlaythroughJournalEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlaythroughJournalEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlaythroughJournalEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlaythroughJournalEntryCountAggregateOutputType> | number
         }
       }
     }
@@ -1464,6 +1539,17 @@ export const GameScalarFieldEnum = {
   coverUrl: 'coverUrl',
   firstReleaseDate: 'firstReleaseDate',
   igdbRating: 'igdbRating',
+  igdbRatingCount: 'igdbRatingCount',
+  summary: 'summary',
+  storyline: 'storyline',
+  screenshots: 'screenshots',
+  artworks: 'artworks',
+  platforms: 'platforms',
+  genres: 'genres',
+  gameModes: 'gameModes',
+  developers: 'developers',
+  publishers: 'publishers',
+  detailsSyncedAt: 'detailsSyncedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1492,6 +1578,8 @@ export const PlaythroughScalarFieldEnum = {
   platform: 'platform',
   startDate: 'startDate',
   endDate: 'endDate',
+  rating: 'rating',
+  review: 'review',
   purchasePrice: 'purchasePrice',
   purchaseStoreId: 'purchaseStoreId',
   purchaseDate: 'purchaseDate',
@@ -1503,6 +1591,19 @@ export const PlaythroughScalarFieldEnum = {
 } as const
 
 export type PlaythroughScalarFieldEnum = (typeof PlaythroughScalarFieldEnum)[keyof typeof PlaythroughScalarFieldEnum]
+
+
+export const PlaythroughJournalEntryScalarFieldEnum = {
+  id: 'id',
+  playthroughId: 'playthroughId',
+  content: 'content',
+  imageUrl: 'imageUrl',
+  privacyLevel: 'privacyLevel',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlaythroughJournalEntryScalarFieldEnum = (typeof PlaythroughJournalEntryScalarFieldEnum)[keyof typeof PlaythroughJournalEntryScalarFieldEnum]
 
 
 export const JournalEntryScalarFieldEnum = {
@@ -1917,6 +2018,7 @@ export type GlobalOmitConfig = {
   game?: Prisma.GameOmit
   libraryEntry?: Prisma.LibraryEntryOmit
   playthrough?: Prisma.PlaythroughOmit
+  playthroughJournalEntry?: Prisma.PlaythroughJournalEntryOmit
   journalEntry?: Prisma.JournalEntryOmit
   journalImage?: Prisma.JournalImageOmit
   list?: Prisma.ListOmit

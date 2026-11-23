@@ -81,6 +81,17 @@ model Game {
   coverUrl         String?
   firstReleaseDate DateTime?
   igdbRating       Int?
+  igdbRatingCount  Int?
+  summary          String?
+  storyline        String?
+  screenshots      String[]  @default([])
+  artworks         String[]  @default([])
+  platforms        String[]  @default([])
+  genres           String[]  @default([])
+  gameModes        String[]  @default([])
+  developers       String[]  @default([])
+  publishers       String[]  @default([])
+  detailsSyncedAt  DateTime?
 
   libraryEntries LibraryEntry[]
   listItems      ListItem[]
@@ -116,21 +127,40 @@ model Playthrough {
   libraryEntryId String
   libraryEntry   LibraryEntry @relation(fields: [libraryEntryId], references: [id], onDelete: Cascade)
 
-  status   PlaythroughStatus
-  platform String
+  status    PlaythroughStatus
+  platform  String
   startDate String? // Allows partial dates like "2015"
   endDate   String?
 
+  // Per-playthrough rating & opinion
+  rating Int? // 1 to 5
+  review String?
+
   // Pricing system
-  purchasePrice  Float?
+  purchasePrice   Float?
   purchaseStoreId String?
   purchaseStore   Store?   @relation("PurchaseStore", fields: [purchaseStoreId], references: [id], onDelete: SetNull)
   purchaseDate    String?
 
-  salePrice      Float?
-  saleStoreId    String?
-  saleStore      Store?   @relation("SaleStore", fields: [saleStoreId], references: [id], onDelete: SetNull)
-  saleDate       String?
+  salePrice   Float?
+  saleStoreId String?
+  saleStore   Store?   @relation("SaleStore", fields: [saleStoreId], references: [id], onDelete: SetNull)
+  saleDate    String?
+
+  journalEntries PlaythroughJournalEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PlaythroughJournalEntry {
+  id            String      @id @default(uuid())
+  playthroughId String
+  playthrough   Playthrough @relation(fields: [playthroughId], references: [id], onDelete: Cascade)
+
+  content      String
+  imageUrl     String?
+  privacyLevel PrivacyLevel @default(PRIVATE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

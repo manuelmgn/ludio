@@ -28,10 +28,12 @@ export type AggregateGame = {
 
 export type GameAvgAggregateOutputType = {
   igdbRating: number | null
+  igdbRatingCount: number | null
 }
 
 export type GameSumAggregateOutputType = {
   igdbRating: number | null
+  igdbRatingCount: number | null
 }
 
 export type GameMinAggregateOutputType = {
@@ -40,6 +42,10 @@ export type GameMinAggregateOutputType = {
   coverUrl: string | null
   firstReleaseDate: Date | null
   igdbRating: number | null
+  igdbRatingCount: number | null
+  summary: string | null
+  storyline: string | null
+  detailsSyncedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +56,10 @@ export type GameMaxAggregateOutputType = {
   coverUrl: string | null
   firstReleaseDate: Date | null
   igdbRating: number | null
+  igdbRatingCount: number | null
+  summary: string | null
+  storyline: string | null
+  detailsSyncedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +70,17 @@ export type GameCountAggregateOutputType = {
   coverUrl: number
   firstReleaseDate: number
   igdbRating: number
+  igdbRatingCount: number
+  summary: number
+  storyline: number
+  screenshots: number
+  artworks: number
+  platforms: number
+  genres: number
+  gameModes: number
+  developers: number
+  publishers: number
+  detailsSyncedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -68,10 +89,12 @@ export type GameCountAggregateOutputType = {
 
 export type GameAvgAggregateInputType = {
   igdbRating?: true
+  igdbRatingCount?: true
 }
 
 export type GameSumAggregateInputType = {
   igdbRating?: true
+  igdbRatingCount?: true
 }
 
 export type GameMinAggregateInputType = {
@@ -80,6 +103,10 @@ export type GameMinAggregateInputType = {
   coverUrl?: true
   firstReleaseDate?: true
   igdbRating?: true
+  igdbRatingCount?: true
+  summary?: true
+  storyline?: true
+  detailsSyncedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -90,6 +117,10 @@ export type GameMaxAggregateInputType = {
   coverUrl?: true
   firstReleaseDate?: true
   igdbRating?: true
+  igdbRatingCount?: true
+  summary?: true
+  storyline?: true
+  detailsSyncedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +131,17 @@ export type GameCountAggregateInputType = {
   coverUrl?: true
   firstReleaseDate?: true
   igdbRating?: true
+  igdbRatingCount?: true
+  summary?: true
+  storyline?: true
+  screenshots?: true
+  artworks?: true
+  platforms?: true
+  genres?: true
+  gameModes?: true
+  developers?: true
+  publishers?: true
+  detailsSyncedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -197,6 +239,17 @@ export type GameGroupByOutputType = {
   coverUrl: string | null
   firstReleaseDate: Date | null
   igdbRating: number | null
+  igdbRatingCount: number | null
+  summary: string | null
+  storyline: string | null
+  screenshots: string[]
+  artworks: string[]
+  platforms: string[]
+  genres: string[]
+  gameModes: string[]
+  developers: string[]
+  publishers: string[]
+  detailsSyncedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: GameCountAggregateOutputType | null
@@ -230,6 +283,17 @@ export type GameWhereInput = {
   coverUrl?: Prisma.StringNullableFilter<"Game"> | string | null
   firstReleaseDate?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   igdbRating?: Prisma.IntNullableFilter<"Game"> | number | null
+  igdbRatingCount?: Prisma.IntNullableFilter<"Game"> | number | null
+  summary?: Prisma.StringNullableFilter<"Game"> | string | null
+  storyline?: Prisma.StringNullableFilter<"Game"> | string | null
+  screenshots?: Prisma.StringNullableListFilter<"Game">
+  artworks?: Prisma.StringNullableListFilter<"Game">
+  platforms?: Prisma.StringNullableListFilter<"Game">
+  genres?: Prisma.StringNullableListFilter<"Game">
+  gameModes?: Prisma.StringNullableListFilter<"Game">
+  developers?: Prisma.StringNullableListFilter<"Game">
+  publishers?: Prisma.StringNullableListFilter<"Game">
+  detailsSyncedAt?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
@@ -242,6 +306,17 @@ export type GameOrderByWithRelationInput = {
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   firstReleaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   igdbRating?: Prisma.SortOrderInput | Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  storyline?: Prisma.SortOrderInput | Prisma.SortOrder
+  screenshots?: Prisma.SortOrder
+  artworks?: Prisma.SortOrder
+  platforms?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  gameModes?: Prisma.SortOrder
+  developers?: Prisma.SortOrder
+  publishers?: Prisma.SortOrder
+  detailsSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   libraryEntries?: Prisma.LibraryEntryOrderByRelationAggregateInput
@@ -257,6 +332,17 @@ export type GameWhereUniqueInput = Prisma.AtLeast<{
   coverUrl?: Prisma.StringNullableFilter<"Game"> | string | null
   firstReleaseDate?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   igdbRating?: Prisma.IntNullableFilter<"Game"> | number | null
+  igdbRatingCount?: Prisma.IntNullableFilter<"Game"> | number | null
+  summary?: Prisma.StringNullableFilter<"Game"> | string | null
+  storyline?: Prisma.StringNullableFilter<"Game"> | string | null
+  screenshots?: Prisma.StringNullableListFilter<"Game">
+  artworks?: Prisma.StringNullableListFilter<"Game">
+  platforms?: Prisma.StringNullableListFilter<"Game">
+  genres?: Prisma.StringNullableListFilter<"Game">
+  gameModes?: Prisma.StringNullableListFilter<"Game">
+  developers?: Prisma.StringNullableListFilter<"Game">
+  publishers?: Prisma.StringNullableListFilter<"Game">
+  detailsSyncedAt?: Prisma.DateTimeNullableFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Game"> | Date | string
   libraryEntries?: Prisma.LibraryEntryListRelationFilter
@@ -269,6 +355,17 @@ export type GameOrderByWithAggregationInput = {
   coverUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   firstReleaseDate?: Prisma.SortOrderInput | Prisma.SortOrder
   igdbRating?: Prisma.SortOrderInput | Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  summary?: Prisma.SortOrderInput | Prisma.SortOrder
+  storyline?: Prisma.SortOrderInput | Prisma.SortOrder
+  screenshots?: Prisma.SortOrder
+  artworks?: Prisma.SortOrder
+  platforms?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  gameModes?: Prisma.SortOrder
+  developers?: Prisma.SortOrder
+  publishers?: Prisma.SortOrder
+  detailsSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.GameCountOrderByAggregateInput
@@ -287,6 +384,17 @@ export type GameScalarWhereWithAggregatesInput = {
   coverUrl?: Prisma.StringNullableWithAggregatesFilter<"Game"> | string | null
   firstReleaseDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Game"> | Date | string | null
   igdbRating?: Prisma.IntNullableWithAggregatesFilter<"Game"> | number | null
+  igdbRatingCount?: Prisma.IntNullableWithAggregatesFilter<"Game"> | number | null
+  summary?: Prisma.StringNullableWithAggregatesFilter<"Game"> | string | null
+  storyline?: Prisma.StringNullableWithAggregatesFilter<"Game"> | string | null
+  screenshots?: Prisma.StringNullableListFilter<"Game">
+  artworks?: Prisma.StringNullableListFilter<"Game">
+  platforms?: Prisma.StringNullableListFilter<"Game">
+  genres?: Prisma.StringNullableListFilter<"Game">
+  gameModes?: Prisma.StringNullableListFilter<"Game">
+  developers?: Prisma.StringNullableListFilter<"Game">
+  publishers?: Prisma.StringNullableListFilter<"Game">
+  detailsSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Game"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Game"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Game"> | Date | string
 }
@@ -297,6 +405,17 @@ export type GameCreateInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutGameInput
@@ -309,6 +428,17 @@ export type GameUncheckedCreateInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutGameInput
@@ -321,6 +451,17 @@ export type GameUpdateInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutGameNestedInput
@@ -333,6 +474,17 @@ export type GameUncheckedUpdateInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutGameNestedInput
@@ -345,6 +497,17 @@ export type GameCreateManyInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -355,6 +518,17 @@ export type GameUpdateManyMutationInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -365,8 +539,27 @@ export type GameUncheckedUpdateManyInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type GameCountOrderByAggregateInput = {
@@ -375,12 +568,24 @@ export type GameCountOrderByAggregateInput = {
   coverUrl?: Prisma.SortOrder
   firstReleaseDate?: Prisma.SortOrder
   igdbRating?: Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  storyline?: Prisma.SortOrder
+  screenshots?: Prisma.SortOrder
+  artworks?: Prisma.SortOrder
+  platforms?: Prisma.SortOrder
+  genres?: Prisma.SortOrder
+  gameModes?: Prisma.SortOrder
+  developers?: Prisma.SortOrder
+  publishers?: Prisma.SortOrder
+  detailsSyncedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type GameAvgOrderByAggregateInput = {
   igdbRating?: Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrder
 }
 
 export type GameMaxOrderByAggregateInput = {
@@ -389,6 +594,10 @@ export type GameMaxOrderByAggregateInput = {
   coverUrl?: Prisma.SortOrder
   firstReleaseDate?: Prisma.SortOrder
   igdbRating?: Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  storyline?: Prisma.SortOrder
+  detailsSyncedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -399,17 +608,50 @@ export type GameMinOrderByAggregateInput = {
   coverUrl?: Prisma.SortOrder
   firstReleaseDate?: Prisma.SortOrder
   igdbRating?: Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrder
+  summary?: Prisma.SortOrder
+  storyline?: Prisma.SortOrder
+  detailsSyncedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type GameSumOrderByAggregateInput = {
   igdbRating?: Prisma.SortOrder
+  igdbRatingCount?: Prisma.SortOrder
 }
 
 export type GameScalarRelationFilter = {
   is?: Prisma.GameWhereInput
   isNot?: Prisma.GameWhereInput
+}
+
+export type GameCreatescreenshotsInput = {
+  set: string[]
+}
+
+export type GameCreateartworksInput = {
+  set: string[]
+}
+
+export type GameCreateplatformsInput = {
+  set: string[]
+}
+
+export type GameCreategenresInput = {
+  set: string[]
+}
+
+export type GameCreategameModesInput = {
+  set: string[]
+}
+
+export type GameCreatedevelopersInput = {
+  set: string[]
+}
+
+export type GameCreatepublishersInput = {
+  set: string[]
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -422,6 +664,41 @@ export type NullableIntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type GameUpdatescreenshotsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdateartworksInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdateplatformsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdategenresInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdategameModesInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdatedevelopersInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type GameUpdatepublishersInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type GameCreateNestedOneWithoutLibraryEntriesInput = {
@@ -458,6 +735,17 @@ export type GameCreateWithoutLibraryEntriesInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listItems?: Prisma.ListItemCreateNestedManyWithoutGameInput
@@ -469,6 +757,17 @@ export type GameUncheckedCreateWithoutLibraryEntriesInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   listItems?: Prisma.ListItemUncheckedCreateNestedManyWithoutGameInput
@@ -496,6 +795,17 @@ export type GameUpdateWithoutLibraryEntriesInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listItems?: Prisma.ListItemUpdateManyWithoutGameNestedInput
@@ -507,6 +817,17 @@ export type GameUncheckedUpdateWithoutLibraryEntriesInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   listItems?: Prisma.ListItemUncheckedUpdateManyWithoutGameNestedInput
@@ -518,6 +839,17 @@ export type GameCreateWithoutListItemsInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryCreateNestedManyWithoutGameInput
@@ -529,6 +861,17 @@ export type GameUncheckedCreateWithoutListItemsInput = {
   coverUrl?: string | null
   firstReleaseDate?: Date | string | null
   igdbRating?: number | null
+  igdbRatingCount?: number | null
+  summary?: string | null
+  storyline?: string | null
+  screenshots?: Prisma.GameCreatescreenshotsInput | string[]
+  artworks?: Prisma.GameCreateartworksInput | string[]
+  platforms?: Prisma.GameCreateplatformsInput | string[]
+  genres?: Prisma.GameCreategenresInput | string[]
+  gameModes?: Prisma.GameCreategameModesInput | string[]
+  developers?: Prisma.GameCreatedevelopersInput | string[]
+  publishers?: Prisma.GameCreatepublishersInput | string[]
+  detailsSyncedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedCreateNestedManyWithoutGameInput
@@ -556,6 +899,17 @@ export type GameUpdateWithoutListItemsInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUpdateManyWithoutGameNestedInput
@@ -567,6 +921,17 @@ export type GameUncheckedUpdateWithoutListItemsInput = {
   coverUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   firstReleaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   igdbRating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  igdbRatingCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  summary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storyline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  screenshots?: Prisma.GameUpdatescreenshotsInput | string[]
+  artworks?: Prisma.GameUpdateartworksInput | string[]
+  platforms?: Prisma.GameUpdateplatformsInput | string[]
+  genres?: Prisma.GameUpdategenresInput | string[]
+  gameModes?: Prisma.GameUpdategameModesInput | string[]
+  developers?: Prisma.GameUpdatedevelopersInput | string[]
+  publishers?: Prisma.GameUpdatepublishersInput | string[]
+  detailsSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntries?: Prisma.LibraryEntryUncheckedUpdateManyWithoutGameNestedInput
@@ -618,6 +983,17 @@ export type GameSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   coverUrl?: boolean
   firstReleaseDate?: boolean
   igdbRating?: boolean
+  igdbRatingCount?: boolean
+  summary?: boolean
+  storyline?: boolean
+  screenshots?: boolean
+  artworks?: boolean
+  platforms?: boolean
+  genres?: boolean
+  gameModes?: boolean
+  developers?: boolean
+  publishers?: boolean
+  detailsSyncedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   libraryEntries?: boolean | Prisma.Game$libraryEntriesArgs<ExtArgs>
@@ -631,6 +1007,17 @@ export type GameSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   coverUrl?: boolean
   firstReleaseDate?: boolean
   igdbRating?: boolean
+  igdbRatingCount?: boolean
+  summary?: boolean
+  storyline?: boolean
+  screenshots?: boolean
+  artworks?: boolean
+  platforms?: boolean
+  genres?: boolean
+  gameModes?: boolean
+  developers?: boolean
+  publishers?: boolean
+  detailsSyncedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["game"]>
@@ -641,6 +1028,17 @@ export type GameSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   coverUrl?: boolean
   firstReleaseDate?: boolean
   igdbRating?: boolean
+  igdbRatingCount?: boolean
+  summary?: boolean
+  storyline?: boolean
+  screenshots?: boolean
+  artworks?: boolean
+  platforms?: boolean
+  genres?: boolean
+  gameModes?: boolean
+  developers?: boolean
+  publishers?: boolean
+  detailsSyncedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["game"]>
@@ -651,11 +1049,22 @@ export type GameSelectScalar = {
   coverUrl?: boolean
   firstReleaseDate?: boolean
   igdbRating?: boolean
+  igdbRatingCount?: boolean
+  summary?: boolean
+  storyline?: boolean
+  screenshots?: boolean
+  artworks?: boolean
+  platforms?: boolean
+  genres?: boolean
+  gameModes?: boolean
+  developers?: boolean
+  publishers?: boolean
+  detailsSyncedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type GameOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverUrl" | "firstReleaseDate" | "igdbRating" | "createdAt" | "updatedAt", ExtArgs["result"]["game"]>
+export type GameOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverUrl" | "firstReleaseDate" | "igdbRating" | "igdbRatingCount" | "summary" | "storyline" | "screenshots" | "artworks" | "platforms" | "genres" | "gameModes" | "developers" | "publishers" | "detailsSyncedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["game"]>
 export type GameInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   libraryEntries?: boolean | Prisma.Game$libraryEntriesArgs<ExtArgs>
   listItems?: boolean | Prisma.Game$listItemsArgs<ExtArgs>
@@ -676,6 +1085,17 @@ export type $GamePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     coverUrl: string | null
     firstReleaseDate: Date | null
     igdbRating: number | null
+    igdbRatingCount: number | null
+    summary: string | null
+    storyline: string | null
+    screenshots: string[]
+    artworks: string[]
+    platforms: string[]
+    genres: string[]
+    gameModes: string[]
+    developers: string[]
+    publishers: string[]
+    detailsSyncedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["game"]>
@@ -1108,6 +1528,17 @@ export interface GameFieldRefs {
   readonly coverUrl: Prisma.FieldRef<"Game", 'String'>
   readonly firstReleaseDate: Prisma.FieldRef<"Game", 'DateTime'>
   readonly igdbRating: Prisma.FieldRef<"Game", 'Int'>
+  readonly igdbRatingCount: Prisma.FieldRef<"Game", 'Int'>
+  readonly summary: Prisma.FieldRef<"Game", 'String'>
+  readonly storyline: Prisma.FieldRef<"Game", 'String'>
+  readonly screenshots: Prisma.FieldRef<"Game", 'String[]'>
+  readonly artworks: Prisma.FieldRef<"Game", 'String[]'>
+  readonly platforms: Prisma.FieldRef<"Game", 'String[]'>
+  readonly genres: Prisma.FieldRef<"Game", 'String[]'>
+  readonly gameModes: Prisma.FieldRef<"Game", 'String[]'>
+  readonly developers: Prisma.FieldRef<"Game", 'String[]'>
+  readonly publishers: Prisma.FieldRef<"Game", 'String[]'>
+  readonly detailsSyncedAt: Prisma.FieldRef<"Game", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Game", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Game", 'DateTime'>
 }
