@@ -1,4 +1,4 @@
-const CACHE_VERSION = "ludio-v1"
+const CACHE_VERSION = "ludio-v2"
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const IMAGE_CACHE = `${CACHE_VERSION}-images`
 const MAX_IMAGE_ENTRIES = 80
