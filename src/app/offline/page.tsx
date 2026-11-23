@@ -1,10 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { WifiOff, RefreshCw, Home } from "lucide-react"
+import { Gamepad2, WifiOff, RefreshCw, Home } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
-import { LudioLogo } from "@/components/brand/LudioLogo"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function OfflinePage() {
@@ -16,7 +15,14 @@ export default function OfflinePage() {
         variant="elevated"
         className="w-full max-w-md p-8 text-center flex flex-col items-center gap-5"
       >
-        <LudioLogo size="md" />
+        <div className="inline-flex items-center gap-2.5">
+          <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-purple-800 border border-purple-300/40 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.45),inset_0_1px_0_rgba(255,255,255,0.3)]">
+            <Gamepad2 className="w-4 h-4 text-white" aria-hidden="true" />
+          </span>
+          <span className="font-pixel text-[1.75rem] text-white tracking-widest leading-none drop-shadow-[0_0_14px_rgba(168,85,247,0.55)]">
+            LUDIO
+          </span>
+        </div>
 
         <span className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/35 flex items-center justify-center text-primary-hover shadow-[0_0_28px_rgba(168,85,247,0.3)]">
           <WifiOff className="w-7 h-7" aria-hidden="true" />

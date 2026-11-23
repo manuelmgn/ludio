@@ -15,7 +15,6 @@ import {
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { LudioMark } from "@/components/brand/LudioLogo"
 
 export const dynamic = "force-dynamic"
 
@@ -82,12 +81,9 @@ export default async function HomePage() {
           </span>
         </div>
 
-        <div className="flex items-center justify-center gap-4 sm:gap-5 mb-5 select-none">
-          <LudioMark size="xl" className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20" />
-          <h1 className="font-pixel text-7xl sm:text-8xl md:text-[7.25rem] tracking-[0.14em] leading-none bg-gradient-to-b from-white via-purple-100 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(168,85,247,0.45)]">
-            LUDIO
-          </h1>
-        </div>
+        <h1 className="font-pixel text-7xl sm:text-8xl md:text-[7.25rem] tracking-[0.14em] leading-none bg-gradient-to-b from-white via-purple-100 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(168,85,247,0.45)] mb-5 select-none">
+          LUDIO
+        </h1>
 
         <p className="max-w-2xl text-base sm:text-lg text-zinc-300/90 font-sans leading-relaxed mb-9">
           O teu santuario persoal de videoxogos. Rexistra as túas partidas, anota estratexias no teu caderno e garda as túas memorias gamer para sempre.
@@ -351,8 +347,8 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="w-full max-w-5xl py-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 font-mono gap-4">
-        <div className="flex items-center gap-2.5">
-          <LudioMark size="xs" glow={false} />
+        <div className="flex items-center gap-2">
+          <Gamepad2 className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
           <span>LUDIO © 2026 — O teu santuario gamer</span>
         </div>
         <div className="flex items-center gap-5">

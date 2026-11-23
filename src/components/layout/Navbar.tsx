@@ -9,9 +9,9 @@ import {
   Library,
   Settings,
   LayoutDashboard,
+  Gamepad2,
 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
-import { LudioLogo } from "@/components/brand/LudioLogo"
 
 export function Navbar() {
   const pathname = usePathname()
@@ -85,8 +85,16 @@ export function Navbar() {
         }`}
       >
         {/* Left: Brand Logo */}
-        <Link href="/" className="flex items-center group shrink-0">
-          <LudioLogo size="md" showVersion />
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-purple-800 border border-purple-300/40 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.45),inset_0_1px_0_rgba(255,255,255,0.3)] group-hover:scale-105 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]">
+            <Gamepad2 className="w-4 h-4 text-white" aria-hidden="true" />
+          </span>
+          <span className="font-pixel text-[1.75rem] text-white tracking-widest leading-none drop-shadow-[0_0_14px_rgba(168,85,247,0.55)] group-hover:text-primary-hover transition-colors">
+            LUDIO
+          </span>
+          <span className="hidden lg:inline-flex items-center text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-purple-200 border border-primary/25">
+            v0.2
+          </span>
         </Link>
 
         {/* Center: Desktop Navigation Links (no duplicate Search link) */}
