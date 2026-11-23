@@ -36,10 +36,11 @@ docker compose -f docker-compose.local.yml up -d
 npm install
 ```
 
-3. Aplica las migraciones de base de datos:
+3. Aplica las migraciones y ejecuta el seed inicial (tiendas por defecto y usuario administrador de `.env`):
 
 ```bash
 npm run db:migrate
+npm run db:seed
 ```
 
 4. Arranca el servidor de desarrollo:
