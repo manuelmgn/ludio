@@ -1,6 +1,12 @@
 "use client"
 
-import React, { createContext, useContext, useSyncExternalStore } from "react"
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+} from "react"
 import gl from "../dictionaries/gl.json"
 import pt from "../dictionaries/pt.json"
 
@@ -61,22 +67,30 @@ interface LanguageProviderProps {
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const language = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     localStorage.setItem(STORAGE_KEY, lang)
     emitChange()
-  }
+  }, [])
 
-  const t = (key: string): string => {
-    const currentDict = dictionaries[language]
-    if (key in currentDict) {
-      return currentDict[key]
-    }
-    console.warn(`[i18n] Clave no encontrada: "${key}" en el idioma "${language}"`)
-    return key
-  }
+  const t = useCallback(
+    (key: string): string => {
+      const currentDict = dictionaries[language]
+      if (key in currentDict) {
+        return currentDict[key]
+      }
+      console.warn(`[i18n] Clave no encontrada: "${key}" en el idioma "${language}"`)
+      return key
+    },
+    [language]
+  )
+
+  const value = useMemo(
+    () => ({ language, setLanguage, t }),
+    [language, setLanguage, t]
+  )
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   )

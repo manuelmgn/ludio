@@ -105,12 +105,16 @@ const DEFAULT_STORES = [
   "Cash Converters",
 ]
 
+let defaultStoresEnsured = false
+
 export async function ensureDefaultStores() {
-  const existingDefaults = await prisma.store.findMany({
-    where: { isDefault: true }
+  if (defaultStoresEnsured) return
+
+  const existingCount = await prisma.store.count({
+    where: { isDefault: true },
   })
 
-  if (existingDefaults.length === 0) {
+  if (existingCount === 0) {
     await prisma.store.createMany({
       data: DEFAULT_STORES.map((name) => ({
         name,
@@ -120,6 +124,8 @@ export async function ensureDefaultStores() {
       skipDuplicates: true,
     })
   }
+
+  defaultStoresEnsured = true
 }
 
 export async function getStores() {

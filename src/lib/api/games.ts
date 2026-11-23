@@ -1,5 +1,6 @@
 "use server"
 
+import { after } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { mapIGDBGameType, type GameType } from "@/lib/game-types"
 
@@ -50,10 +51,45 @@ interface IGDBGame {
 }
 
 let cachedToken: { token: string; expiresAt: number } | null = null
+let inFlightToken: Promise<string> | null = null
+
+const SEARCH_CACHE_TTL_MS = 5 * 60 * 1000
+const SEARCH_CACHE_MAX_ENTRIES = 120
+const IGDB_FETCH_TIMEOUT_MS = 8000
+
+const searchCache = new Map<string, { data: SearchGameItem[]; expiresAt: number }>()
+const inFlightSearches = new Map<string, Promise<SearchResult>>()
+
+function getCachedSearch(key: string): SearchGameItem[] | null {
+  const entry = searchCache.get(key)
+  if (!entry) return null
+  if (entry.expiresAt <= Date.now()) {
+    searchCache.delete(key)
+    return null
+  }
+  // Refresh LRU order
+  searchCache.delete(key)
+  searchCache.set(key, entry)
+  return entry.data
+}
+
+function setCachedSearch(key: string, data: SearchGameItem[]) {
+  if (searchCache.size >= SEARCH_CACHE_MAX_ENTRIES) {
+    const oldestKey = searchCache.keys().next().value
+    if (oldestKey !== undefined) {
+      searchCache.delete(oldestKey)
+    }
+  }
+  searchCache.set(key, { data, expiresAt: Date.now() + SEARCH_CACHE_TTL_MS })
+}
 
 async function getIGDBToken(): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60000) {
     return cachedToken.token
+  }
+
+  if (inFlightToken) {
+    return inFlightToken
   }
 
   const clientId = process.env.IGDB_CLIENT_ID
@@ -65,21 +101,28 @@ async function getIGDBToken(): Promise<string> {
 
   const url = `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`
 
-  const response = await fetch(url, {
-    method: "POST",
+  inFlightToken = (async () => {
+    const response = await fetch(url, {
+      method: "POST",
+      signal: AbortSignal.timeout(IGDB_FETCH_TIMEOUT_MS),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch IGDB token: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    cachedToken = {
+      token: data.access_token,
+      expiresAt: Date.now() + (data.expires_in || 3600) * 1000,
+    }
+
+    return data.access_token as string
+  })().finally(() => {
+    inFlightToken = null
   })
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch IGDB token: ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  cachedToken = {
-    token: data.access_token,
-    expiresAt: Date.now() + (data.expires_in || 3600) * 1000,
-  }
-
-  return data.access_token
+  return inFlightToken
 }
 
 function normalizeText(text: string): string {
@@ -300,11 +343,30 @@ export async function searchGames(query: string): Promise<SearchResult> {
     return { success: false, error: "A busca debe ter polo menos 2 caracteres." }
   }
 
+  const cacheKey = normalizeText(trimmed) || trimmed.toLowerCase()
+  const cached = getCachedSearch(cacheKey)
+  if (cached) {
+    return { success: true, data: cached }
+  }
+
+  const existingInFlight = inFlightSearches.get(cacheKey)
+  if (existingInFlight) {
+    return existingInFlight
+  }
+
+  const searchTask = executeSearchGames(trimmed, cacheKey).finally(() => {
+    inFlightSearches.delete(cacheKey)
+  })
+  inFlightSearches.set(cacheKey, searchTask)
+  return searchTask
+}
+
+async function executeSearchGames(trimmed: string, cacheKey: string): Promise<SearchResult> {
   try {
     const token = await getIGDBToken()
     const variants = getQueryVariants(trimmed)
 
-    // Parallel IGDB requests with up to 150 entries each
+    // Parallel IGDB requests with balanced limits for low latency
     const cleanSearchQuery = trimmed.replace(/["\\]/g, "")
     const igdbFields =
       "fields name, alternative_names.name, cover.url, total_rating_count, total_rating, rating, hypes, game_type, version_parent, first_release_date;"
@@ -316,7 +378,8 @@ export async function searchGames(query: string): Promise<SearchResult> {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
-      body: `search "${cleanSearchQuery}"; ${igdbFields} limit 150;`,
+      body: `search "${cleanSearchQuery}"; ${igdbFields} limit 80;`,
+      signal: AbortSignal.timeout(IGDB_FETCH_TIMEOUT_MS),
     }).then(async (r) => {
       if (!r.ok) return []
       return (await r.json()) as IGDBGame[]
@@ -336,7 +399,8 @@ export async function searchGames(query: string): Promise<SearchResult> {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
-      body: `${igdbFields} where (${whereConditions}); sort total_rating_count desc; limit 150;`,
+      body: `${igdbFields} where (${whereConditions}); sort total_rating_count desc; limit 80;`,
+      signal: AbortSignal.timeout(IGDB_FETCH_TIMEOUT_MS),
     }).then(async (r) => {
       if (!r.ok) return []
       return (await r.json()) as IGDBGame[]
@@ -386,6 +450,9 @@ export async function searchGames(query: string): Promise<SearchResult> {
         gameType: null,
       }))
 
+      if (formattedLocal.length > 0) {
+        setCachedSearch(cacheKey, formattedLocal)
+      }
       return { success: true, data: formattedLocal }
     }
 
@@ -423,30 +490,26 @@ export async function searchGames(query: string): Promise<SearchResult> {
     // Sort by default by relevance score descending
     formattedGames.sort((a, b) => b.relevanceScore - a.relevanceScore)
 
-    // Upsert into local database in background batches so records exist for details & library
-    // We don't block the request if database is slow, but we await the top 30
-    const topToUpsert = formattedGames.slice(0, 50)
-    await Promise.allSettled(
-      topToUpsert.map((g) => {
-        const releaseDateObj = g.firstReleaseDate ? new Date(g.firstReleaseDate) : null
-        return prisma.game.upsert({
-          where: { id: g.id },
-          update: {
-            title: g.title,
-            coverUrl: g.coverUrl,
-            firstReleaseDate: releaseDateObj,
-            igdbRating: g.rating,
-          },
-          create: {
+    setCachedSearch(cacheKey, formattedGames)
+
+    // Persist newly discovered games in a single bulk query AFTER the response is sent
+    const topToPersist = formattedGames.slice(0, 50)
+    after(async () => {
+      try {
+        await prisma.game.createMany({
+          data: topToPersist.map((g) => ({
             id: g.id,
             title: g.title,
             coverUrl: g.coverUrl,
-            firstReleaseDate: releaseDateObj,
+            firstReleaseDate: g.firstReleaseDate ? new Date(g.firstReleaseDate) : null,
             igdbRating: g.rating,
-          },
+          })),
+          skipDuplicates: true,
         })
-      })
-    )
+      } catch (bgError) {
+        console.error("[searchGames] Background persist error:", bgError)
+      }
+    })
 
     return { success: true, data: formattedGames }
   } catch (error) {
@@ -512,6 +575,7 @@ export async function syncGameMetadataIfMissing(gameId: string) {
         Accept: "application/json",
       },
       body: `fields name, cover.url, summary, storyline, total_rating, total_rating_count, rating, first_release_date, platforms.name, genres.name, game_modes.name, screenshots.url, artworks.url, involved_companies.developer, involved_companies.publisher, involved_companies.company.name; where id = ${numericId}; limit 1;`,
+      signal: AbortSignal.timeout(IGDB_FETCH_TIMEOUT_MS),
     })
     if (!res.ok) return null
     const items = (await res.json()) as IGDBGameDetails[]
@@ -563,9 +627,10 @@ export async function syncGameMetadataIfMissing(gameId: string) {
       )
     )
 
-    return await prisma.game.update({
+    return await prisma.game.upsert({
       where: { id: gameId },
-      data: {
+      update: {
+        title: igdbGame.name,
         firstReleaseDate: releaseDate,
         igdbRating,
         igdbRatingCount,
@@ -580,6 +645,24 @@ export async function syncGameMetadataIfMissing(gameId: string) {
         publishers,
         detailsSyncedAt: new Date(),
         ...(coverUrl ? { coverUrl } : {}),
+      },
+      create: {
+        id: gameId,
+        title: igdbGame.name,
+        coverUrl: coverUrl ?? null,
+        firstReleaseDate: releaseDate,
+        igdbRating,
+        igdbRatingCount,
+        summary: igdbGame.summary?.trim() || null,
+        storyline: igdbGame.storyline?.trim() || null,
+        screenshots,
+        artworks,
+        platforms,
+        genres,
+        gameModes,
+        developers,
+        publishers,
+        detailsSyncedAt: new Date(),
       },
     })
   } catch (error) {

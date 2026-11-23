@@ -1,12 +1,14 @@
+import { cache } from "react"
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 
 /**
  * Returns the currently authenticated database user, or null if not logged in.
+ * Memoized per request via React `cache` to avoid duplicate session/DB lookups.
  * Never falls back to another user or creates demo accounts.
  */
-export async function getAuthenticatedUser() {
+export const getAuthenticatedUser = cache(async () => {
   const session = await auth()
   if (!session?.user) {
     return null
@@ -33,7 +35,7 @@ export async function getAuthenticatedUser() {
   }
 
   return null
-}
+})
 
 /**
  * Requires an authenticated user in Server Components; redirects to `/login` otherwise.

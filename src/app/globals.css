@@ -74,9 +74,6 @@ html {
   background-color: var(--background);
   scroll-padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
   scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
-  @media (prefers-reduced-motion: no-preference) {
-    scroll-behavior: smooth;
-  }
 }
 
 body {
@@ -216,4 +213,10 @@ dialog::backdrop {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Defer layout/paint for strictly below-the-fold grid cards */
+.card-defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 280px;
 }

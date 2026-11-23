@@ -32,16 +32,17 @@ interface GamePageProps {
 export default async function GamePage({ params }: GamePageProps) {
   const { id } = await params
 
-  let game = await prisma.game.findUnique({
-    where: { id },
-  })
+  const [initialGame, user] = await Promise.all([
+    prisma.game.findUnique({ where: { id } }),
+    requireAuthenticatedUser(),
+    ensureDefaultStores(),
+  ])
 
-  if (!game) {
-    notFound()
-  }
+  let game = initialGame
 
-  // Sync rich IGDB details if not yet fetched
+  // Sync rich IGDB details if not yet fetched (or if clicked before background search persist completed)
   if (
+    !game ||
     game.detailsSyncedAt === null ||
     game.firstReleaseDate === null ||
     game.igdbRating === null
@@ -50,6 +51,10 @@ export default async function GamePage({ params }: GamePageProps) {
     if (synced) {
       game = synced
     }
+  }
+
+  if (!game) {
+    notFound()
   }
 
   const releaseYear = game.firstReleaseDate ? game.firstReleaseDate.getFullYear() : null
@@ -61,59 +66,59 @@ export default async function GamePage({ params }: GamePageProps) {
       })
     : null
 
-  const user = await requireAuthenticatedUser()
+  const [libraryEntry, customPlatforms, stores] = await Promise.all([
+    user
+      ? prisma.libraryEntry.findUnique({
+          where: {
+            userId_gameId: {
+              userId: user.id,
+              gameId: id,
+            },
+          },
+          include: {
+            playthroughs: {
+              orderBy: { createdAt: "desc" },
+              include: {
+                purchaseStore: true,
+                saleStore: true,
+                journalEntries: {
+                  orderBy: { createdAt: "desc" },
+                },
+              },
+            },
+            journalEntry: {
+              include: {
+                images: {
+                  orderBy: { createdAt: "desc" },
+                },
+              },
+            },
+            gameCanvas: {
+              include: {
+                images: {
+                  orderBy: { createdAt: "desc" },
+                },
+              },
+            },
+          },
+        })
+      : Promise.resolve(null),
+    user
+      ? prisma.customPlatform.findMany({
+          where: { userId: user.id },
+          select: { name: true },
+        })
+      : Promise.resolve([]),
+    prisma.store.findMany({
+      where: {
+        OR: [{ isDefault: true }, ...(user ? [{ userId: user.id }] : [])],
+      },
+      select: { id: true, name: true },
+      orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+    }),
+  ])
 
-  const libraryEntry = user
-    ? await prisma.libraryEntry.findUnique({
-        where: {
-          userId_gameId: {
-            userId: user.id,
-            gameId: id,
-          },
-        },
-        include: {
-          playthroughs: {
-            orderBy: { createdAt: "desc" },
-            include: {
-              purchaseStore: true,
-              saleStore: true,
-              journalEntries: {
-                orderBy: { createdAt: "desc" },
-              },
-            },
-          },
-          journalEntry: {
-            include: {
-              images: {
-                orderBy: { createdAt: "desc" },
-              },
-            },
-          },
-          gameCanvas: {
-            include: {
-              images: {
-                orderBy: { createdAt: "desc" },
-              },
-            },
-          },
-        },
-      })
-    : null
-
-  const customPlatforms = user
-    ? await prisma.customPlatform.findMany({
-        where: { userId: user.id },
-      })
-    : []
   const customPlatformNames = customPlatforms.map((p) => p.name)
-
-  await ensureDefaultStores()
-  const stores = await prisma.store.findMany({
-    where: {
-      OR: [{ isDefault: true }, ...(user ? [{ userId: user.id }] : [])],
-    },
-    orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-  })
   const storeOptions = stores.map((s) => ({ id: s.id, name: s.name }))
 
   // Compute playthrough numbers (chronological: oldest = #1, newest = #N)
@@ -272,6 +277,8 @@ export default async function GamePage({ params }: GamePageProps) {
                 alt={game.title}
                 fill
                 unoptimized
+                priority
+                fetchPriority="high"
                 className="object-cover"
               />
             ) : (

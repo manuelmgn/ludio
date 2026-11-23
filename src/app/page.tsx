@@ -173,6 +173,7 @@ export default async function HomePage() {
               return (
                 <GlassPanel
                   key={entry.game.id}
+                  variant="card"
                   interactive
                   className="p-2.5 flex flex-col justify-between group"
                 >
@@ -185,7 +186,7 @@ export default async function HomePage() {
                             alt={entry.game.title}
                             fill
                             unoptimized
-                            className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                            className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                           />
                           <div
                             aria-hidden="true"
@@ -203,7 +204,7 @@ export default async function HomePage() {
 
                       {statusMeta && (
                         <div
-                          className={`absolute top-2 left-2 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono border flex items-center gap-1.5 ${statusMeta.badge}`}
+                          className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono border flex items-center gap-1.5 ${statusMeta.badge}`}
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} />
                           <span>{statusMeta.label}</span>
@@ -211,13 +212,13 @@ export default async function HomePage() {
                       )}
 
                       {entry.game.firstReleaseDate && (
-                        <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
+                        <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
                           {entry.game.firstReleaseDate.getFullYear()}
                         </div>
                       )}
 
                       {entry.game.igdbRating !== null && (
-                        <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
+                        <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
                           <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
                           <span>{entry.game.igdbRating}</span>
                         </div>
@@ -252,7 +253,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
             {suggestedGames.map((game) => (
               <Link key={game.id} href={`/games/${game.id}`} className="block group">
-                <GlassPanel interactive className="p-2.5 flex flex-col h-full">
+                <GlassPanel variant="card" interactive className="p-2.5 flex flex-col h-full">
                   <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-3 ring-1 ring-white/[0.06]">
                     {game.coverUrl ? (
                       <Image
@@ -260,7 +261,7 @@ export default async function HomePage() {
                         alt={game.title}
                         fill
                         unoptimized
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/90 via-[#1b1030] to-[#0c0c16] p-3 text-center">
@@ -269,12 +270,12 @@ export default async function HomePage() {
                       </div>
                     )}
                     {game.firstReleaseDate && (
-                      <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
+                      <div className="absolute top-2 left-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
                         {game.firstReleaseDate.getFullYear()}
                       </div>
                     )}
                     {game.igdbRating !== null && (
-                      <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
+                      <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
                         <span>{game.igdbRating}</span>
                       </div>

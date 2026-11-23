@@ -35,8 +35,7 @@ export interface UserStats {
 }
 
 export default async function DashboardPage() {
-  const session = await auth()
-  const user = await requireAuthenticatedUser()
+  const [session, user] = await Promise.all([auth(), requireAuthenticatedUser()])
 
   let stats: UserStats = {
     totalGames: 0,

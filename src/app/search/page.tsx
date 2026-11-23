@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect, useMemo, Suspense, useRef } from "react"
+import { useState, useEffect, useMemo, Suspense, useRef, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import {
   Search,
@@ -11,6 +11,7 @@ import {
   X,
   AlertCircle,
   Compass,
+  Loader2,
 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
@@ -28,6 +29,69 @@ function isValidTypeFilter(value: string | null): value is TypeFilterOption {
 }
 
 const ITEMS_PER_PAGE = 24
+const CLIENT_CACHE_TTL_MS = 5 * 60 * 1000
+const SESSION_CACHE_KEY = "ludio_search_cache_v1"
+const DEBOUNCE_MS = 350
+
+interface CachedSearchEntry {
+  data: SearchGameItem[]
+  expiresAt: number
+}
+
+const clientSearchCache = new Map<string, CachedSearchEntry>()
+
+function normalizeClientKey(term: string): string {
+  return term
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+}
+
+function getClientCachedResults(term: string): SearchGameItem[] | null {
+  const key = normalizeClientKey(term)
+  const mem = clientSearchCache.get(key)
+  if (mem) {
+    if (mem.expiresAt > Date.now()) return mem.data
+    clientSearchCache.delete(key)
+  }
+  try {
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Record<string, CachedSearchEntry>
+    const entry = parsed[key]
+    if (entry && entry.expiresAt > Date.now()) {
+      clientSearchCache.set(key, entry)
+      return entry.data
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return null
+}
+
+function setClientCachedResults(term: string, data: SearchGameItem[]) {
+  const key = normalizeClientKey(term)
+  const entry: CachedSearchEntry = { data, expiresAt: Date.now() + CLIENT_CACHE_TTL_MS }
+  clientSearchCache.set(key, entry)
+  if (clientSearchCache.size > 30) {
+    const oldest = clientSearchCache.keys().next().value
+    if (oldest !== undefined) clientSearchCache.delete(oldest)
+  }
+  try {
+    const raw = sessionStorage.getItem(SESSION_CACHE_KEY)
+    const parsed: Record<string, CachedSearchEntry> = raw ? JSON.parse(raw) : {}
+    parsed[key] = entry
+    const keys = Object.keys(parsed)
+    if (keys.length > 10) {
+      delete parsed[keys[0]]
+    }
+    sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(parsed))
+  } catch {
+    // Ignore storage quota errors
+  }
+}
 
 interface SearchState {
   results: SearchGameItem[]
@@ -48,8 +112,11 @@ function SearchContent() {
   const [sortBy, setSortBy] = useState<SortOption>(initialSort)
   const [typeFilter, setTypeFilter] = useState<TypeFilterOption>(initialType)
   const [currentPage, setCurrentPage] = useState(1)
-  const [isPending, startTransition] = useTransition()
+  const [isSearching, setIsSearching] = useState(false)
   const resultsRef = useRef<HTMLDivElement>(null)
+  const requestIdRef = useRef(0)
+  const lastExecutedKeyRef = useRef("")
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [state, setState] = useState<SearchState>({
     results: [],
@@ -72,7 +139,7 @@ function SearchContent() {
     return () => clearTimeout(timer)
   }, [])
 
-  const saveRecentSearch = (term: string) => {
+  const saveRecentSearch = useCallback((term: string) => {
     try {
       const trimmed = term.trim()
       if (!trimmed) return
@@ -85,7 +152,7 @@ function SearchContent() {
     } catch {
       // Ignore
     }
-  }
+  }, [])
 
   const clearRecentSearches = () => {
     try {
@@ -96,55 +163,152 @@ function SearchContent() {
     }
   }
 
-  const performSearch = (searchTerm: string) => {
-    const trimmed = searchTerm.trim()
-    if (trimmed.length < 2) return
+  const performSearch = useCallback(
+    async (searchTerm: string, options?: { saveRecent?: boolean; force?: boolean }) => {
+      const trimmed = searchTerm.trim()
+      if (trimmed.length < 2) return
 
-    saveRecentSearch(trimmed)
-    setState((prev) => ({ ...prev, error: null }))
+      const normalizedKey = normalizeClientKey(trimmed)
+      if (!options?.force && normalizedKey === lastExecutedKeyRef.current) {
+        return
+      }
 
-    startTransition(async () => {
-      const result = await searchGames(trimmed)
+      if (options?.saveRecent) {
+        saveRecentSearch(trimmed)
+      }
 
-      if (result.success) {
+      // Instant client cache hit (e.g. navigating back from a game detail page)
+      const cached = getClientCachedResults(trimmed)
+      if (cached) {
+        lastExecutedKeyRef.current = normalizedKey
+        requestIdRef.current += 1
+        setIsSearching(false)
         setState({
-          results: result.data,
+          results: cached,
           error: null,
           hasSearched: true,
         })
         setCurrentPage(1)
-      } else {
+        return
+      }
+
+      const currentRequestId = ++requestIdRef.current
+      lastExecutedKeyRef.current = normalizedKey
+      setIsSearching(true)
+      setState((prev) => ({ ...prev, error: null }))
+
+      try {
+        const result = await searchGames(trimmed)
+        if (currentRequestId !== requestIdRef.current) return
+
+        if (result.success) {
+          setClientCachedResults(trimmed, result.data)
+          setState({
+            results: result.data,
+            error: null,
+            hasSearched: true,
+          })
+          setCurrentPage(1)
+        } else {
+          setState({
+            results: [],
+            error: result.error,
+            hasSearched: true,
+          })
+        }
+      } catch {
+        if (currentRequestId !== requestIdRef.current) return
         setState({
           results: [],
-          error: result.error,
+          error: "Erro ao buscar xogos. Téntao de novo.",
           hasSearched: true,
         })
+      } finally {
+        if (currentRequestId === requestIdRef.current) {
+          setIsSearching(false)
+        }
       }
-    })
-  }
+    },
+    [saveRecentSearch]
+  )
 
+  // Sync with URL query param (e.g., navigation from Navbar / Home / Back button)
   useEffect(() => {
     if (initialQ && initialQ.trim().length >= 2) {
       const timer = setTimeout(() => {
-        performSearch(initialQ)
+        setQuery(initialQ)
+        void performSearch(initialQ, { saveRecent: true })
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [initialQ])
+  }, [initialQ, performSearch])
 
-  const handleSearch = () => {
-    if (query.trim().length >= 2) {
+  // Live debounced search as user types
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    const trimmed = query.trim()
+    if (trimmed.length < 2) {
+      return
+    }
+
+    const normalizedKey = normalizeClientKey(trimmed)
+    if (normalizedKey === lastExecutedKeyRef.current) return
+
+    debounceTimerRef.current = setTimeout(() => {
       setTypeFilter("all")
       const params = new URLSearchParams()
-      params.set("q", query.trim())
+      params.set("q", trimmed)
       if (sortBy !== "relevance") params.set("sort", sortBy)
-      router.replace(`/search?${params.toString()}`)
-      performSearch(query)
+      router.replace(`/search?${params.toString()}`, { scroll: false })
+      void performSearch(trimmed, { saveRecent: false })
+    }, DEBOUNCE_MS)
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
     }
+  }, [query, sortBy, router, performSearch])
+
+  const handleQueryChange = (nextValue: string) => {
+    setQuery(nextValue)
+    if (nextValue.trim().length === 0 && state.hasSearched) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      lastExecutedKeyRef.current = ""
+      requestIdRef.current += 1
+      setIsSearching(false)
+      setState({ results: [], error: null, hasSearched: false })
+      setTypeFilter("all")
+    }
+  }
+
+  const triggerExplicitSearch = (term: string) => {
+    const trimmed = term.trim()
+    if (trimmed.length < 2) return
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    setQuery(trimmed)
+    setTypeFilter("all")
+    const params = new URLSearchParams()
+    params.set("q", trimmed)
+    if (sortBy !== "relevance") params.set("sort", sortBy)
+    router.replace(`/search?${params.toString()}`, { scroll: false })
+    void performSearch(trimmed, { saveRecent: true, force: true })
+  }
+
+  const handleSearch = () => {
+    triggerExplicitSearch(query)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
+      e.preventDefault()
       handleSearch()
     }
   }
@@ -162,6 +326,16 @@ function SearchContent() {
     }))
   }, [state.results])
 
+  const releaseTimestamps = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const item of state.results) {
+      if (item.firstReleaseDate) {
+        map.set(item.id, Date.parse(item.firstReleaseDate))
+      }
+    }
+    return map
+  }, [state.results])
+
   const sortedGames = useMemo(() => {
     const items =
       typeFilter === "all"
@@ -169,17 +343,17 @@ function SearchContent() {
         : state.results.filter((g) => g.gameType === typeFilter)
     switch (sortBy) {
       case "release_desc":
-        return items.sort((a, b) => {
-          const timeA = a.firstReleaseDate ? new Date(a.firstReleaseDate).getTime() : -Infinity
-          const timeB = b.firstReleaseDate ? new Date(b.firstReleaseDate).getTime() : -Infinity
-          return timeB - timeA
-        })
+        return items.sort(
+          (a, b) =>
+            (releaseTimestamps.get(b.id) ?? -Infinity) -
+            (releaseTimestamps.get(a.id) ?? -Infinity)
+        )
       case "release_asc":
-        return items.sort((a, b) => {
-          const timeA = a.firstReleaseDate ? new Date(a.firstReleaseDate).getTime() : Infinity
-          const timeB = b.firstReleaseDate ? new Date(b.firstReleaseDate).getTime() : Infinity
-          return timeA - timeB
-        })
+        return items.sort(
+          (a, b) =>
+            (releaseTimestamps.get(a.id) ?? Infinity) -
+            (releaseTimestamps.get(b.id) ?? Infinity)
+        )
       case "rating_desc":
         return items.sort((a, b) => (b.rating || 0) - (a.rating || 0))
       case "title_asc":
@@ -188,7 +362,7 @@ function SearchContent() {
       default:
         return items.sort((a, b) => b.relevanceScore - a.relevanceScore)
     }
-  }, [state.results, sortBy, typeFilter])
+  }, [state.results, sortBy, typeFilter, releaseTimestamps])
 
   const totalPages = Math.ceil(sortedGames.length / ITEMS_PER_PAGE)
   const paginatedGames = useMemo(() => {
@@ -231,19 +405,32 @@ function SearchContent() {
           <div className="flex-1 relative">
             <Input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={t("search_placeholder")}
               aria-label={t("search_placeholder")}
-              disabled={isPending}
               autoFocus
-              icon={<Search className="w-4 h-4" aria-hidden="true" />}
+              icon={
+                isSearching ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-primary-hover" aria-hidden="true" />
+                ) : (
+                  <Search className="w-4 h-4" aria-hidden="true" />
+                )
+              }
               className="pr-9 bg-transparent border-transparent shadow-none focus:ring-0 focus:border-transparent focus:bg-transparent"
             />
-            {query && !isPending && (
+            {query && (
               <button
                 type="button"
-                onClick={() => setQuery("")}
+                onClick={() => {
+                  setQuery("")
+                  lastExecutedKeyRef.current = ""
+                  requestIdRef.current += 1
+                  setIsSearching(false)
+                  setState({ results: [], error: null, hasSearched: false })
+                  setTypeFilter("all")
+                  router.replace("/search", { scroll: false })
+                }}
                 aria-label="Limpar busca"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
@@ -254,16 +441,16 @@ function SearchContent() {
           <Button
             type="button"
             onClick={handleSearch}
-            disabled={isPending || query.trim().length < 2}
+            disabled={query.trim().length < 2}
             className="h-[42px] px-6 shrink-0"
           >
-            {isPending ? t("search_loading") : t("search")}
+            {isSearching ? t("search_loading") : t("search")}
           </Button>
         </div>
       </div>
 
       {/* Sorting & Filter Bar */}
-      {state.hasSearched && state.results.length > 0 && !isPending && (
+      {state.hasSearched && state.results.length > 0 && (
         <div
           ref={resultsRef}
           className="w-full max-w-6xl flex flex-col gap-3 mb-6 pb-4 border-b border-white/[0.08]"
@@ -363,15 +550,15 @@ function SearchContent() {
         </GlassPanel>
       )}
 
-      {/* Loading Shimmer Grid */}
-      {isPending && (
+      {/* Loading Shimmer Grid (only when no existing results are shown) */}
+      {isSearching && state.results.length === 0 && (
         <div className="w-full max-w-6xl flex flex-col gap-5">
           <p className="text-center text-xs font-mono text-zinc-400">
             {t("search_loading")} — Analizando títulos, variantes e datas de lanzamento...
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {Array.from({ length: 12 }).map((_, i) => (
-              <GlassPanel key={i} className="p-2.5 flex flex-col gap-2.5">
+              <GlassPanel key={i} variant="card" className="p-2.5 flex flex-col gap-2.5">
                 <div className="w-full aspect-[3/4] rounded-xl skeleton-shimmer" />
                 <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
               </GlassPanel>
@@ -381,7 +568,7 @@ function SearchContent() {
       )}
 
       {/* Empty Results */}
-      {state.hasSearched && state.results.length === 0 && state.error === null && !isPending && (
+      {state.hasSearched && state.results.length === 0 && state.error === null && !isSearching && (
         <GlassPanel className="max-w-md w-full text-center py-12 px-6 flex flex-col items-center gap-2">
           <Search className="w-8 h-8 text-zinc-500 mb-2" aria-hidden="true" />
           <p className="text-zinc-200 font-display font-medium text-base">{t("search_empty")}</p>
@@ -392,7 +579,7 @@ function SearchContent() {
       )}
 
       {/* Search Hints & Popular Suggestions */}
-      {!state.hasSearched && !isPending && (
+      {!state.hasSearched && !isSearching && (
         <div className="w-full max-w-xl py-8 flex flex-col items-center gap-8 text-center">
           {recentSearches.length > 0 && (
             <div className="w-full flex flex-col items-center gap-3">
@@ -414,14 +601,7 @@ function SearchContent() {
                   <button
                     key={term}
                     type="button"
-                    onClick={() => {
-                      setQuery(term)
-                      setTypeFilter("all")
-                      const params = new URLSearchParams()
-                      params.set("q", term)
-                      router.replace(`/search?${params.toString()}`)
-                      performSearch(term)
-                    }}
+                    onClick={() => triggerExplicitSearch(term)}
                     className="text-xs px-3.5 py-1.5 rounded-xl bg-primary/10 border border-primary/30 text-purple-200 hover:bg-primary/20 hover:border-primary/50 transition-all font-sans cursor-pointer"
                   >
                     {term}
@@ -448,14 +628,7 @@ function SearchContent() {
                 <button
                   key={popular}
                   type="button"
-                  onClick={() => {
-                    setQuery(popular)
-                    setTypeFilter("all")
-                    const params = new URLSearchParams()
-                    params.set("q", popular)
-                    router.replace(`/search?${params.toString()}`)
-                    performSearch(popular)
-                  }}
+                  onClick={() => triggerExplicitSearch(popular)}
                   className="text-xs px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 hover:border-primary/50 hover:bg-white/[0.08] hover:text-white transition-all text-zinc-300 cursor-pointer"
                 >
                   {popular}
@@ -471,7 +644,7 @@ function SearchContent() {
         state.results.length > 0 &&
         sortedGames.length === 0 &&
         state.error === null &&
-        !isPending && (
+        !isSearching && (
           <GlassPanel className="max-w-md w-full text-center py-10 px-6 flex flex-col items-center gap-3">
             <p className="text-zinc-200 font-display font-medium text-sm">
               {t("filter_type_empty")}
@@ -491,10 +664,14 @@ function SearchContent() {
         )}
 
       {/* Game Cards Grid */}
-      {paginatedGames.length > 0 && !isPending && (
+      {paginatedGames.length > 0 && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full max-w-6xl mb-10">
-            {paginatedGames.map((game) => (
+          <div
+            className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full max-w-6xl mb-10 transition-opacity duration-200 ${
+              isSearching ? "opacity-55 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {paginatedGames.map((game, idx) => (
               <GameCard
                 key={game.id}
                 id={game.id}
@@ -503,6 +680,7 @@ function SearchContent() {
                 releaseYear={game.releaseYear}
                 rating={game.rating}
                 gameType={game.gameType}
+                deferRender={idx >= 12}
               />
             ))}
           </div>

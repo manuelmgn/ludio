@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { memo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Gamepad2, Star } from "lucide-react"
@@ -16,9 +16,10 @@ export interface GameCardProps {
   releaseYear?: number | null
   rating?: number | null
   gameType?: GameType | null
+  deferRender?: boolean
 }
 
-export function GameCard({
+export const GameCard = memo(function GameCard({
   id,
   title,
   coverUrl,
@@ -26,6 +27,7 @@ export function GameCard({
   releaseYear,
   rating,
   gameType,
+  deferRender = false,
 }: GameCardProps) {
   const { t } = useLanguage()
   const [imgError, setImgError] = useState(false)
@@ -34,8 +36,12 @@ export function GameCard({
   const typeStyle = gameType ? GAME_TYPE_STYLES[gameType] : null
 
   return (
-    <Link href={`/games/${id}`} className="block w-full group">
+    <Link
+      href={`/games/${id}`}
+      className={`block w-full group ${deferRender ? "card-defer-render" : ""}`}
+    >
       <GlassPanel
+        variant="card"
         interactive
         className="flex flex-col gap-2.5 p-2.5 overflow-hidden h-full"
       >
@@ -47,7 +53,8 @@ export function GameCard({
                 alt={title}
                 fill
                 unoptimized
-                className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                loading={deferRender ? "lazy" : undefined}
+                className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
                 onError={() => setImgError(true)}
               />
               <div
@@ -66,14 +73,14 @@ export function GameCard({
 
           {/* Release Year Badge */}
           {year && (
-            <div className="absolute top-2 left-2 bg-black/65 backdrop-blur-xl px-2 py-0.5 rounded-md text-[10px] font-mono font-medium text-zinc-100 border border-white/15">
+            <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium text-zinc-100 border border-white/15">
               {year}
             </div>
           )}
 
           {/* Rating Badge */}
           {rating !== null && rating !== undefined && (
-            <div className="absolute top-2 right-2 bg-black/65 backdrop-blur-xl px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium text-amber-300 border border-amber-400/25 flex items-center gap-1">
+            <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium text-amber-300 border border-amber-400/25 flex items-center gap-1">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
               <span>{Math.round(rating)}</span>
             </div>
@@ -82,7 +89,7 @@ export function GameCard({
           {/* Game Type Badge */}
           {typeStyle && gameType !== "main" && (
             <div
-              className={`absolute bottom-2 left-2 backdrop-blur-xl px-2 py-0.5 rounded-md text-[10px] font-mono font-medium border ${typeStyle.badgeClass}`}
+              className={`absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-medium border ${typeStyle.badgeClass}`}
             >
               {t(typeStyle.i18nKey) || gameType}
             </div>
@@ -97,4 +104,4 @@ export function GameCard({
       </GlassPanel>
     </Link>
   )
-}
+})

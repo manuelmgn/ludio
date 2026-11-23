@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useDeferredValue } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -63,6 +63,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
   const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<FilterTab>("ALL")
   const [searchQuery, setSearchQuery] = useState("")
+  const deferredSearchQuery = useDeferredValue(searchQuery)
   const [selectedPlatform, setSelectedPlatform] = useState("ALL")
   const [selectedStore, setSelectedStore] = useState("ALL")
   const [sortBy, setSortBy] = useState<SortOption>("updated_desc")
@@ -124,11 +125,25 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     setOnlyWithPrice(false)
   }
 
+  const releaseTimestamps = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const entry of entries) {
+      if (entry.game.firstReleaseDate) {
+        const ts =
+          entry.game.firstReleaseDate instanceof Date
+            ? entry.game.firstReleaseDate.getTime()
+            : Date.parse(entry.game.firstReleaseDate)
+        map.set(entry.game.id, ts)
+      }
+    }
+    return map
+  }, [entries])
+
   const filteredAndSortedEntries = useMemo(() => {
+    const normalizedQuery = deferredSearchQuery.toLowerCase().trim()
     const result = entries.filter((entry) => {
-      if (searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase().trim()
-        if (!entry.game.title.toLowerCase().includes(query)) {
+      if (normalizedQuery !== "") {
+        if (!entry.game.title.toLowerCase().includes(normalizedQuery)) {
           return false
         }
       }
@@ -178,13 +193,13 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
           return rB - rA
         }
         case "release_desc": {
-          const dA = a.game.firstReleaseDate ? new Date(a.game.firstReleaseDate).getTime() : -Infinity
-          const dB = b.game.firstReleaseDate ? new Date(b.game.firstReleaseDate).getTime() : -Infinity
+          const dA = releaseTimestamps.get(a.game.id) ?? -Infinity
+          const dB = releaseTimestamps.get(b.game.id) ?? -Infinity
           return dB - dA
         }
         case "release_asc": {
-          const dA = a.game.firstReleaseDate ? new Date(a.game.firstReleaseDate).getTime() : Infinity
-          const dB = b.game.firstReleaseDate ? new Date(b.game.firstReleaseDate).getTime() : Infinity
+          const dA = releaseTimestamps.get(a.game.id) ?? Infinity
+          const dB = releaseTimestamps.get(b.game.id) ?? Infinity
           return dA - dB
         }
         case "price_desc": {
@@ -210,7 +225,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     })
 
     return result
-  }, [entries, activeTab, searchQuery, selectedPlatform, selectedStore, onlyWithPrice, sortBy])
+  }, [entries, activeTab, deferredSearchQuery, selectedPlatform, selectedStore, onlyWithPrice, sortBy, releaseTimestamps])
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -389,24 +404,28 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
       {/* Games Grid */}
       {filteredAndSortedEntries.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
-          {filteredAndSortedEntries.map((entry) => {
+          {filteredAndSortedEntries.map((entry, idx) => {
+            const deferRender = idx >= 10
             const latestPlaythrough = entry.playthroughs[0]
             const isWish = entry.playthroughs.length === 0
             const statusBadge = isWish
-              ? { label: "Desexado", dot: "bg-purple-400", color: "bg-purple-950/85 text-purple-200 border-purple-400/35" }
+              ? { label: "Desexado", dot: "bg-purple-400", color: "bg-purple-950/90 text-purple-200 border-purple-400/35" }
               : latestPlaythrough?.status === "PLAYING"
-              ? { label: "Xogando", dot: "bg-sky-400", color: "bg-sky-950/85 text-sky-200 border-sky-400/35" }
+              ? { label: "Xogando", dot: "bg-sky-400", color: "bg-sky-950/90 text-sky-200 border-sky-400/35" }
               : latestPlaythrough?.status === "COMPLETED"
-              ? { label: "Completado", dot: "bg-emerald-400", color: "bg-emerald-950/85 text-emerald-200 border-emerald-400/35" }
+              ? { label: "Completado", dot: "bg-emerald-400", color: "bg-emerald-950/90 text-emerald-200 border-emerald-400/35" }
               : latestPlaythrough?.status === "ON_HOLD"
-              ? { label: "En Pausa", dot: "bg-amber-400", color: "bg-amber-950/85 text-amber-200 border-amber-400/35" }
-              : { label: "Abandonado", dot: "bg-rose-400", color: "bg-rose-950/85 text-rose-200 border-rose-400/35" }
+              ? { label: "En Pausa", dot: "bg-amber-400", color: "bg-amber-950/90 text-amber-200 border-amber-400/35" }
+              : { label: "Abandonado", dot: "bg-rose-400", color: "bg-rose-950/90 text-rose-200 border-rose-400/35" }
 
             return (
               <GlassPanel
                 key={entry.game.id}
+                variant="card"
                 interactive
-                className="p-2.5 flex flex-col justify-between overflow-hidden group"
+                className={`p-2.5 flex flex-col justify-between overflow-hidden group ${
+                  deferRender ? "card-defer-render" : ""
+                }`}
               >
                 <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-2.5 ring-1 ring-white/[0.06]">
                   {entry.game.coverUrl ? (
@@ -416,7 +435,8 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                         alt={entry.game.title}
                         fill
                         unoptimized
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        loading={deferRender ? "lazy" : undefined}
+                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                       />
                       <div
                         aria-hidden="true"
@@ -434,7 +454,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
 
                   {/* Status Badge */}
                   <div
-                    className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono border backdrop-blur-md flex items-center gap-1.5 ${statusBadge.color}`}
+                    className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono border flex items-center gap-1.5 ${statusBadge.color}`}
                   >
                     <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
                     <span>{statusBadge.label}</span>
@@ -442,21 +462,21 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
 
                   {/* Release Year Badge */}
                   {entry.game.firstReleaseDate && (
-                    <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
+                    <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
                       {new Date(entry.game.firstReleaseDate).getFullYear()}
                     </div>
                   )}
 
                   {/* IGDB Rating Badge */}
                   {entry.game.igdbRating !== null && entry.game.igdbRating !== undefined && (
-                    <div className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
+                    <div className="absolute bottom-2 left-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
                       IGDB {entry.game.igdbRating}
                     </div>
                   )}
 
                   {/* Personal Rating Badge */}
                   {entry.rating && (
-                    <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[11px] font-mono text-amber-300 border border-amber-400/25 flex items-center gap-1">
+                    <div className="absolute bottom-2 right-2 bg-black/85 px-1.5 py-0.5 rounded-md text-[11px] font-mono text-amber-300 border border-amber-400/25 flex items-center gap-1">
                       <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
                       <span>{entry.rating}</span>
                     </div>

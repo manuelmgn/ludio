@@ -147,6 +147,7 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://images.igdb.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=VT323&display=swap"
@@ -154,16 +155,23 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased min-h-dvh bg-background text-foreground flex flex-col font-sans relative selection:bg-primary/35 selection:text-white">
-        {/* Global Obsidian Atmospheric Layer */}
+        {/* Global Obsidian Atmospheric Layer (pure radial gradients — zero GPU blur passes) */}
         <div
           aria-hidden="true"
           className="fixed inset-0 -z-20 pointer-events-none overflow-hidden"
         >
           <div className="absolute inset-0 bg-obsidian-grid opacity-75" />
-          <div className="absolute -top-36 left-1/4 w-[640px] h-[640px] rounded-full bg-purple-600/20 blur-[160px]" />
-          <div className="absolute bottom-[-140px] right-1/5 w-[560px] h-[560px] rounded-full bg-indigo-700/20 blur-[160px]" />
-          <div className="absolute top-1/2 -left-40 w-[400px] h-[400px] rounded-full bg-cyan-600/12 blur-[150px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,transparent_0%,rgba(8,8,13,0.72)_74%,rgba(8,8,13,0.96)_100%)]" />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: [
+                "radial-gradient(640px circle at 35% 4%, rgba(147, 51, 234, 0.22), transparent 68%)",
+                "radial-gradient(560px circle at 78% 92%, rgba(67, 56, 202, 0.20), transparent 68%)",
+                "radial-gradient(420px circle at 4% 54%, rgba(8, 145, 178, 0.12), transparent 66%)",
+                "radial-gradient(ellipse at top, transparent 0%, rgba(8, 8, 13, 0.72) 74%, rgba(8, 8, 13, 0.96) 100%)",
+              ].join(", "),
+            }}
+          />
         </div>
 
         <LanguageProvider>
