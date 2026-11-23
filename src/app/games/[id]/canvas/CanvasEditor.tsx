@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect, useRef, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -51,11 +52,13 @@ export function CanvasEditor({
   initialContent,
   images: initialImages,
 }: CanvasEditorProps) {
+  const router = useRouter()
   const { t } = useLanguage()
   const [content, setContent] = useState(initialContent)
   const [lastSavedContent, setLastSavedContent] = useState(initialContent)
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const isSavingTextRef = useRef(false)
 
   const [file, setFile] = useState<File | null>(null)
   const [privacy, setPrivacy] = useState<PrivacyLevel>(PrivacyLevel.PRIVATE)
@@ -72,18 +75,26 @@ export function CanvasEditor({
   const hasUnsavedChanges = content !== lastSavedContent
 
   const handleSaveText = useCallback(() => {
+    if (isSavingTextRef.current) return
+    isSavingTextRef.current = true
+    const contentToSave = content
     setTextMessage(null)
     startTransitionText(async () => {
-      const result = await saveCanvasText(libraryEntryId, content)
-      if (result.success) {
-        setLastSavedContent(content)
-        setTextMessage({ type: "success", text: t("save") + " ✓" })
-        setTimeout(() => setTextMessage(null), 3000)
-      } else {
-        setTextMessage({ type: "error", text: result.error || "Erro ao gardar." })
+      try {
+        const result = await saveCanvasText(libraryEntryId, contentToSave)
+        if (result.success) {
+          setLastSavedContent(contentToSave)
+          setTextMessage({ type: "success", text: t("save") + " ✓" })
+          router.refresh()
+          setTimeout(() => setTextMessage(null), 3000)
+        } else {
+          setTextMessage({ type: "error", text: result.error || "Erro ao gardar." })
+        }
+      } finally {
+        isSavingTextRef.current = false
       }
     })
-  }, [content, libraryEntryId, t])
+  }, [content, libraryEntryId, router, t])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

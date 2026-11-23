@@ -35,10 +35,13 @@ export function PlaythroughRatingCard({
   const [hovered, setHovered] = useState<number>(0)
   const [isEditingReview, setIsEditingReview] = useState(false)
   const [review, setReview] = useState(initialReview ?? "")
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const handleStarClick = (star: number) => {
+    const prevRating = rating
     const nextRating = rating === star ? 0 : star
+    setErrorMsg(null)
     setRating(nextRating)
     startTransition(async () => {
       const res = await updatePlaythroughRating(
@@ -48,11 +51,15 @@ export function PlaythroughRatingCard({
       )
       if (res.success) {
         router.refresh()
+      } else {
+        setRating(prevRating)
+        setErrorMsg(res.error || "Non se puido gardar a valoración.")
       }
     })
   }
 
   const handleSaveReview = () => {
+    setErrorMsg(null)
     startTransition(async () => {
       const res = await updatePlaythroughRating(
         playthroughId,
@@ -63,6 +70,8 @@ export function PlaythroughRatingCard({
       if (res.success) {
         setIsEditingReview(false)
         router.refresh()
+      } else {
+        setErrorMsg(res.error || "Non se puido gardar a opinión.")
       }
     })
   }
@@ -108,6 +117,10 @@ export function PlaythroughRatingCard({
           </button>
         ))}
       </div>
+
+      {errorMsg && (
+        <p className="text-xs text-rose-400">{errorMsg}</p>
+      )}
 
       {!isEditingReview ? (
         <div className="flex flex-col gap-2">

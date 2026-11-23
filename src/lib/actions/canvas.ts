@@ -1,23 +1,34 @@
 "use server"
 
+import { getAuthenticatedOrDemoUser } from "@/lib/auth-user"
 import { prisma } from "@/lib/prisma"
+import { deleteLocalUpload } from "@/lib/storage"
 import { PrivacyLevel } from "@generated/prisma/enums"
 import { revalidatePath } from "next/cache"
-import fs from "fs"
-import path from "path"
 
 export async function saveCanvasText(libraryEntryId: string, content: string) {
   try {
+    const user = await getAuthenticatedOrDemoUser()
+    const libraryEntry = await prisma.libraryEntry.findUnique({
+      where: { id: libraryEntryId },
+      select: { userId: true, gameId: true },
+    })
+
+    if (!libraryEntry || libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para editar este canvas." }
+    }
+
     const canvas = await prisma.gameCanvas.upsert({
       where: { libraryEntryId },
       update: { content },
       create: {
         libraryEntryId,
-        content
-      }
+        content,
+      },
     })
 
-    revalidatePath(`/games/${libraryEntryId}/canvas`)
+    revalidatePath(`/games/${libraryEntry.gameId}/canvas`)
+    revalidatePath(`/games/${libraryEntry.gameId}`)
     return { success: true, data: canvas }
   } catch (error) {
     console.error("Error saving canvas text:", error)
@@ -25,27 +36,40 @@ export async function saveCanvasText(libraryEntryId: string, content: string) {
   }
 }
 
-export async function saveCanvasImageRecord(libraryEntryId: string, url: string, privacy: PrivacyLevel) {
+export async function saveCanvasImageRecord(
+  libraryEntryId: string,
+  url: string,
+  privacy: PrivacyLevel
+) {
   try {
-    // Primero asegurarnos de que el canvas existe
+    const user = await getAuthenticatedOrDemoUser()
+    const libraryEntry = await prisma.libraryEntry.findUnique({
+      where: { id: libraryEntryId },
+      select: { userId: true, gameId: true },
+    })
+
+    if (!libraryEntry || libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para editar este canvas." }
+    }
+
     const canvas = await prisma.gameCanvas.upsert({
       where: { libraryEntryId },
       update: {},
       create: {
-        libraryEntryId
-      }
+        libraryEntryId,
+      },
     })
 
-    // Crear el registro de la imagen
     const image = await prisma.canvasImage.create({
       data: {
         url,
         privacy,
-        canvasId: canvas.id
-      }
+        canvasId: canvas.id,
+      },
     })
 
-    revalidatePath(`/games/${libraryEntryId}/canvas`)
+    revalidatePath(`/games/${libraryEntry.gameId}/canvas`)
+    revalidatePath(`/games/${libraryEntry.gameId}`)
     return { success: true, data: image }
   } catch (error) {
     console.error("Error saving canvas image record:", error)
@@ -55,32 +79,36 @@ export async function saveCanvasImageRecord(libraryEntryId: string, url: string,
 
 export async function deleteCanvasImage(imageId: string, libraryEntryId: string) {
   try {
+    const user = await getAuthenticatedOrDemoUser()
     const image = await prisma.canvasImage.findUnique({
-      where: { id: imageId }
+      where: { id: imageId },
+      include: {
+        canvas: {
+          include: {
+            libraryEntry: {
+              select: { id: true, userId: true, gameId: true },
+            },
+          },
+        },
+      },
     })
 
-    if (!image) {
+    if (!image || image.canvas.libraryEntry.id !== libraryEntryId) {
       return { success: false, error: "Imagen no encontrada." }
     }
 
-    // Si la imagen es un archivo local en /uploads, eliminarlo del disco
-    if (image.url.startsWith("/uploads/")) {
-      const fileName = image.url.replace("/uploads/", "")
-      const filePath = path.join(process.cwd(), "public", "uploads", fileName)
-      if (fs.existsSync(filePath)) {
-        try {
-          await fs.promises.unlink(filePath)
-        } catch (err) {
-          console.warn("Could not delete file from disk:", err)
-        }
-      }
+    if (image.canvas.libraryEntry.userId !== user.id) {
+      return { success: false, error: "Non tes permisos para eliminar esta imaxe." }
     }
 
+    await deleteLocalUpload(image.url)
+
     await prisma.canvasImage.delete({
-      where: { id: imageId }
+      where: { id: imageId },
     })
 
-    revalidatePath(`/games/${libraryEntryId}/canvas`)
+    revalidatePath(`/games/${image.canvas.libraryEntry.gameId}/canvas`)
+    revalidatePath(`/games/${image.canvas.libraryEntry.gameId}`)
     return { success: true }
   } catch (error) {
     console.error("Error deleting canvas image:", error)

@@ -1,7 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { getAuthenticatedOrDemoUser } from "@/lib/auth-user"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { revalidatePath } from "next/cache"
 
@@ -27,31 +27,20 @@ export interface AddGameData {
   saleDate?: string
 }
 
-async function getAuthenticatedOrDemoUser() {
-  const session = await auth()
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    })
-    if (user) return user
-  }
+function toNullableString(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
 
-  let user = await prisma.user.findFirst()
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email: "admin@ludio.app",
-        username: "admin",
-        passwordHash: "dummy_hash",
-      },
-    })
-  }
-  return user
+function toNullableFiniteNumber(value: number | null | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null
 }
 
 export async function addGameToLibrary(gameId: string, data: AddGameData): Promise<ActionResponse> {
   try {
     const user = await getAuthenticatedOrDemoUser()
+    const normalizedReview = toNullableString(data.publicReview)
+    const normalizedRating = toNullableFiniteNumber(data.rating)
 
     // 1. Find or create the LibraryEntry for this user and game
     let libraryEntry = await prisma.libraryEntry.findUnique({
@@ -68,18 +57,23 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
         data: {
           userId: user.id,
           gameId,
-          rating: data.rating,
-          publicReview: data.publicReview,
+          rating: normalizedRating,
+          publicReview: normalizedReview,
         },
       })
-    } else if (data.rating !== undefined || data.publicReview !== undefined) {
-      libraryEntry = await prisma.libraryEntry.update({
-        where: { id: libraryEntry.id },
-        data: {
-          rating: data.rating !== undefined ? data.rating : libraryEntry.rating,
-          publicReview: data.publicReview !== undefined ? data.publicReview : libraryEntry.publicReview,
-        },
-      })
+    } else {
+      // Never overwrite existing overall rating/review when adding another playthrough
+      const shouldFillRating = libraryEntry.rating === null && normalizedRating !== null
+      const shouldFillReview = !libraryEntry.publicReview && normalizedReview !== null
+      if (shouldFillRating || shouldFillReview) {
+        libraryEntry = await prisma.libraryEntry.update({
+          where: { id: libraryEntry.id },
+          data: {
+            ...(shouldFillRating ? { rating: normalizedRating } : {}),
+            ...(shouldFillReview ? { publicReview: normalizedReview } : {}),
+          },
+        })
+      }
     }
 
     // 2. Create the Playthrough only if status is NOT "WISHED"
@@ -89,17 +83,17 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
         data: {
           libraryEntryId: libraryEntry.id,
           status: data.status,
-          platform: data.platform || "PC",
-          startDate: data.startDate || null,
-          endDate: data.endDate || null,
-          rating: data.rating ?? null,
-          review: data.publicReview?.trim() || null,
-          purchasePrice: data.purchasePrice ?? null,
-          purchaseStoreId: data.purchaseStoreId || null,
-          purchaseDate: data.purchaseDate || null,
-          salePrice: data.salePrice ?? null,
-          saleStoreId: data.saleStoreId || null,
-          saleDate: data.saleDate || null,
+          platform: toNullableString(data.platform) || "PC",
+          startDate: toNullableString(data.startDate),
+          endDate: toNullableString(data.endDate),
+          rating: normalizedRating,
+          review: normalizedReview,
+          purchasePrice: toNullableFiniteNumber(data.purchasePrice),
+          purchaseStoreId: toNullableString(data.purchaseStoreId),
+          purchaseDate: toNullableString(data.purchaseDate),
+          salePrice: toNullableFiniteNumber(data.salePrice),
+          saleStoreId: toNullableString(data.saleStoreId),
+          saleDate: toNullableString(data.saleDate),
         },
       })
       createdPlaythroughId = created.id
@@ -225,17 +219,35 @@ export async function updatePlaythrough(
       where: { id: playthroughId },
       data: {
         status: data.status,
-        platform: data.platform,
-        startDate: data.startDate !== undefined ? data.startDate : playthrough.startDate,
-        endDate: data.endDate !== undefined ? data.endDate : playthrough.endDate,
-        rating: data.rating !== undefined ? data.rating : playthrough.rating,
-        review: data.review !== undefined ? data.review : playthrough.review,
-        purchasePrice: data.purchasePrice !== undefined ? data.purchasePrice : playthrough.purchasePrice,
-        purchaseStoreId: data.purchaseStoreId !== undefined ? data.purchaseStoreId : playthrough.purchaseStoreId,
-        purchaseDate: data.purchaseDate !== undefined ? data.purchaseDate : playthrough.purchaseDate,
-        salePrice: data.salePrice !== undefined ? data.salePrice : playthrough.salePrice,
-        saleStoreId: data.saleStoreId !== undefined ? data.saleStoreId : playthrough.saleStoreId,
-        saleDate: data.saleDate !== undefined ? data.saleDate : playthrough.saleDate,
+        platform: toNullableString(data.platform) || playthrough.platform || "PC",
+        startDate: data.startDate !== undefined ? toNullableString(data.startDate) : playthrough.startDate,
+        endDate: data.endDate !== undefined ? toNullableString(data.endDate) : playthrough.endDate,
+        rating: data.rating !== undefined ? toNullableFiniteNumber(data.rating) : playthrough.rating,
+        review: data.review !== undefined ? toNullableString(data.review) : playthrough.review,
+        purchasePrice:
+          data.purchasePrice !== undefined
+            ? toNullableFiniteNumber(data.purchasePrice)
+            : playthrough.purchasePrice,
+        purchaseStoreId:
+          data.purchaseStoreId !== undefined
+            ? toNullableString(data.purchaseStoreId)
+            : playthrough.purchaseStoreId,
+        purchaseDate:
+          data.purchaseDate !== undefined
+            ? toNullableString(data.purchaseDate)
+            : playthrough.purchaseDate,
+        salePrice:
+          data.salePrice !== undefined
+            ? toNullableFiniteNumber(data.salePrice)
+            : playthrough.salePrice,
+        saleStoreId:
+          data.saleStoreId !== undefined
+            ? toNullableString(data.saleStoreId)
+            : playthrough.saleStoreId,
+        saleDate:
+          data.saleDate !== undefined
+            ? toNullableString(data.saleDate)
+            : playthrough.saleDate,
       },
     })
 
