@@ -172,8 +172,18 @@ body {
 
 .animate-page-enter {
   @media (prefers-reduced-motion: no-preference) {
-    animation: page-enter 0.34s var(--ease-fluid) both;
+    animation: page-enter 0.34s var(--ease-fluid) backwards;
   }
+}
+
+/* Prevent page scroll chaining while a native modal dialog is open */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 /* Shimmer loading skeleton */

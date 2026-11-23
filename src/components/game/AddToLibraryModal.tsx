@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition, useEffect, useRef, useId } from "react"
 import { useRouter } from "next/navigation"
 import {
   Plus,
@@ -46,6 +46,12 @@ export function AddToLibraryModal({
   stores,
 }: AddToLibraryModalProps) {
   const router = useRouter()
+  const idPrefix = useId()
+  const titleId = `${idPrefix}-title`
+  const platformId = `${idPrefix}-platform`
+  const startDateId = `${idPrefix}-startDate`
+  const endDateId = `${idPrefix}-endDate`
+  const dialogRef = useRef<HTMLDialogElement>(null)
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<PlaythroughStatus>("PLAYING")
   const [selectedRating, setSelectedRating] = useState<number>(0)
@@ -55,20 +61,47 @@ export function AddToLibraryModal({
   const allPlatforms = Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms]))
 
   useEffect(() => {
-    if (!open) return
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isPending) onClose()
-    }
-    window.addEventListener("keydown", handleKey)
-    return () => {
-      document.body.style.overflow = prevOverflow
-      window.removeEventListener("keydown", handleKey)
-    }
-  }, [open, isPending, onClose])
+    const dialog = dialogRef.current
+    if (!dialog) return
 
-  if (!open) return null
+    if (open) {
+      if (!dialog.open) {
+        dialog.showModal()
+      }
+    } else if (dialog.open) {
+      dialog.close()
+    }
+  }, [open])
+
+  // Fallback light-dismiss for browsers without <dialog closedby> support (e.g. Safari)
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog || typeof HTMLDialogElement === "undefined") return
+    if ("closedBy" in HTMLDialogElement.prototype) return
+
+    const isOutside = (e: PointerEvent) => {
+      const r = dialog.getBoundingClientRect()
+      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom
+    }
+
+    let pressedOutside = false
+    const onPointerDown = (e: PointerEvent) => {
+      pressedOutside = isOutside(e)
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      if (pressedOutside && isOutside(e) && !isPending) {
+        dialog.close()
+      }
+      pressedOutside = false
+    }
+
+    dialog.addEventListener("pointerdown", onPointerDown)
+    dialog.addEventListener("pointerup", onPointerUp)
+    return () => {
+      dialog.removeEventListener("pointerdown", onPointerDown)
+      dialog.removeEventListener("pointerup", onPointerUp)
+    }
+  }, [isPending])
 
   const statusOptions: { id: PlaythroughStatus; label: string; dot: string }[] = [
     { id: "PLAYING", label: STATUS_META.PLAYING.label, dot: STATUS_META.PLAYING.dot },
@@ -130,23 +163,42 @@ export function AddToLibraryModal({
   const inputClass =
     "w-full min-h-[44px] sm:min-h-0 rounded-xl border border-white/10 bg-[#0b0b12]/90 px-3 py-2 text-base sm:text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all font-sans"
 
+  const handleDialogCancel = (e: React.SyntheticEvent<HTMLDialogElement>) => {
+    if (isPending) {
+      e.preventDefault()
+    }
+  }
+
+  const handleDialogClose = () => {
+    const dialog = dialogRef.current
+    if (dialog) {
+      dialog.returnValue = ""
+    }
+    setStatus("PLAYING")
+    setSelectedRating(0)
+    setShowPricing(false)
+    setError(null)
+    if (open) {
+      onClose()
+    }
+  }
+
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
-      onClick={() => !isPending && onClose()}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="add-library-modal-title"
+    <dialog
+      ref={dialogRef}
+      {...({ closedby: isPending ? "none" : "any" } as Record<string, string>)}
+      aria-labelledby={titleId}
+      onCancel={handleDialogCancel}
+      onClose={handleDialogClose}
+      className="m-auto p-0 w-[calc(100%-2rem)] max-w-lg max-h-[min(88dvh,calc(100dvh-max(2rem,env(safe-area-inset-top,0px)+env(safe-area-inset-bottom,0px))))] overflow-y-auto overscroll-contain rounded-2xl bg-[#11111a] border border-white/15 shadow-2xl text-zinc-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm"
     >
-      <div
-        className="w-full max-w-lg max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl bg-[#11111a] border border-white/15 shadow-2xl text-zinc-100"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {open && (
+        <>
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#11111a]/95 backdrop-blur z-10">
           <div>
-            <h3 id="add-library-modal-title" className="text-base font-display font-bold text-white">
+            <h1 id={titleId} className="text-base font-display font-bold text-white">
               {mode === "new-playthrough" ? "Rexistrar nova partida" : "Engadir á biblioteca"}
-            </h3>
+            </h1>
             <p className="text-xs text-zinc-400">
               {gameTitle}
               {releaseYear ? ` (${releaseYear})` : ""}
@@ -201,14 +253,15 @@ export function AddToLibraryModal({
 
           {/* Platform */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="modal-platform" className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+            <label htmlFor={platformId} className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
               Plataforma
             </label>
             <select
-              id="modal-platform"
+              id={platformId}
               name="platform"
               defaultValue={allPlatforms[0]}
               disabled={isPending}
+              autoFocus
               className={inputClass}
             >
               {allPlatforms.map((p) => (
@@ -222,11 +275,11 @@ export function AddToLibraryModal({
           {/* Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="modal-startDate" className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+              <label htmlFor={startDateId} className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
                 Data de inicio (opcional)
               </label>
               <input
-                id="modal-startDate"
+                id={startDateId}
                 type="date"
                 name="startDate"
                 disabled={isPending}
@@ -234,11 +287,11 @@ export function AddToLibraryModal({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="modal-endDate" className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+              <label htmlFor={endDateId} className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
                 Data de fin (opcional)
               </label>
               <input
-                id="modal-endDate"
+                id={endDateId}
                 type="date"
                 name="endDate"
                 disabled={isPending}
@@ -376,8 +429,9 @@ export function AddToLibraryModal({
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+        </>
+      )}
+    </dialog>
   )
 }
 
