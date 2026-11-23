@@ -34,6 +34,8 @@ export function GameGallery({ officialImages, userImages }: GameGalleryProps) {
 
   useEffect(() => {
     if (lightboxIdx === null) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxIdx(null)
       if (e.key === "ArrowRight") {
@@ -48,7 +50,10 @@ export function GameGallery({ officialImages, userImages }: GameGalleryProps) {
       }
     }
     window.addEventListener("keydown", handleKey)
-    return () => window.removeEventListener("keydown", handleKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener("keydown", handleKey)
+    }
   }, [lightboxIdx, visibleImages.length])
 
   if (allImages.length === 0) return null
@@ -140,7 +145,7 @@ export function GameGallery({ officialImages, userImages }: GameGalleryProps) {
       {/* Lightbox Modal */}
       {activeItem && lightboxIdx !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
           onClick={() => setLightboxIdx(null)}
           role="dialog"
           aria-modal="true"

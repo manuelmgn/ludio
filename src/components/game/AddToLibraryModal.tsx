@@ -56,11 +56,16 @@ export function AddToLibraryModal({
 
   useEffect(() => {
     if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isPending) onClose()
     }
     window.addEventListener("keydown", handleKey)
-    return () => window.removeEventListener("keydown", handleKey)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener("keydown", handleKey)
+    }
   }, [open, isPending, onClose])
 
   if (!open) return null
@@ -123,18 +128,18 @@ export function AddToLibraryModal({
   }
 
   const inputClass =
-    "w-full rounded-xl border border-white/10 bg-[#0b0b12]/90 px-3 py-2 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all font-sans"
+    "w-full min-h-[44px] sm:min-h-0 rounded-xl border border-white/10 bg-[#0b0b12]/90 px-3 py-2 text-base sm:text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all font-sans"
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
       onClick={() => !isPending && onClose()}
       role="dialog"
       aria-modal="true"
       aria-labelledby="add-library-modal-title"
     >
       <div
-        className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-[#11111a] border border-white/15 shadow-2xl text-zinc-100"
+        className="w-full max-w-lg max-h-[88dvh] overflow-y-auto overscroll-contain rounded-2xl bg-[#11111a] border border-white/15 shadow-2xl text-zinc-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#11111a]/95 backdrop-blur z-10">

@@ -7,6 +7,15 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
+      const isPublicPwaRoute =
+        nextUrl.pathname === "/offline" ||
+        nextUrl.pathname === "/sw.js" ||
+        nextUrl.pathname.startsWith("/pwa/")
+
+      if (isPublicPwaRoute) {
+        return true
+      }
+
       const isAuthPage =
         nextUrl.pathname === "/login" || nextUrl.pathname === "/register"
 

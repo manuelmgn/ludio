@@ -462,8 +462,15 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                     </div>
                   )}
 
-                  {/* Hover Quick Action Overlay */}
-                  <div className="absolute inset-0 bg-[#08080f]/75 backdrop-blur-md opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col items-center justify-center gap-2 p-3">
+                  {/* Direct Tap Navigation on Touch Devices */}
+                  <Link
+                    href={`/games/${entry.game.id}`}
+                    aria-label={entry.game.title}
+                    className="[@media(hover:hover)]:hidden absolute inset-0 z-10"
+                  />
+
+                  {/* Hover Quick Action Overlay (Desktop / Pointer devices with hover) */}
+                  <div className="hidden [@media(hover:hover)]:flex absolute inset-0 bg-[#08080f]/75 backdrop-blur-md opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] flex-col items-center justify-center gap-2 p-3">
                     <Link
                       href={`/games/${entry.game.id}`}
                       className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/14 hover:bg-white/22 text-white text-xs font-medium border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-[background-color,transform] duration-150 active:scale-[0.97]"

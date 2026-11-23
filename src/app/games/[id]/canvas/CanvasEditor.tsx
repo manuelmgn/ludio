@@ -97,6 +97,15 @@ export function CanvasEditor({
   }, [content, libraryEntryId, router, t])
 
   useEffect(() => {
+    if (!selectedImage) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [selectedImage])
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault()
@@ -497,7 +506,7 @@ export function CanvasEditor({
                       handleDeleteImage(img.id)
                     }}
                     disabled={isDeletingImageId === img.id}
-                    className="absolute top-3 right-3 bg-rose-950/85 hover:bg-rose-600 text-white rounded-lg p-1.5 border border-rose-500/35 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all cursor-pointer"
+                    className="absolute top-3 right-3 bg-rose-950/85 hover:bg-rose-600 text-white rounded-lg p-2 sm:p-1.5 border border-rose-500/35 opacity-0 [@media(hover:none)]:opacity-100 group-hover:opacity-100 focus:opacity-100 transition-all cursor-pointer"
                     title={t("delete")}
                     aria-label={t("delete")}
                   >
@@ -520,22 +529,24 @@ export function CanvasEditor({
           role="dialog"
           aria-modal="true"
           aria-label="Captura ampliada"
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))]"
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="relative max-w-5xl max-h-[90vh] w-full h-[80vh] flex flex-col items-center justify-center"
+            className="relative max-w-5xl max-h-[88dvh] w-full h-[80dvh] flex flex-col gap-3"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-11 right-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono border border-white/15 transition-colors cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Pechar (Esc)</span>
-            </button>
-            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/15 bg-[#0a0a12] shadow-2xl">
+            <div className="flex items-center justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedImage(null)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono border border-white/15 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Pechar (Esc)</span>
+              </button>
+            </div>
+            <div className="relative flex-1 w-full rounded-2xl overflow-hidden border border-white/15 bg-[#0a0a12] shadow-2xl">
               <Image
                 src={selectedImage.url}
                 alt="Captura ampliada"

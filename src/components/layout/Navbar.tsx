@@ -21,7 +21,8 @@ export function Navbar() {
   const [quickQuery, setQuickQuery] = useState("")
   const searchInputRef = useRef<HTMLInputElement>(null)
 
-  const isAuthPage = pathname === "/login" || pathname === "/register"
+  const isAuthPage =
+    pathname === "/login" || pathname === "/register" || pathname === "/offline"
   const pageHasHeroSearch = pathname === "/" || pathname === "/search"
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 px-3 sm:px-6 pt-3 pointer-events-none">
+    <header className="fixed top-0 left-0 w-full z-50 pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] sm:pl-[max(1.5rem,env(safe-area-inset-left,0px))] sm:pr-[max(1.5rem,env(safe-area-inset-right,0px))] pt-[max(0.75rem,calc(env(safe-area-inset-top,0px)+0.4rem))] pointer-events-none">
       <div
         className={`pointer-events-auto max-w-6xl mx-auto h-14 px-3.5 sm:px-5 rounded-2xl flex items-center justify-between gap-3 transition-[background-color,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           scrolled

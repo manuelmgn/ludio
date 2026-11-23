@@ -10,8 +10,13 @@ import {
   Check,
   X,
   Plus,
+  Smartphone,
+  Share,
+  PlusSquare,
+  CheckCircle2,
 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { usePwa } from "@/contexts/PwaContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
@@ -40,6 +45,14 @@ interface StoreItem {
 
 export default function SettingsPage() {
   const { language, setLanguage, t } = useLanguage()
+  const {
+    isStandalone,
+    canInstallPrompt,
+    isIOSInstallable,
+    isInstalling,
+    triggerInstall,
+  } = usePwa()
+  const [pwaFeedback, setPwaFeedback] = useState<string | null>(null)
   const [platformName, setPlatformName] = useState("")
   const [platforms, setPlatforms] = useState<CustomPlatform[]>([])
   const [isPending, startTransition] = useTransition()
@@ -378,7 +391,68 @@ export default function SettingsPage() {
           )}
         </GlassPanel>
 
-        {/* Section 4: Data Export / Backup */}
+        {/* Section 4: Install as Mobile App (PWA) */}
+        <GlassPanel>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Smartphone className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">
+              {t("pwa_settings_title")}
+            </h2>
+          </div>
+          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
+            {t("pwa_settings_desc")}
+          </p>
+
+          {isStandalone ? (
+            <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 border border-emerald-400/35 px-3.5 py-2.5 text-xs font-medium text-emerald-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <span>{t("pwa_installed_badge")}</span>
+            </div>
+          ) : canInstallPrompt ? (
+            <div className="flex flex-col items-start gap-2.5">
+              <Button
+                type="button"
+                aria-disabled={isInstalling ? "true" : undefined}
+                onClick={async () => {
+                  if (isInstalling) return
+                  const outcome = await triggerInstall()
+                  if (outcome === "installed") {
+                    setPwaFeedback(t("pwa_install_success"))
+                  } else if (outcome === "dismissed") {
+                    setPwaFeedback(t("pwa_install_canceled"))
+                  } else if (outcome === "error") {
+                    setPwaFeedback(t("pwa_install_error"))
+                  }
+                }}
+              >
+                <Download className="w-4 h-4" aria-hidden="true" />
+                <span>{isInstalling ? t("pwa_installing") : t("pwa_install_btn")}</span>
+              </Button>
+              {pwaFeedback && (
+                <p role="status" className="text-xs font-mono text-purple-200">
+                  {pwaFeedback}
+                </p>
+              )}
+            </div>
+          ) : isIOSInstallable ? (
+            <div className="rounded-xl bg-white/[0.04] border border-white/[0.08] p-3.5 text-xs text-zinc-200 font-sans leading-relaxed flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Share className="w-4 h-4 text-primary-hover shrink-0" aria-hidden="true" />
+                <span>{t("pwa_ios_step_1")}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <PlusSquare className="w-4 h-4 text-primary-hover shrink-0" aria-hidden="true" />
+                <span>{t("pwa_ios_step_2")}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
+              {t("pwa_browser_menu_hint")}
+            </p>
+          )}
+        </GlassPanel>
+
+        {/* Section 5: Data Export / Backup */}
         <GlassPanel variant="accent">
           <div className="flex items-center gap-2.5 mb-1.5">
             <Download className="w-5 h-5 text-primary-hover" aria-hidden="true" />

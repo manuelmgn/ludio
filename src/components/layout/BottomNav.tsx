@@ -9,7 +9,7 @@ export function BottomNav() {
   const pathname = usePathname()
   const { t } = useLanguage()
 
-  if (pathname === "/login" || pathname === "/register") return null
+  if (pathname === "/login" || pathname === "/register" || pathname === "/offline") return null
 
   const items = [
     { href: "/", label: t("home"), icon: Home },
@@ -27,7 +27,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegación móbil"
-      className="md:hidden fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 pointer-events-none"
+      className="md:hidden fixed inset-x-0 bottom-0 z-50 pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pt-2 pointer-events-none"
     >
       <div className="pointer-events-auto liquid-glass-pill mx-auto max-w-md rounded-[24px] p-1.5 grid grid-cols-5 gap-1">
         {items.map((item) => {
@@ -38,7 +38,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-[18px] transition-[background-color,color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95 ${
+              className={`relative flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-2 px-1 rounded-[18px] transition-[background-color,color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95 ${
                 active
                   ? "bg-gradient-to-b from-purple-500/85 to-purple-700/85 text-white shadow-[0_4px_18px_-2px_rgba(168,85,247,0.55),inset_0_1px_0_rgba(255,255,255,0.32)]"
                   : "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.06]"

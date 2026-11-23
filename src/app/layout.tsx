@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { auth } from "@/auth"
 import { LanguageProvider } from "@/contexts/LanguageContext"
+import { PwaProvider } from "@/contexts/PwaContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { BottomNav } from "@/components/layout/BottomNav"
+import { PwaInstallBanner } from "@/components/pwa/PwaInstallBanner"
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,10 +32,60 @@ export const metadata: Metadata = {
     "partidas",
     "canvas",
   ],
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   appleWebApp: {
     capable: true,
     title: "Ludio",
     statusBarStyle: "black-translucent",
+    startupImage: [
+      {
+        url: "/pwa/splash?w=1320&h=2868",
+        media:
+          "(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1290&h=2796",
+        media:
+          "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1206&h=2622",
+        media:
+          "(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1179&h=2556",
+        media:
+          "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1170&h=2532",
+        media:
+          "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1125&h=2436",
+        media:
+          "(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=1668&h=2388",
+        media:
+          "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+      {
+        url: "/pwa/splash?w=2048&h=2732",
+        media:
+          "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)",
+      },
+    ],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
   openGraph: {
     type: "website",
@@ -75,7 +127,7 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased min-h-screen bg-background text-foreground flex flex-col font-sans relative selection:bg-primary/35 selection:text-white">
+      <body className="antialiased min-h-dvh bg-background text-foreground flex flex-col font-sans relative selection:bg-primary/35 selection:text-white">
         {/* Global Obsidian Atmospheric Layer */}
         <div
           aria-hidden="true"
@@ -89,17 +141,20 @@ export default async function RootLayout({
         </div>
 
         <LanguageProvider>
-          {isAuthenticated && <Navbar />}
-          <main
-            className={
-              isAuthenticated
-                ? "pt-22 sm:pt-24 pb-28 md:pb-8 min-h-screen flex-1 flex flex-col"
-                : "min-h-screen flex-1 flex flex-col"
-            }
-          >
-            <div className="flex-1 flex flex-col animate-page-enter">{children}</div>
-          </main>
-          {isAuthenticated && <BottomNav />}
+          <PwaProvider>
+            {isAuthenticated && <Navbar />}
+            <main
+              className={
+                isAuthenticated
+                  ? "pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:pt-[calc(5.75rem+env(safe-area-inset-top,0px))] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] min-h-dvh flex-1 flex flex-col"
+                  : "pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] min-h-dvh flex-1 flex flex-col"
+              }
+            >
+              <div className="flex-1 flex flex-col animate-page-enter">{children}</div>
+            </main>
+            {isAuthenticated && <BottomNav />}
+            <PwaInstallBanner />
+          </PwaProvider>
         </LanguageProvider>
       </body>
     </html>
