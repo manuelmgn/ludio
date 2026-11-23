@@ -65,7 +65,11 @@ Para construir y levantar todo el stack en producción:
 docker compose up -d --build
 ```
 
-La app en producción estará disponible en [http://localhost:5020](http://localhost:5020).
+### Puertos públicos en producción
+- **`5020`**: Aplicación web principal ([http://localhost:5020](http://localhost:5020)).
+- **`5021`**: Base de datos PostgreSQL (`localhost:5021`, mapeada al puerto 5432 del contenedor).
+- **`5022`**: Prisma Studio (`npm run db:studio` abre en [http://localhost:5022](http://localhost:5022)).
+- **`5023 - 5029`**: Rango reservado para otros servicios públicos adicionales.
 
 Para ver los logs de inicialización o de la aplicación:
 
