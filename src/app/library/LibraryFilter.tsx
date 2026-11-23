@@ -463,24 +463,24 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                   )}
 
                   {/* Hover Quick Action Overlay */}
-                  <div className="absolute inset-0 bg-[#08080f]/82 backdrop-blur-sm opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-2 p-3">
+                  <div className="absolute inset-0 bg-[#08080f]/75 backdrop-blur-md opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col items-center justify-center gap-2 p-3">
                     <Link
                       href={`/games/${entry.game.id}`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/12 hover:bg-white/20 text-white text-xs font-medium border border-white/15 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/14 hover:bg-white/22 text-white text-xs font-medium border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
                     >
                       <FileText className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Ficha do xogo</span>
                     </Link>
                     <Link
                       href={`/games/${entry.game.id}/canvas`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-primary/45 hover:bg-primary/65 text-white text-xs font-medium border border-primary/50 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-primary/55 hover:bg-primary/75 text-white text-xs font-medium border border-purple-300/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
                     >
                       <Palette className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Canvas</span>
                     </Link>
                     <Link
                       href={`/games/${entry.game.id}/journal`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.14] text-zinc-200 text-xs font-medium border border-white/10 transition-colors"
+                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] text-zinc-100 text-xs font-medium border border-white/15 transition-[background-color,transform] duration-150 active:scale-[0.97]"
                     >
                       <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Diario</span>

@@ -99,14 +99,14 @@ export default async function HomePage() {
           O teu santuario persoal de videoxogos. Rexistra as túas partidas, anota estratexias no teu caderno e garda as túas memorias gamer para sempre.
         </p>
 
-        {/* Hero Quick Search Bar */}
+        {/* Hero Quick Search Bar (Liquid Glass Spotlight) */}
         <form
           action="/search"
           method="GET"
-          className="w-full max-w-2xl flex items-center gap-2 bg-[#0e0e17]/85 border border-white/[0.12] rounded-2xl p-2 backdrop-blur-xl shadow-[0_16px_50px_-12px_rgba(0,0,0,0.85)] mb-8 group focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-all"
+          className="w-full max-w-2xl flex items-center gap-2 liquid-glass-pill rounded-2xl p-2 mb-8 group focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-[border-color,box-shadow] duration-200"
         >
           <Search
-            className="w-4 h-4 text-zinc-500 ml-3 shrink-0 group-focus-within:text-primary-hover transition-colors"
+            className="w-4 h-4 text-zinc-400 ml-3 shrink-0 group-focus-within:text-primary-hover transition-colors"
             aria-hidden="true"
           />
           <input
@@ -114,11 +114,11 @@ export default async function HomePage() {
             type="text"
             placeholder="Buscar calquera videoxogo (ex: Chrono Trigger, Zelda, Metroid)..."
             aria-label="Buscar videoxogos"
-            className="flex-1 bg-transparent px-2 py-2.5 text-sm text-white placeholder-zinc-500 outline-none font-sans"
+            className="flex-1 bg-transparent px-2 py-2.5 text-sm text-white placeholder-zinc-400/80 outline-none font-sans"
           />
           <button
             type="submit"
-            className="rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 px-5 py-2.5 text-xs font-medium text-white border border-purple-400/30 shadow-[0_6px_20px_-4px_rgba(168,85,247,0.55)] transition-all font-sans cursor-pointer"
+            className="rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 px-5 py-2.5 text-xs font-medium text-white border border-purple-300/35 shadow-[0_6px_20px_-4px_rgba(168,85,247,0.55),inset_0_1px_0_rgba(255,255,255,0.28)] transition-[transform,background-color,box-shadow] duration-200 active:scale-[0.97] font-sans cursor-pointer"
           >
             Buscar
           </button>

@@ -21,24 +21,24 @@ export function GlassPanel({
 }: GlassPanelProps) {
   const variants = {
     default:
-      "border-white/[0.08] bg-[#11111a]/75 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.75)] before:from-white/[0.06] before:to-transparent",
+      "border-white/[0.11] bg-[#12121e]/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_14px_40px_-14px_rgba(0,0,0,0.78)] before:from-white/[0.08] before:via-white/[0.02] before:to-transparent",
     elevated:
-      "border-white/[0.12] bg-[#161624]/85 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.85)] before:from-white/[0.09] before:to-transparent",
+      "border-white/[0.16] bg-[#171726]/68 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_22px_54px_-16px_rgba(0,0,0,0.85)] before:from-white/[0.12] before:via-white/[0.03] before:to-transparent",
     accent:
-      "border-primary/30 bg-gradient-to-b from-primary/[0.12] via-[#131122]/85 to-[#10101a]/85 shadow-[0_16px_44px_-12px_rgba(168,85,247,0.22)] before:from-primary/15 before:to-transparent",
+      "border-primary/35 bg-gradient-to-br from-primary/[0.16] via-[#151226]/72 to-[#10101c]/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_18px_46px_-14px_rgba(168,85,247,0.28)] before:from-primary/20 before:to-transparent",
     subtle:
-      "border-white/[0.06] bg-white/[0.025] shadow-lg before:from-white/[0.03] before:to-transparent",
+      "border-white/[0.08] bg-white/[0.035] shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_28px_-10px_rgba(0,0,0,0.6)] before:from-white/[0.05] before:to-transparent",
   }
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border p-6 backdrop-blur-xl",
-        "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-b",
-        "after:pointer-events-none after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-white/15 after:to-transparent",
+        "relative overflow-hidden rounded-2xl border p-6 backdrop-blur-2xl backdrop-saturate-[180%]",
+        "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-br",
+        "after:pointer-events-none after:absolute after:inset-x-4 after:top-0 after:h-px after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent",
         variants[variant],
         interactive &&
-          "transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_18px_45px_-12px_rgba(168,85,247,0.25)]",
+          "transition-[transform,border-color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-primary/45 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_22px_48px_-14px_rgba(168,85,247,0.3)]",
         className
       )}
       {...props}
