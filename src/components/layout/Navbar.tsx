@@ -16,7 +16,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
-  const { language, setLanguage, t } = useLanguage()
+  const { t } = useLanguage()
   const [scrolled, setScrolled] = useState(false)
   const [quickQuery, setQuickQuery] = useState("")
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -118,12 +118,12 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Right: Single Unified Search (hidden on Home & Search to avoid 2 search bars) + Language Switcher */}
-        <div className="flex items-center gap-2 shrink-0">
-          {!pageHasHeroSearch && (
+        {/* Right: Single Unified Search (hidden on Home & Search to avoid 2 search bars) */}
+        {!pageHasHeroSearch && (
+          <div className="hidden md:flex items-center shrink-0">
             <form
               onSubmit={handleQuickSearch}
-              className="hidden md:flex items-center gap-2 bg-black/30 hover:bg-black/40 focus-within:bg-black/50 border border-white/[0.1] focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20 rounded-xl px-2.5 h-9 w-48 focus-within:w-60 transition-[width,background-color,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+              className="flex items-center gap-2 bg-black/30 hover:bg-black/40 focus-within:bg-black/50 border border-white/[0.1] focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20 rounded-xl px-2.5 h-9 w-48 focus-within:w-60 transition-[width,background-color,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
             >
               <button
                 type="submit"
@@ -145,42 +145,8 @@ export function Navbar() {
                 ⌘K
               </kbd>
             </form>
-          )}
-
-          {/* Language Switcher */}
-          <div
-            className="flex items-center bg-black/30 border border-white/[0.1] rounded-xl p-0.5"
-            role="group"
-            aria-label="Idioma"
-          >
-            <button
-              type="button"
-              onClick={() => setLanguage("gl")}
-              aria-pressed={language === "gl"}
-              className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
-                language === "gl"
-                  ? "bg-primary/90 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-              title="Galego"
-            >
-              GL
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("pt")}
-              aria-pressed={language === "pt"}
-              className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
-                language === "pt"
-                  ? "bg-primary/90 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-              title="Português"
-            >
-              PT
-            </button>
           </div>
-        </div>
+        )}
       </div>
     </header>
   )

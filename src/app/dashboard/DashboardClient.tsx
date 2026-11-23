@@ -34,7 +34,7 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ user, stats, signOutAction }: DashboardClientProps) {
-  const { language, setLanguage, t } = useLanguage()
+  const { t } = useLanguage()
 
   const statusBadges: Record<string, { label: string; dot: string; color: string }> = {
     PLAYING: {
@@ -138,29 +138,6 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
             </div>
 
             <div className="flex items-center gap-2.5 flex-wrap">
-              <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setLanguage("gl")}
-                  aria-pressed={language === "gl"}
-                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
-                    language === "gl" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  GL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLanguage("pt")}
-                  aria-pressed={language === "pt"}
-                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
-                    language === "pt" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  PT
-                </button>
-              </div>
-
               <Link
                 href="/settings"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs font-sans border border-white/10 transition-colors"
