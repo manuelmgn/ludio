@@ -2,12 +2,11 @@
 
 import { useActionState } from "react"
 import Link from "next/link"
-import { Mail, Lock, AlertCircle } from "lucide-react"
+import { Gamepad2, User, Lock, AlertCircle } from "lucide-react"
 import { authenticate } from "../actions/login"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { LudioLogo } from "@/components/brand/LudioLogo"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function LoginPage() {
@@ -18,8 +17,13 @@ export default function LoginPage() {
     <div className="flex flex-1 items-center justify-center p-4">
       <GlassPanel variant="elevated" className="w-full max-w-md p-8 flex flex-col gap-6">
         <div className="text-center flex flex-col items-center">
-          <div className="mb-4">
-            <LudioLogo size="lg" />
+          <div className="inline-flex items-center gap-2.5 mb-4">
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-800 border border-purple-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.45)]">
+              <Gamepad2 className="w-5 h-5 text-white" aria-hidden="true" />
+            </span>
+            <span className="font-pixel text-4xl text-white tracking-widest drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]">
+              LUDIO
+            </span>
           </div>
           <h1 className="text-xl font-display font-semibold text-white">{t("login")}</h1>
           <p className="text-xs text-zinc-400 mt-1">{t("login_subtitle")}</p>
@@ -34,15 +38,15 @@ export default function LoginPage() {
 
         <form action={formAction} className="flex flex-col gap-4">
           <Input
-            id="login-email"
-            label={t("email_label")}
-            name="email"
-            type="email"
-            autoComplete="email"
+            id="login-username"
+            label={t("username_label")}
+            name="username"
+            type="text"
+            autoComplete="username"
             required
-            placeholder="gamer@ludio.app"
+            placeholder="pixel_warrior"
             disabled={isPending}
-            icon={<Mail className="w-4 h-4" aria-hidden="true" />}
+            icon={<User className="w-4 h-4" aria-hidden="true" />}
           />
 
           <Input

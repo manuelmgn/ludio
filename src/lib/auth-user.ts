@@ -8,13 +8,31 @@ import { prisma } from "@/lib/prisma"
  */
 export async function getAuthenticatedUser() {
   const session = await auth()
-  if (!session?.user?.email) {
+  if (!session?.user) {
     return null
   }
 
-  return prisma.user.findUnique({
-    where: { email: session.user.email },
-  })
+  if (session.user.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    })
+    if (user) return user
+  }
+
+  if (session.user.name) {
+    const user = await prisma.user.findUnique({
+      where: { username: session.user.name },
+    })
+    if (user) return user
+  }
+
+  if (session.user.email) {
+    return prisma.user.findUnique({
+      where: { email: session.user.email },
+    })
+  }
+
+  return null
 }
 
 /**
