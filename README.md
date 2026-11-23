@@ -65,6 +65,8 @@ Para construir y levantar todo el stack en producción:
 docker compose up -d --build
 ```
 
+La app en producción estará disponible en [http://localhost:5020](http://localhost:5020).
+
 Para ver los logs de inicialización o de la aplicación:
 
 ```bash
