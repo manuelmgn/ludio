@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+generated
+public/uploads/*
+!public/uploads/.gitkeep
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+README.md

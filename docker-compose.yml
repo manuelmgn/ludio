@@ -1,14 +1,53 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ludio_postgres
-    restart: always
+    container_name: ludio_postgres_prod
+    restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - "5432:5432"
     volumes:
       - ludio_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ludio-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: init
+    container_name: ludio_init
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: ludio_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ludio_uploads:/app/public/uploads
+    depends_on:
+      ludio-init:
+        condition: service_completed_successfully
 
 volumes:
   ludio_pgdata:
+  ludio_uploads:

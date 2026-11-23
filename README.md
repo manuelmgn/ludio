@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ludio
 
-## Getting Started
+Aplicación web construida con Next.js, Prisma 7, Auth.js y PostgreSQL.
 
-First, run the development server:
+## Requisitos previos
+
+- Node.js 22+ y npm
+- Docker y Docker Compose
+
+## Configuración inicial
+
+1. Copia la plantilla de variables de entorno y completa tus credenciales:
+
+```bash
+cp .env.example .env
+```
+
+Variables principales en `.env`:
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`
+- `AUTH_SECRET` (en producción genera uno aleatorio con `openssl rand -base64 32`)
+- `IGDB_CLIENT_ID` e `IGDB_CLIENT_SECRET` (credenciales de Twitch/IGDB para búsqueda de juegos)
+
+---
+
+## Desarrollo local (PostgreSQL en Docker + Next.js en local)
+
+1. Levanta solo la base de datos:
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+```
+
+2. Instala dependencias (ejecuta `prisma generate` automáticamente mediante `postinstall`):
+
+```bash
+npm install
+```
+
+3. Aplica las migraciones de base de datos:
+
+```bash
+npm run db:migrate
+```
+
+4. Arranca el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La app estará disponible en [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Producción con Docker
 
-## Learn More
+El archivo `docker-compose.yml` orquesta tres servicios:
+1. **`db`**: PostgreSQL 15 con `healthcheck`.
+2. **`ludio-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy`.
+3. **`app`**: Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `ludio-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `ludio_uploads`.
 
-To learn more about Next.js, take a look at the following resources:
+Para construir y levantar todo el stack en producción:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose up -d --build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Para ver los logs de inicialización o de la aplicación:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose logs -f ludio-init app
+```
