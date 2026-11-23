@@ -149,5 +149,17 @@
   "backup_title": "Copia de Seguridade & Exportación",
   "backup_desc": "Exporta toda a túa biblioteca, partidas, prezos e notas nun ficheiro JSON estándar.",
   "backup_btn": "Descargar Copia de Seguridade (JSON)",
-  "backup_exporting": "Xerando ficheiro..."
+  "backup_exporting": "Xerando ficheiro...",
+  "filter_type_label": "Tipo",
+  "filter_type_all": "Todos",
+  "filter_type_empty": "Non hai resultados deste tipo para esta busca.",
+  "filter_type_reset": "Mostrar todos os tipos",
+  "game_type_main": "Xogo",
+  "game_type_remake": "Remake",
+  "game_type_remaster": "Remaster",
+  "game_type_expansion": "Expansión",
+  "game_type_dlc": "DLC",
+  "game_type_bundle": "Bundle",
+  "game_type_port": "Port",
+  "game_type_mod": "Mod"
 }

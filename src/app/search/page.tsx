@@ -17,9 +17,15 @@ import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { searchGames, type SearchGameItem } from "@/lib/api/games"
+import { GAME_TYPE_ORDER, GAME_TYPE_STYLES, type GameType } from "@/lib/game-types"
 import { GameCard } from "@/components/ui/GameCard"
 
 type SortOption = "relevance" | "release_desc" | "release_asc" | "rating_desc" | "title_asc"
+type TypeFilterOption = "all" | GameType
+
+function isValidTypeFilter(value: string | null): value is TypeFilterOption {
+  return value === "all" || (value !== null && GAME_TYPE_ORDER.includes(value as GameType))
+}
 
 const ITEMS_PER_PAGE = 24
 
@@ -35,9 +41,12 @@ function SearchContent() {
   const router = useRouter()
   const initialQ = searchParams?.get("q") || ""
   const initialSort = (searchParams?.get("sort") as SortOption) || "relevance"
+  const rawInitialType = searchParams?.get("type") ?? null
+  const initialType: TypeFilterOption = isValidTypeFilter(rawInitialType) ? rawInitialType : "all"
 
   const [query, setQuery] = useState(initialQ)
   const [sortBy, setSortBy] = useState<SortOption>(initialSort)
+  const [typeFilter, setTypeFilter] = useState<TypeFilterOption>(initialType)
   const [currentPage, setCurrentPage] = useState(1)
   const [isPending, startTransition] = useTransition()
   const resultsRef = useRef<HTMLDivElement>(null)
@@ -125,6 +134,7 @@ function SearchContent() {
 
   const handleSearch = () => {
     if (query.trim().length >= 2) {
+      setTypeFilter("all")
       const params = new URLSearchParams()
       params.set("q", query.trim())
       if (sortBy !== "relevance") params.set("sort", sortBy)
@@ -139,8 +149,24 @@ function SearchContent() {
     }
   }
 
+  const typeCounts = useMemo(() => {
+    const counts = new Map<GameType, number>()
+    for (const item of state.results) {
+      if (item.gameType) {
+        counts.set(item.gameType, (counts.get(item.gameType) || 0) + 1)
+      }
+    }
+    return GAME_TYPE_ORDER.filter((type) => (counts.get(type) || 0) > 0).map((type) => ({
+      type,
+      count: counts.get(type) || 0,
+    }))
+  }, [state.results])
+
   const sortedGames = useMemo(() => {
-    const items = [...state.results]
+    const items =
+      typeFilter === "all"
+        ? [...state.results]
+        : state.results.filter((g) => g.gameType === typeFilter)
     switch (sortBy) {
       case "release_desc":
         return items.sort((a, b) => {
@@ -162,7 +188,7 @@ function SearchContent() {
       default:
         return items.sort((a, b) => b.relevanceScore - a.relevanceScore)
     }
-  }, [state.results, sortBy])
+  }, [state.results, sortBy, typeFilter])
 
   const totalPages = Math.ceil(sortedGames.length / ITEMS_PER_PAGE)
   const paginatedGames = useMemo(() => {
@@ -199,8 +225,8 @@ function SearchContent() {
         </p>
       </div>
 
-      {/* Search Input Bar */}
-      <GlassPanel variant="elevated" className="w-full max-w-2xl mb-8 p-2.5">
+      {/* Search Input Bar (Liquid Glass) */}
+      <div className="w-full max-w-2xl mb-8 p-2 rounded-2xl liquid-glass-pill focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-[border-color,box-shadow] duration-200">
         <div className="flex gap-2 items-center">
           <div className="flex-1 relative">
             <Input
@@ -212,14 +238,14 @@ function SearchContent() {
               disabled={isPending}
               autoFocus
               icon={<Search className="w-4 h-4" aria-hidden="true" />}
-              className="pr-9"
+              className="pr-9 bg-transparent border-transparent shadow-none focus:ring-0 focus:border-transparent focus:bg-transparent"
             />
             {query && !isPending && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Limpar busca"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-200 transition-colors cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
@@ -234,45 +260,98 @@ function SearchContent() {
             {isPending ? t("search_loading") : t("search")}
           </Button>
         </div>
-      </GlassPanel>
+      </div>
 
       {/* Sorting & Filter Bar */}
       {state.hasSearched && state.results.length > 0 && !isPending && (
         <div
           ref={resultsRef}
-          className="w-full max-w-6xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-white/[0.08]"
+          className="w-full max-w-6xl flex flex-col gap-3 mb-6 pb-4 border-b border-white/[0.08]"
         >
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-mono text-zinc-300 tabular-nums">
-              {state.results.length} {t("results_count")}
-            </span>
-            {totalPages > 1 && (
-              <span className="text-[11px] font-mono text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full tabular-nums">
-                Páxina {currentPage} {t("page_of")} {totalPages}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs font-mono text-zinc-300 tabular-nums">
+                {typeFilter === "all"
+                  ? `${state.results.length} ${t("results_count")}`
+                  : `${sortedGames.length} ${t("page_of")} ${state.results.length} ${t("results_count")}`}
               </span>
-            )}
+              {totalPages > 1 && (
+                <span className="text-[11px] font-mono text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full tabular-nums">
+                  Páxina {currentPage} {t("page_of")} {totalPages}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-zinc-500 font-sans mr-1">{t("sort_by")}:</span>
+              {sortButtons.map((btn) => (
+                <button
+                  key={btn.id}
+                  type="button"
+                  onClick={() => {
+                    setSortBy(btn.id)
+                    setCurrentPage(1)
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                    sortBy === btn.id
+                      ? "bg-primary text-white border-purple-400/40 shadow-[0_2px_12px_rgba(168,85,247,0.4)] font-medium"
+                      : "bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.09]"
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs text-zinc-500 font-sans mr-1">{t("sort_by")}:</span>
-            {sortButtons.map((btn) => (
+          {/* Game Type Filter Pills */}
+          {typeCounts.length > 1 && (
+            <div className="flex items-center gap-1.5 flex-wrap pt-1">
+              <span className="text-xs text-zinc-500 font-sans mr-1">
+                {t("filter_type_label")}:
+              </span>
               <button
-                key={btn.id}
                 type="button"
                 onClick={() => {
-                  setSortBy(btn.id)
+                  setTypeFilter("all")
                   setCurrentPage(1)
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
-                  sortBy === btn.id
-                    ? "bg-primary text-white border-purple-400/40 shadow-[0_2px_12px_rgba(168,85,247,0.4)] font-medium"
-                    : "bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.09]"
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                  typeFilter === "all"
+                    ? "bg-white/15 text-white border-white/25 font-medium"
+                    : "bg-white/[0.03] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.08]"
                 }`}
               >
-                {btn.label}
+                <span>{t("filter_type_all")}</span>
+                <span className="text-[10px] font-mono opacity-75 tabular-nums">
+                  {state.results.length}
+                </span>
               </button>
-            ))}
-          </div>
+
+              {typeCounts.map(({ type, count }) => {
+                const style = GAME_TYPE_STYLES[type]
+                const isActive = typeFilter === type
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setTypeFilter(isActive ? "all" : type)
+                      setCurrentPage(1)
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                      isActive
+                        ? `${style.activePillClass} font-medium`
+                        : "bg-white/[0.03] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    <span>{t(style.i18nKey)}</span>
+                    <span className="text-[10px] font-mono opacity-75 tabular-nums">{count}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -337,6 +416,7 @@ function SearchContent() {
                     type="button"
                     onClick={() => {
                       setQuery(term)
+                      setTypeFilter("all")
                       const params = new URLSearchParams()
                       params.set("q", term)
                       router.replace(`/search?${params.toString()}`)
@@ -370,6 +450,7 @@ function SearchContent() {
                   type="button"
                   onClick={() => {
                     setQuery(popular)
+                    setTypeFilter("all")
                     const params = new URLSearchParams()
                     params.set("q", popular)
                     router.replace(`/search?${params.toString()}`)
@@ -385,6 +466,30 @@ function SearchContent() {
         </div>
       )}
 
+      {/* Empty Filtered Results */}
+      {state.hasSearched &&
+        state.results.length > 0 &&
+        sortedGames.length === 0 &&
+        state.error === null &&
+        !isPending && (
+          <GlassPanel className="max-w-md w-full text-center py-10 px-6 flex flex-col items-center gap-3">
+            <p className="text-zinc-200 font-display font-medium text-sm">
+              {t("filter_type_empty")}
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setTypeFilter("all")
+                setCurrentPage(1)
+              }}
+              className="text-xs px-4 py-2"
+            >
+              {t("filter_type_reset")}
+            </Button>
+          </GlassPanel>
+        )}
+
       {/* Game Cards Grid */}
       {paginatedGames.length > 0 && !isPending && (
         <>
@@ -397,6 +502,7 @@ function SearchContent() {
                 coverUrl={game.coverUrl}
                 releaseYear={game.releaseYear}
                 rating={game.rating}
+                gameType={game.gameType}
               />
             ))}
           </div>

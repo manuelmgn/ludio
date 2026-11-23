@@ -149,5 +149,17 @@
   "backup_title": "Cópia de Segurança & Exportação",
   "backup_desc": "Exporta toda a tua biblioteca, sessões, preços e notas num ficheiro JSON padrão.",
   "backup_btn": "Transferir Cópia de Segurança (JSON)",
-  "backup_exporting": "A gerar ficheiro..."
+  "backup_exporting": "A gerar ficheiro...",
+  "filter_type_label": "Tipo",
+  "filter_type_all": "Todos",
+  "filter_type_empty": "Não há resultados deste tipo para esta pesquisa.",
+  "filter_type_reset": "Mostrar todos os tipos",
+  "game_type_main": "Jogo",
+  "game_type_remake": "Remake",
+  "game_type_remaster": "Remaster",
+  "game_type_expansion": "Expansão",
+  "game_type_dlc": "DLC",
+  "game_type_bundle": "Bundle",
+  "game_type_port": "Port",
+  "game_type_mod": "Mod"
 }

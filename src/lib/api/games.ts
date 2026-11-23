@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { mapIGDBGameType, type GameType } from "@/lib/game-types"
 
 export interface SearchGameItem {
   id: string
@@ -11,6 +12,7 @@ export interface SearchGameItem {
   rating: number | null
   totalRatingCount: number | null
   relevanceScore: number
+  gameType: GameType | null
 }
 
 interface SearchSuccess {
@@ -25,16 +27,25 @@ interface SearchError {
 
 export type SearchResult = SearchSuccess | SearchError
 
+interface IGDBAlternativeName {
+  id?: number
+  name?: string
+}
+
 interface IGDBGame {
   id: number
   name: string
+  alternative_names?: IGDBAlternativeName[]
   cover?: {
     id: number
     url: string
   }
   total_rating_count?: number
+  total_rating?: number
   rating?: number
-  category?: number
+  hypes?: number
+  game_type?: number
+  version_parent?: number
   first_release_date?: number
 }
 
@@ -76,6 +87,9 @@ function normalizeText(text: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
 }
 
@@ -97,52 +111,186 @@ function getQueryVariants(query: string): string[] {
   return Array.from(variants).filter((v) => v.length >= 2)
 }
 
-function calculateRelevanceScore(game: IGDBGame, query: string): number {
+interface TextMatchResult {
+  score: number
+  strong: boolean
+  isExact: boolean
+}
+
+function matchesAcronym(textNorm: string, qCompact: string): boolean {
+  if (qCompact.length < 2 || qCompact.length > 6 || !/^[a-z0-9]+$/.test(qCompact)) {
+    return false
+  }
+  const words = textNorm.split(" ").filter(Boolean)
+  if (words.length < qCompact.length) return false
+  const initials = words.map((w) => w[0]).join("")
+  return initials.includes(qCompact)
+}
+
+function scoreTextMatch(
+  textNorm: string,
+  qNorm: string,
+  qWords: string[],
+  qCompact: string
+): TextMatchResult {
+  if (!textNorm || !qNorm) {
+    return { score: 0, strong: false, isExact: false }
+  }
+
+  const padded = ` ${textNorm} `
+  const tWords = textNorm.split(" ").filter(Boolean)
+
+  // 1. Exact match
+  if (textNorm === qNorm) {
+    return { score: 1000, strong: true, isExact: true }
+  }
+
+  // 2. Contiguous whole-word phrase match (e.g. "zelda" in "The Legend of Zelda: ...")
+  if (padded.includes(` ${qNorm} `)) {
+    const startsBonus = textNorm.startsWith(`${qNorm} `) ? 120 : 0
+    return { score: 1000 + startsBonus, strong: true, isExact: false }
+  }
+
+  // 3. All query words appear as whole words (e.g. "zelda ocarina")
+  if (qWords.length > 1 && qWords.every((w) => padded.includes(` ${w} `))) {
+    return { score: 950, strong: true, isExact: false }
+  }
+
+  // 4. All query words match word prefixes (e.g. "zeld" -> "Zelda", "poke" -> "Pokémon")
+  if (qWords.length > 0 && qWords.every((w) => tWords.some((tw) => tw.startsWith(w)))) {
+    const startsBonus = textNorm.startsWith(qNorm) ? 80 : 0
+    return { score: 820 + startsBonus, strong: true, isExact: false }
+  }
+
+  // 5. Acronym match (e.g. "gta" -> "Grand Theft Auto", "botw" -> "Breath of the Wild")
+  if (matchesAcronym(textNorm, qCompact)) {
+    return { score: 900, strong: true, isExact: false }
+  }
+
+  // 6. Partial word-prefix coverage for multi-word queries
+  if (qWords.length > 1) {
+    const matched = qWords.filter((w) => tWords.some((tw) => tw.startsWith(w))).length
+    if (matched > 0) {
+      const ratio = matched / qWords.length
+      return { score: Math.round(ratio * 600), strong: ratio >= 0.5, isExact: false }
+    }
+  }
+
+  return { score: 0, strong: false, isExact: false }
+}
+
+function evaluateGameRelevance(
+  game: IGDBGame,
+  query: string,
+  fromSearchEndpoint: boolean
+): { keep: boolean; score: number } {
   const qNorm = normalizeText(query)
-  const titleNorm = normalizeText(game.name)
-  const qWords = qNorm.split(/\s+/).filter(Boolean)
+  const qWords = qNorm.split(" ").filter(Boolean)
+  const qCompact = qNorm.replace(/\s+/g, "")
 
-  let score = 0
+  const titleNorm = normalizeText(game.name || "")
+  const titleMatch = scoreTextMatch(titleNorm, qNorm, qWords, qCompact)
 
-  // 1. Exact title match
-  if (titleNorm === qNorm) {
-    score += 5000
-  } else if (titleNorm.startsWith(qNorm + " ") || titleNorm.startsWith(qNorm + ":")) {
-    score += 3000
-  } else if (titleNorm.startsWith(qNorm)) {
-    score += 2500
-  } else if (titleNorm.includes(qNorm)) {
-    score += 1200
+  let bestAltMatch: TextMatchResult = { score: 0, strong: false, isExact: false }
+  for (const alt of game.alternative_names ?? []) {
+    if (!alt?.name) continue
+    const altNorm = normalizeText(alt.name)
+    const m = scoreTextMatch(altNorm, qNorm, qWords, qCompact)
+    if (
+      m.score > bestAltMatch.score ||
+      (m.score === bestAltMatch.score && m.isExact && !bestAltMatch.isExact)
+    ) {
+      bestAltMatch = m
+    }
   }
 
-  // 2. Word-level token coverage
-  if (qWords.length > 0) {
-    const matchedWords = qWords.filter((w) => titleNorm.includes(w)).length
-    score += Math.round((matchedWords / qWords.length) * 1200)
+  const hasStrongMatch = titleMatch.strong || bestAltMatch.strong
+  // Filter out mid-word substring false positives (e.g. "gta" inside "Eggtastic" or "Ragtag")
+  if (!hasStrongMatch && !fromSearchEndpoint) {
+    return { keep: false, score: -1 }
   }
 
-  // 3. Category weighting
-  // 0: Main Game, 8: Remake, 9: Remaster, 10: Expanded, 11: Port, 2: Expansion, 5: Mod
-  if (game.category === 0) {
-    score += 500 // Official main game
-  } else if (game.category === 8 || game.category === 9) {
-    score += 400 // Official remake/remaster
-  } else if (game.category === 10 || game.category === 11 || game.category === 2) {
-    score += 250 // Port, expanded, expansion
-  } else if (game.category === 5) {
-    score -= 500 // Heavily demote fan mods/hacks
-  }
-
-  // 4. Popularity boost based on total rating count
   const ratingCount = game.total_rating_count || 0
-  score += Math.min(Math.round(ratingCount * 2.5), 1500)
+  const hypes = game.hypes || 0
+  const effectivePop = ratingCount + hypes * 0.5
 
-  // 5. Critic/User Rating boost
-  if (game.rating) {
-    score += Math.round(game.rating)
+  // 1. Text match score (title or alternative name / acronym)
+  let textScore = 0
+  if (titleMatch.score >= bestAltMatch.score) {
+    textScore = titleMatch.score
+    if (titleMatch.isExact) {
+      // Exact title boost scales down for obscure 0-rating entries (e.g. 1989 Game & Watch "Zelda")
+      textScore += effectivePop >= 10 ? 450 : 120
+    }
+  } else {
+    // Alternative name matched better (e.g. "GTA V" for "Grand Theft Auto V")
+    textScore = Math.max(0, bestAltMatch.score - 40)
+    if (bestAltMatch.isExact) {
+      textScore += effectivePop >= 10 ? 350 : 80
+    }
   }
 
-  return score
+  if (textScore === 0 && fromSearchEndpoint) {
+    textScore = 350
+  }
+
+  // 2. Logarithmic popularity score (total_rating_count + hypes for upcoming games like GTA VI)
+  const popScore = Math.round(Math.log10(1 + effectivePop) * 450)
+
+  // 3. Confidence-weighted critic/user rating boost
+  const ratingVal = game.total_rating ?? game.rating ?? 0
+  const ratingConfidence = Math.min(ratingCount / 10, 1)
+  const ratingScore = Math.round(ratingVal * 2.5 * ratingConfidence)
+
+  // 4. IGDB game_type weighting (replaces deprecated `category`)
+  // 0: Main Game, 8: Remake, 9: Remaster, 4: Standalone Expansion, 10: Expanded Game,
+  // 2: Expansion, 11: Port, 6: Episode, 1: DLC, 3: Bundle, 7: Season, 13: Pack, 14: Update,
+  // 12: Fork, 5: Mod
+  let typeScore = 0
+  switch (game.game_type) {
+    case 0:
+      typeScore = 450
+      break
+    case 8:
+    case 9:
+      typeScore = 350
+      break
+    case 4:
+    case 10:
+      typeScore = 280
+      break
+    case 2:
+    case 11:
+    case 6:
+      typeScore = 100
+      break
+    case 1:
+    case 3:
+    case 7:
+    case 13:
+    case 14:
+      typeScore = -150
+      break
+    case 12:
+      typeScore = -300
+      break
+    case 5:
+      typeScore = -900
+      break
+    default:
+      typeScore = 0
+  }
+
+  // 5. Demote special/collector/bundle editions below their parent base game
+  const versionPenalty = game.version_parent ? -350 : 0
+
+  // 6. Slightly demote entries without cover art (often stubs or fan placeholders)
+  const coverPenalty = game.cover?.url ? 0 : -150
+
+  return {
+    keep: true,
+    score: textScore + popScore + ratingScore + typeScore + versionPenalty + coverPenalty,
+  }
 }
 
 export async function searchGames(query: string): Promise<SearchResult> {
@@ -158,6 +306,9 @@ export async function searchGames(query: string): Promise<SearchResult> {
 
     // Parallel IGDB requests with up to 150 entries each
     const cleanSearchQuery = trimmed.replace(/["\\]/g, "")
+    const igdbFields =
+      "fields name, alternative_names.name, cover.url, total_rating_count, total_rating, rating, hypes, game_type, version_parent, first_release_date;"
+
     const searchPromise = fetch("https://api.igdb.com/v4/games", {
       method: "POST",
       headers: {
@@ -165,14 +316,17 @@ export async function searchGames(query: string): Promise<SearchResult> {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
-      body: `search "${cleanSearchQuery}"; fields name, cover.url, total_rating_count, rating, category, first_release_date; limit 150;`,
+      body: `search "${cleanSearchQuery}"; ${igdbFields} limit 150;`,
     }).then(async (r) => {
       if (!r.ok) return []
       return (await r.json()) as IGDBGame[]
     }).catch(() => [] as IGDBGame[])
 
     const whereConditions = variants
-      .map((v) => `name ~ *"${v.replace(/["\\]/g, "")}"*`)
+      .map((v) => {
+        const clean = v.replace(/["\\]/g, "")
+        return `name ~ *"${clean}"* | alternative_names.name ~ *"${clean}"*`
+      })
       .join(" | ")
 
     const popularityPromise = fetch("https://api.igdb.com/v4/games", {
@@ -182,13 +336,18 @@ export async function searchGames(query: string): Promise<SearchResult> {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
-      body: `fields name, cover.url, total_rating_count, rating, category, first_release_date; where ${whereConditions}; sort total_rating_count desc; limit 150;`,
+      body: `${igdbFields} where (${whereConditions}); sort total_rating_count desc; limit 150;`,
     }).then(async (r) => {
       if (!r.ok) return []
       return (await r.json()) as IGDBGame[]
     }).catch(() => [] as IGDBGame[])
 
     const [searchRes, popularityRes] = await Promise.all([searchPromise, popularityPromise])
+
+    const searchIds = new Set<number>()
+    for (const g of searchRes) {
+      if (g.id) searchIds.add(g.id)
+    }
 
     // Merge without duplicates by ID
     const gameMap = new Map<number, IGDBGame>()
@@ -224,16 +383,27 @@ export async function searchGames(query: string): Promise<SearchResult> {
         rating: g.igdbRating ?? null,
         totalRatingCount: null,
         relevanceScore: 100,
+        gameType: null,
       }))
 
       return { success: true, data: formattedLocal }
     }
 
+    // Evaluate relevance and filter out mid-word substring noise (e.g. "gta" inside "Eggtastic")
+    const evaluatedGames = allGames.map((igdbGame) => ({
+      igdbGame,
+      evalResult: evaluateGameRelevance(igdbGame, trimmed, searchIds.has(igdbGame.id)),
+    }))
+
+    const keptGames = evaluatedGames.filter((entry) => entry.evalResult.keep)
+    const finalPool = keptGames.length > 0 ? keptGames : evaluatedGames
+
     // Map each game to SearchGameItem with calculated relevance score and release date
-    const formattedGames: SearchGameItem[] = allGames.map((igdbGame) => {
+    const formattedGames: SearchGameItem[] = finalPool.map(({ igdbGame, evalResult }) => {
       const releaseDate = igdbGame.first_release_date
         ? new Date(igdbGame.first_release_date * 1000)
         : null
+      const rawRating = igdbGame.total_rating ?? igdbGame.rating
 
       return {
         id: igdbGame.id.toString(),
@@ -243,9 +413,10 @@ export async function searchGames(query: string): Promise<SearchResult> {
           : null,
         firstReleaseDate: releaseDate ? releaseDate.toISOString() : null,
         releaseYear: releaseDate ? releaseDate.getFullYear() : null,
-        rating: igdbGame.rating ? Math.round(igdbGame.rating) : null,
+        rating: rawRating ? Math.round(rawRating) : null,
         totalRatingCount: igdbGame.total_rating_count || 0,
-        relevanceScore: calculateRelevanceScore(igdbGame, trimmed),
+        relevanceScore: evalResult.score,
+        gameType: mapIGDBGameType(igdbGame.game_type),
       }
     })
 
@@ -302,6 +473,7 @@ export async function searchGames(query: string): Promise<SearchResult> {
         rating: g.igdbRating ?? null,
         totalRatingCount: null,
         relevanceScore: 100,
+        gameType: null,
       }))
 
       return { success: true, data: formattedLocal }

@@ -5,6 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { Gamepad2, Star } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { GAME_TYPE_STYLES, type GameType } from "@/lib/game-types"
 
 export interface GameCardProps {
   id: string
@@ -13,6 +15,7 @@ export interface GameCardProps {
   firstReleaseDate?: Date | string | null
   releaseYear?: number | null
   rating?: number | null
+  gameType?: GameType | null
 }
 
 export function GameCard({
@@ -22,10 +25,13 @@ export function GameCard({
   firstReleaseDate,
   releaseYear,
   rating,
+  gameType,
 }: GameCardProps) {
+  const { t } = useLanguage()
   const [imgError, setImgError] = useState(false)
 
   const year = releaseYear ?? (firstReleaseDate ? new Date(firstReleaseDate).getFullYear() : null)
+  const typeStyle = gameType ? GAME_TYPE_STYLES[gameType] : null
 
   return (
     <Link href={`/games/${id}`} className="block w-full group">
@@ -33,7 +39,7 @@ export function GameCard({
         interactive
         className="flex flex-col gap-2.5 p-2.5 overflow-hidden h-full"
       >
-        <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative ring-1 ring-white/[0.06]">
+        <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative ring-1 ring-white/[0.08]">
           {coverUrl && !imgError ? (
             <>
               <Image
@@ -41,7 +47,7 @@ export function GameCard({
                 alt={title}
                 fill
                 unoptimized
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
                 onError={() => setImgError(true)}
               />
               <div
@@ -60,16 +66,25 @@ export function GameCard({
 
           {/* Release Year Badge */}
           {year && (
-            <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono font-medium text-zinc-200 border border-white/10">
+            <div className="absolute top-2 left-2 bg-black/65 backdrop-blur-xl px-2 py-0.5 rounded-md text-[10px] font-mono font-medium text-zinc-100 border border-white/15">
               {year}
             </div>
           )}
 
           {/* Rating Badge */}
           {rating !== null && rating !== undefined && (
-            <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium text-amber-300 border border-amber-400/20 flex items-center gap-1">
+            <div className="absolute top-2 right-2 bg-black/65 backdrop-blur-xl px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium text-amber-300 border border-amber-400/25 flex items-center gap-1">
               <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
               <span>{Math.round(rating)}</span>
+            </div>
+          )}
+
+          {/* Game Type Badge */}
+          {typeStyle && gameType !== "main" && (
+            <div
+              className={`absolute bottom-2 left-2 backdrop-blur-xl px-2 py-0.5 rounded-md text-[10px] font-mono font-medium border ${typeStyle.badgeClass}`}
+            >
+              {t(typeStyle.i18nKey) || gameType}
             </div>
           )}
         </div>
