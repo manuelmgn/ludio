@@ -1,10 +1,29 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
+import {
+  Settings,
+  Globe,
+  Gamepad2,
+  Store,
+  Download,
+  Check,
+  X,
+  Plus,
+} from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
-import { addCustomPlatform, getCustomPlatforms, deleteCustomPlatform, getStores, addStore, deleteStore, exportUserData } from "@/lib/actions/settings"
+import { Button } from "@/components/ui/Button"
+import {
+  addCustomPlatform,
+  getCustomPlatforms,
+  deleteCustomPlatform,
+  getStores,
+  addStore,
+  deleteStore,
+  exportUserData,
+} from "@/lib/actions/settings"
 
 interface CustomPlatform {
   id: string
@@ -27,14 +46,12 @@ export default function SettingsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // Stores state
   const [storeName, setStoreName] = useState("")
   const [storesList, setStoresList] = useState<StoreItem[]>([])
   const [isStorePending, startStoreTransition] = useTransition()
   const [deletingStoreId, setDeletingStoreId] = useState<string | null>(null)
   const [storeMessage, setStoreMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // Export state
   const [isExporting, setIsExporting] = useState(false)
 
   const handleExportData = async () => {
@@ -147,64 +164,74 @@ export default function SettingsPage() {
   const customStores = storesList.filter((s) => !s.isDefault)
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
-      {/* Background decoration */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-1/3 right-1/4 w-[500px] h-[500px] bg-blue-900/15 rounded-full blur-[140px] -z-10" />
+    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
+      <div className="w-full max-w-3xl flex flex-col gap-6">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
+            <Settings className="w-5 h-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 className="text-3xl font-display font-bold text-white tracking-tight">
+              {t("settings")}
+            </h1>
+            <p className="text-xs text-zinc-400 font-sans">
+              Personaliza idioma, plataformas, tendas e copias de seguridade.
+            </p>
+          </div>
+        </div>
 
-      <h1 className="text-4xl font-pixel text-white mb-8 tracking-wider mt-6 flex items-center gap-3">
-        <span>⚙️</span>
-        <span>{t("settings")}</span>
-      </h1>
-
-      <div className="w-full max-w-2xl flex flex-col gap-6">
-        
         {/* Section 1: Language */}
         <GlassPanel>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">🌐</span>
-            <h2 className="text-xl font-medium text-white font-sans">{t("language")}</h2>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Globe className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">{t("language")}</h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mb-4">
             Selecciona o idioma principal da interface.
           </p>
-          <div className="flex gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <button
+              type="button"
               onClick={() => setLanguage("gl")}
-              className={`flex-1 py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+              aria-pressed={language === "gl"}
+              className={`py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer border ${
                 language === "gl"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_15px_rgba(157,0,255,0.4)]"
-                  : "bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10 hover:text-white"
+                  ? "bg-primary/20 text-white border-primary/60 shadow-[0_0_20px_rgba(168,85,247,0.28)]"
+                  : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:bg-white/[0.08] hover:text-white"
               }`}
             >
               <span>Galego</span>
-              {language === "gl" && <span>✓</span>}
+              {language === "gl" && <Check className="w-4 h-4 text-primary-hover" aria-hidden="true" />}
             </button>
             <button
+              type="button"
               onClick={() => setLanguage("pt")}
-              className={`flex-1 py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+              aria-pressed={language === "pt"}
+              className={`py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer border ${
                 language === "pt"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_15px_rgba(157,0,255,0.4)]"
-                  : "bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10 hover:text-white"
+                  ? "bg-primary/20 text-white border-primary/60 shadow-[0_0_20px_rgba(168,85,247,0.28)]"
+                  : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:bg-white/[0.08] hover:text-white"
               }`}
             >
               <span>Português</span>
-              {language === "pt" && <span>✓</span>}
+              {language === "pt" && <Check className="w-4 h-4 text-primary-hover" aria-hidden="true" />}
             </button>
           </div>
         </GlassPanel>
 
         {/* Section 2: Custom Platforms */}
         <GlassPanel>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">🎮</span>
-            <h2 className="text-xl font-medium text-white font-sans">{t("custom_platforms_title")}</h2>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Gamepad2 className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">
+              {t("custom_platforms_title")}
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
             {t("custom_platforms_desc")}
           </p>
 
-          <form onSubmit={handleAddPlatform} className="flex gap-2 mb-6 items-end">
+          <form onSubmit={handleAddPlatform} className="flex gap-2 mb-5 items-end">
             <div className="flex-1">
               <Input
                 value={platformName}
@@ -213,24 +240,28 @@ export default function SettingsPage() {
                 disabled={isPending}
               />
             </div>
-            <button
+            <Button
               type="submit"
               disabled={isPending || platformName.trim().length === 0}
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
+              className="h-[42px] shrink-0"
             >
-              {isPending ? t("saving") : t("add_platform_btn")}
-            </button>
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              <span>{isPending ? t("saving") : t("add_platform_btn")}</span>
+            </Button>
           </form>
 
           {message && (
-            <p className={`mb-4 text-xs ${message.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+            <p
+              className={`mb-4 text-xs font-mono ${
+                message.type === "success" ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
               {message.text}
             </p>
           )}
 
-          {/* Platforms List */}
-          <div className="pt-4 border-t border-white/10">
-            <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+          <div className="pt-4 border-t border-white/[0.08]">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
               As túas plataformas activas ({platforms.length})
             </span>
 
@@ -239,39 +270,37 @@ export default function SettingsPage() {
                 {platforms.map((p) => (
                   <div
                     key={p.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-sans text-zinc-200"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
                   >
                     <span>{p.name}</span>
                     <button
+                      type="button"
                       onClick={() => handleDeletePlatform(p.id)}
                       disabled={deletingId === p.id}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors ml-1"
+                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
                       title={t("delete")}
+                      aria-label={`${t("delete")} ${p.name}`}
                     >
-                      {deletingId === p.id ? "..." : "✕"}
+                      {deletingId === p.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-zinc-500 italic">
-                {t("no_custom_platforms")}
-              </p>
+              <p className="text-xs text-zinc-500 italic">{t("no_custom_platforms")}</p>
             )}
           </div>
         </GlassPanel>
 
-        {/* Section 3: Stores (Tiendas) */}
+        {/* Section 3: Stores */}
         <GlassPanel>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">🏪</span>
-            <h2 className="text-xl font-medium text-white font-sans">{t("stores_title")}</h2>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Store className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">{t("stores_title")}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
-            {t("stores_desc")}
-          </p>
+          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">{t("stores_desc")}</p>
 
-          <form onSubmit={handleAddStore} className="flex gap-2 mb-6 items-end">
+          <form onSubmit={handleAddStore} className="flex gap-2 mb-5 items-end">
             <div className="flex-1">
               <Input
                 value={storeName}
@@ -280,24 +309,28 @@ export default function SettingsPage() {
                 disabled={isStorePending}
               />
             </div>
-            <button
+            <Button
               type="submit"
               disabled={isStorePending || storeName.trim().length === 0}
-              className="rounded-xl bg-primary px-5 py-2.5 text-sm text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
+              className="h-[42px] shrink-0"
             >
-              {isStorePending ? t("saving") : t("add_store_btn")}
-            </button>
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              <span>{isStorePending ? t("saving") : t("add_store_btn")}</span>
+            </Button>
           </form>
 
           {storeMessage && (
-            <p className={`mb-4 text-xs ${storeMessage.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+            <p
+              className={`mb-4 text-xs font-mono ${
+                storeMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
               {storeMessage.text}
             </p>
           )}
 
-          {/* Default Stores */}
-          <div className="pt-4 border-t border-white/10">
-            <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+          <div className="pt-4 border-t border-white/[0.08]">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
               {t("stores_default_label")} ({defaultStores.length})
             </span>
             {defaultStores.length > 0 ? (
@@ -305,39 +338,38 @@ export default function SettingsPage() {
                 {defaultStores.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs font-sans text-zinc-200"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/[0.07] border border-amber-500/20 text-xs font-sans text-zinc-200"
                   >
                     <span>{s.name}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-zinc-500 italic mb-4">
-                {t("no_stores")}
-              </p>
+              <p className="text-xs text-zinc-500 italic mb-4">{t("no_stores")}</p>
             )}
           </div>
 
-          {/* Custom Stores */}
           {customStores.length > 0 && (
-            <div className="pt-3 border-t border-white/10">
-              <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+            <div className="pt-3 border-t border-white/[0.08]">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
                 {t("stores_custom_label")} ({customStores.length})
               </span>
               <div className="flex flex-wrap gap-2">
                 {customStores.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-sans text-zinc-200"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
                   >
                     <span>{s.name}</span>
                     <button
+                      type="button"
                       onClick={() => handleDeleteStore(s.id)}
                       disabled={deletingStoreId === s.id}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors ml-1"
+                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
                       title={t("delete")}
+                      aria-label={`${t("delete")} ${s.name}`}
                     >
-                      {deletingStoreId === s.id ? "..." : "✕"}
+                      {deletingStoreId === s.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
                     </button>
                   </div>
                 ))}
@@ -347,25 +379,32 @@ export default function SettingsPage() {
         </GlassPanel>
 
         {/* Section 4: Data Export / Backup */}
-        <GlassPanel>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">💾</span>
-            <h2 className="text-xl font-medium text-white font-sans">{t("backup_title") || "Copia de Seguridade"}</h2>
+        <GlassPanel variant="accent">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Download className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">
+              {t("backup_title") || "Copia de Seguridade"}
+            </h2>
           </div>
-          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
-            {t("backup_desc") || "Exporta toda a túa biblioteca, partidas, prezos e notas nun ficheiro JSON estándar."}
+          <p className="text-xs text-zinc-300/80 mb-5 font-sans leading-relaxed">
+            {t("backup_desc") ||
+              "Exporta toda a túa biblioteca, partidas, prezos e notas nun ficheiro JSON estándar."}
           </p>
 
-          <button
+          <Button
+            type="button"
+            variant="glass"
             onClick={handleExportData}
             disabled={isExporting}
-            className="flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-3 text-sm text-white font-medium transition-all disabled:opacity-50"
           >
-            <span>📥</span>
-            <span>{isExporting ? (t("backup_exporting") || "Xerando...") : (t("backup_btn") || "Descargar Copia de Seguridade (JSON)")}</span>
-          </button>
+            <Download className="w-4 h-4 text-primary-hover" aria-hidden="true" />
+            <span>
+              {isExporting
+                ? t("backup_exporting") || "Xerando..."
+                : t("backup_btn") || "Descargar Copia de Seguridade (JSON)"}
+            </span>
+          </Button>
         </GlassPanel>
-
       </div>
     </div>
   )

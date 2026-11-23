@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import Link from "next/link"
+import { AlertTriangle, RotateCcw, Home } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
 
@@ -17,30 +18,36 @@ export default function GlobalError({
   }, [error])
 
   return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center p-4 relative">
-      <div className="fixed top-1/3 left-1/3 w-96 h-96 bg-rose-900/20 rounded-full blur-[140px] -z-10" />
-      <GlassPanel className="max-w-md w-full p-8 flex flex-col items-center text-center gap-4 border-rose-500/20 bg-rose-950/10">
-        <span className="text-4xl">💥</span>
-        <h1 className="text-2xl font-pixel text-white tracking-wider">
+    <div className="flex flex-1 flex-col items-center justify-center p-4">
+      <GlassPanel
+        variant="elevated"
+        className="max-w-md w-full p-8 flex flex-col items-center text-center gap-4 border-rose-500/25"
+      >
+        <span className="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+          <AlertTriangle className="w-7 h-7" aria-hidden="true" />
+        </span>
+        <h1 className="text-2xl font-display font-bold text-white tracking-tight">
           Algo fallou
         </h1>
-        <p className="text-sm font-sans text-zinc-300">
+        <p className="text-sm font-sans text-zinc-300 leading-relaxed">
           Produciuse un erro inesperado. Podes tentalo de novo ou volver ao inicio.
         </p>
         {error.message && (
-          <p className="text-xs font-mono text-rose-400 bg-rose-950/40 p-2.5 rounded-lg w-full break-all border border-rose-500/20">
+          <p className="text-xs font-mono text-rose-300 bg-rose-950/40 p-3 rounded-xl w-full break-all border border-rose-500/25">
             {error.message}
           </p>
         )}
-        <div className="flex items-center gap-3 mt-4">
+        <div className="flex items-center gap-3 mt-3">
           <Button onClick={() => reset()} variant="primary">
-            Tentar de novo
+            <RotateCcw className="w-4 h-4" aria-hidden="true" />
+            <span>Tentar de novo</span>
           </Button>
           <Link
             href="/"
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-sans transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] text-zinc-100 text-sm font-sans border border-white/10 transition-colors"
           >
-            Inicio
+            <Home className="w-4 h-4" aria-hidden="true" />
+            <span>Inicio</span>
           </Link>
         </div>
       </GlassPanel>

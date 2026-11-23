@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { Palette, Star, ArrowRight } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 import { GlassPanel } from "@/components/ui/GlassPanel"
@@ -30,13 +31,17 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
 
   if (!user) {
     return (
-      <div className="flex min-h-[70vh] flex-col items-center justify-center p-8">
-        <GlassPanel className="text-center max-w-md">
-          <p className="text-white font-sans text-sm mb-4">
+      <div className="flex flex-1 items-center justify-center p-8">
+        <GlassPanel className="text-center max-w-md flex flex-col items-center gap-4">
+          <p className="text-zinc-200 font-sans text-sm">
             Debes iniciar sesión para acceder ao Canvas.
           </p>
-          <Link href="/login" className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-sans">
-            Iniciar sesión →
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white text-xs font-medium font-sans"
+          >
+            <span>Iniciar sesión</span>
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </GlassPanel>
       </div>
@@ -49,7 +54,6 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
 
   if (!game) return notFound()
 
-  // Buscar o LibraryEntry para este usuario e este xogo
   const libraryEntry = await prisma.libraryEntry.findUnique({
     where: {
       userId_gameId: {
@@ -71,20 +75,23 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
 
   if (!libraryEntry) {
     return (
-      <div className="flex min-h-[70vh] flex-col items-center justify-center p-8 relative">
+      <div className="flex flex-1 items-center justify-center p-8">
         <GlassPanel className="text-center max-w-md p-8 flex flex-col items-center gap-3">
-          <span className="text-3xl">🎨</span>
-          <p className="text-white font-sans text-base">
+          <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
+            <Palette className="w-6 h-6" aria-hidden="true" />
+          </span>
+          <p className="text-white font-display font-semibold text-base">
             Non tes este xogo na túa biblioteca.
           </p>
-          <p className="text-zinc-400 text-xs font-sans">
+          <p className="text-zinc-400 text-xs font-sans leading-relaxed">
             Debes engadir o xogo primeiro para poder acceder ao seu caderno Canvas de notas e capturas.
           </p>
           <Link
             href={`/games/${gameId}`}
-            className="mt-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-medium font-sans transition-colors"
+            className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white text-xs font-medium font-sans transition-all"
           >
-            Ir á ficha do xogo →
+            <span>Ir á ficha do xogo</span>
+            <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </GlassPanel>
       </div>
@@ -96,34 +103,41 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
   const images = canvas?.images || []
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
-      <div className="fixed top-1/4 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-1/3 left-1/4 w-[500px] h-[500px] bg-blue-900/15 rounded-full blur-[140px] -z-10" />
+    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
+      <div className="w-full max-w-6xl flex flex-col items-center">
+        <div className="w-full flex flex-col items-start mb-6">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
+              <Palette className="w-5 h-5" aria-hidden="true" />
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
+              Canvas: {libraryEntry.game.title}
+            </h1>
+            {libraryEntry.game.firstReleaseDate && (
+              <span className="text-xs font-mono text-zinc-300 bg-white/[0.05] border border-white/10 px-2.5 py-0.5 rounded-full">
+                {libraryEntry.game.firstReleaseDate.getFullYear()}
+              </span>
+            )}
+            {libraryEntry.game.igdbRating !== null && (
+              <span className="inline-flex items-center gap-1 text-xs font-mono text-amber-300 bg-amber-950/40 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+                <span>{libraryEntry.game.igdbRating}</span>
+              </span>
+            )}
+          </div>
+          <p className="text-zinc-400 font-sans text-xs sm:text-sm mt-2">
+            Espazo libre para as túas estratexias, notas e galería de capturas.
+          </p>
+        </div>
 
-      <h1 className="text-4xl font-pixel text-white mb-2 tracking-wider mt-4 flex items-center gap-3 flex-wrap justify-center">
-        <span>Canvas: {libraryEntry.game.title}</span>
-        {libraryEntry.game.firstReleaseDate && (
-          <span className="text-sm font-mono text-zinc-300 bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
-            {libraryEntry.game.firstReleaseDate.getFullYear()}
-          </span>
-        )}
-        {libraryEntry.game.igdbRating !== null && (
-          <span className="text-sm font-mono text-amber-400 bg-amber-950/40 border border-amber-500/30 px-2.5 py-0.5 rounded-full">
-            ⭐ {libraryEntry.game.igdbRating}
-          </span>
-        )}
-      </h1>
-      <p className="text-zinc-400 font-sans text-xs mb-8">
-        Espazo libre para as túas estratexias, notas e galería de capturas.
-      </p>
-
-      <CanvasEditor 
-        libraryEntryId={libraryEntry.id}
-        gameId={libraryEntry.gameId}
-        gameTitle={libraryEntry.game.title}
-        initialContent={initialContent}
-        images={images}
-      />
+        <CanvasEditor
+          libraryEntryId={libraryEntry.id}
+          gameId={libraryEntry.gameId}
+          gameTitle={libraryEntry.game.title}
+          initialContent={initialContent}
+          images={images}
+        />
+      </div>
     </div>
   )
 }

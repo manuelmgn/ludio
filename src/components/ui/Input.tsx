@@ -12,13 +12,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label htmlFor={id} className="text-xs font-sans text-zinc-300 uppercase tracking-wider">
+          <label
+            htmlFor={id}
+            className="text-[11px] font-mono font-medium text-zinc-400 uppercase tracking-wider"
+          >
             {label}
           </label>
         )}
-        <div className="relative flex items-center w-full">
+        <div className="relative flex items-center w-full group">
           {icon && (
-            <div className="absolute left-3.5 text-zinc-500 pointer-events-none flex items-center">
+            <div className="absolute left-3.5 text-zinc-500 group-focus-within:text-primary-hover transition-colors pointer-events-none flex items-center">
               {icon}
             </div>
           )}
@@ -26,9 +29,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={id}
             ref={ref}
             className={cn(
-              "w-full rounded-xl border border-white/10 bg-black/40 px-4 py-2.5 text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans text-sm",
+              "w-full rounded-xl border border-white/10 bg-[#0b0b12]/80 px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none shadow-[inset_0_1px_2px_rgba(0,0,0,0.45)]",
+              "hover:border-white/20 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:bg-[#0d0d16] transition-all font-sans",
               icon && "pl-10",
-              error && "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/30",
+              error && "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/25",
               className
             )}
             {...props}

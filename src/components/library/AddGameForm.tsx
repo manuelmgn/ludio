@@ -2,8 +2,19 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import {
+  Gamepad2,
+  Euro,
+  ChevronDown,
+  ChevronRight,
+  Star,
+  TrendingDown,
+  TrendingUp,
+  Plus,
+} from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
+import { Select } from "@/components/ui/Select"
 import { addGameToLibrary } from "@/lib/actions/library"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -25,9 +36,9 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [showPricing, setShowPricing] = useState(false)
-
   const [status, setStatus] = useState<"WISHED" | PlaythroughStatus>("WISHED")
-  
+  const [selectedRating, setSelectedRating] = useState<number>(0)
+
   const isPlaythrough = status !== "WISHED"
   const isCompleted = status === "COMPLETED"
 
@@ -48,6 +59,14 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
 
   const allPlatforms = Array.from(new Set([...standardPlatforms, ...customPlatforms]))
 
+  const statusOptions: { id: "WISHED" | PlaythroughStatus; label: string; dot: string }[] = [
+    { id: "WISHED", label: t("filter_wish") || "Desexado", dot: "bg-purple-400" },
+    { id: "PLAYING", label: t("filter_playing") || "Xogando", dot: "bg-sky-400" },
+    { id: "COMPLETED", label: t("filter_completed") || "Completado", dot: "bg-emerald-400" },
+    { id: "ON_HOLD", label: t("filter_on_hold") || "En Pausa", dot: "bg-amber-400" },
+    { id: "ABANDONED", label: t("filter_abandoned") || "Abandonado", dot: "bg-rose-400" },
+  ]
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
@@ -56,10 +75,8 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
     const platform = formData.get("platform") as string
     const startDate = formData.get("startDate") as string
     const endDate = formData.get("endDate") as string
-    const ratingStr = formData.get("rating") as string
     const publicReview = formData.get("publicReview") as string
 
-    // Pricing fields
     const purchasePriceStr = formData.get("purchasePrice") as string
     const purchaseStoreId = formData.get("purchaseStoreId") as string
     const purchaseDate = formData.get("purchaseDate") as string
@@ -72,12 +89,12 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
       return
     }
 
-    if (isCompleted && !ratingStr) {
+    if (isCompleted && selectedRating === 0) {
       setError("Debes deixar unha valoración para un xogo completado.")
       return
     }
 
-    const rating = isCompleted && ratingStr ? parseInt(ratingStr, 10) : undefined
+    const rating = isCompleted && selectedRating > 0 ? selectedRating : undefined
     const purchasePrice = purchasePriceStr?.trim() ? parseFloat(purchasePriceStr) : undefined
     const salePrice = salePriceStr?.trim() ? parseFloat(salePriceStr) : undefined
 
@@ -105,84 +122,97 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
     })
   }
 
+  const inputClass =
+    "w-full rounded-xl border border-white/10 bg-[#0b0b12]/85 px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all font-sans"
+
   return (
-    <GlassPanel className="w-full flex flex-col gap-6">
-      <h2 className="text-xl font-pixel text-white flex items-center gap-2">
-        <span>🎮</span>
+    <GlassPanel className="w-full flex flex-col gap-5">
+      <h2 className="text-lg font-display font-semibold text-white flex items-center gap-2.5">
+        <Gamepad2 className="w-5 h-5 text-primary-hover" aria-hidden="true" />
         <span>{t("add_to_library")}</span>
       </h2>
-      
+
       {error && (
-        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-200 text-sm">
+        <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-200 text-xs">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {/* Visual Status Selector */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="status" className="text-white/70 font-sans text-sm">
+          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">
             {t("status_label")}
-          </label>
-          <select 
-            name="status" 
-            id="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as "WISHED" | PlaythroughStatus)}
-            disabled={isPending}
-            className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
-          >
-            <option value="WISHED">⭐ {t("filter_wish")}</option>
-            <option value="PLAYING">🕹️ {t("filter_playing")}</option>
-            <option value="COMPLETED">🏆 {t("filter_completed")}</option>
-            <option value="ON_HOLD">⏸️ {t("filter_on_hold")}</option>
-            <option value="ABANDONED">🛑 {t("filter_abandoned")}</option>
-          </select>
+          </span>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {statusOptions.map((opt) => {
+              const active = status === opt.id
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => setStatus(opt.id)}
+                  aria-pressed={active}
+                  className={`px-3 py-2 rounded-xl text-xs font-sans border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    active
+                      ? "bg-primary/20 text-white border-primary/60 shadow-[0_0_16px_rgba(168,85,247,0.25)] font-medium"
+                      : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:bg-white/[0.07] hover:text-zinc-200"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
+                  <span className="truncate">{opt.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {isPlaythrough && (
           <>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="platform" className="text-white/70 font-sans text-sm">
-                {t("platform_label")}
-              </label>
-              <select 
-                name="platform" 
-                id="platform"
-                disabled={isPending}
-                className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
-              >
-                <option value="">{t("select_platform") || "Selecciona Plataforma..."}</option>
-                {allPlatforms.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              name="platform"
+              id="platform"
+              label={t("platform_label")}
+              disabled={isPending}
+            >
+              <option value="">{t("select_platform") || "Selecciona Plataforma..."}</option>
+              {allPlatforms.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </Select>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 flex flex-col gap-2">
-                <label htmlFor="startDate" className="text-white/70 font-sans text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="startDate"
+                  className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider"
+                >
                   {t("start_date") || "Data de inicio (opcional)"}
                 </label>
-                <input 
-                  type="date" 
-                  name="startDate" 
+                <input
+                  type="date"
+                  name="startDate"
                   id="startDate"
                   disabled={isPending}
-                  className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
+                  className={inputClass}
                 />
               </div>
-              <div className="flex-1 flex flex-col gap-2">
-                <label htmlFor="endDate" className="text-white/70 font-sans text-sm">
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="endDate"
+                  className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider"
+                >
                   {t("end_date") || "Data de fin (opcional)"}
                 </label>
-                <input 
-                  type="date" 
-                  name="endDate" 
+                <input
+                  type="date"
+                  name="endDate"
                   id="endDate"
                   disabled={isPending}
-                  className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -191,26 +221,33 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
             <button
               type="button"
               onClick={() => setShowPricing(!showPricing)}
-              className="flex items-center gap-2 text-sm font-sans text-zinc-400 hover:text-white transition-colors self-start mt-1"
+              aria-expanded={showPricing}
+              className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-amber-300 transition-colors self-start py-1 cursor-pointer"
             >
-              <span className="text-base">{showPricing ? "▼" : "▶"}</span>
-              <span>💶 {t("pricing_toggle")}</span>
+              {showPricing ? (
+                <ChevronDown className="w-4 h-4" aria-hidden="true" />
+              ) : (
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
+              )}
+              <Euro className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+              <span>{t("pricing_toggle")}</span>
             </button>
 
             {showPricing && (
-              <div className="p-4 border border-amber-500/20 bg-amber-500/5 rounded-xl flex flex-col gap-4 animate-in fade-in duration-200">
-                <span className="text-xs font-mono uppercase tracking-wider text-amber-400/80">
+              <div className="p-4 border border-amber-500/20 bg-amber-500/[0.04] rounded-2xl flex flex-col gap-4">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300">
                   {t("pricing_section_title")}
                 </span>
 
-                {/* Purchase section */}
-                <div className="flex flex-col gap-3">
-                  <span className="text-xs font-sans text-zinc-400 flex items-center gap-1.5">
-                    <span>💸</span> {t("purchase_label")}
+                {/* Purchase */}
+                <div className="flex flex-col gap-2.5">
+                  <span className="text-xs font-sans text-zinc-300 flex items-center gap-1.5">
+                    <TrendingDown className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
+                    <span>{t("purchase_label")}</span>
                   </span>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="purchasePrice" className="text-white/50 font-sans text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="purchasePrice" className="text-zinc-500 font-sans text-[11px]">
                         {t("price_label")}
                       </label>
                       <input
@@ -221,27 +258,29 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         id="purchasePrice"
                         placeholder="0.00"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       />
                     </div>
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="purchaseStoreId" className="text-white/50 font-sans text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="purchaseStoreId" className="text-zinc-500 font-sans text-[11px]">
                         {t("store_label")}
                       </label>
                       <select
                         name="purchaseStoreId"
                         id="purchaseStoreId"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       >
                         <option value="">{t("select_store")}</option>
                         {stores.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
                         ))}
                       </select>
                     </div>
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="purchaseDate" className="text-white/50 font-sans text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="purchaseDate" className="text-zinc-500 font-sans text-[11px]">
                         {t("date_label")}
                       </label>
                       <input
@@ -249,20 +288,21 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         name="purchaseDate"
                         id="purchaseDate"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Sale section */}
-                <div className="flex flex-col gap-3 pt-3 border-t border-white/5">
-                  <span className="text-xs font-sans text-zinc-400 flex items-center gap-1.5">
-                    <span>💰</span> {t("sale_label")}
+                {/* Sale */}
+                <div className="flex flex-col gap-2.5 pt-3 border-t border-white/[0.06]">
+                  <span className="text-xs font-sans text-zinc-300 flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+                    <span>{t("sale_label")}</span>
                   </span>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="salePrice" className="text-white/50 font-sans text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="salePrice" className="text-zinc-500 font-sans text-[11px]">
                         {t("price_label")}
                       </label>
                       <input
@@ -273,27 +313,29 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         id="salePrice"
                         placeholder="0.00"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       />
                     </div>
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="saleStoreId" className="text-white/50 font-sans text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="saleStoreId" className="text-zinc-500 font-sans text-[11px]">
                         {t("store_label")}
                       </label>
                       <select
                         name="saleStoreId"
                         id="saleStoreId"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       >
                         <option value="">{t("select_store")}</option>
                         {stores.map((s) => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
                         ))}
                       </select>
                     </div>
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="saleDate" className="text-white/50 font-sans text-xs">
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="saleDate" className="text-zinc-500 font-sans text-[11px]">
                         {t("date_label")}
                       </label>
                       <input
@@ -301,7 +343,7 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         name="saleDate"
                         id="saleDate"
                         disabled={isPending}
-                        className="rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans text-sm"
+                        className={inputClass}
                       />
                     </div>
                   </div>
@@ -312,45 +354,59 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
         )}
 
         {isCompleted && (
-          <div className="mt-2 p-4 border border-primary/30 bg-primary/5 rounded-xl flex flex-col gap-4">
+          <div className="p-4 border border-primary/30 bg-primary/[0.06] rounded-2xl flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <label htmlFor="rating" className="text-white/70 font-sans text-sm">
-                {t("rating_label")} <span className="text-primary">*</span>
-              </label>
-              <select 
-                name="rating" 
-                id="rating"
-                disabled={isPending}
-                required
-                className="rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans"
-              >
-                <option value="">{t("select_rating") || "Selecciona estrelas..."}</option>
-                <option value="5">⭐⭐⭐⭐⭐ (5) - Obra Mestra</option>
-                <option value="4">⭐⭐⭐⭐ (4) - Moi Bo</option>
-                <option value="3">⭐⭐⭐ (3) - Bo</option>
-                <option value="2">⭐⭐ (2) - Regular</option>
-                <option value="1">⭐ (1) - Frouxo</option>
-              </select>
+              <span className="text-[11px] font-mono text-purple-200 uppercase tracking-wider">
+                {t("rating_label")} <span className="text-primary-hover">*</span>
+              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setSelectedRating(star)}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                      selectedRating === star
+                        ? "bg-amber-500/20 border-amber-400/50 text-amber-200"
+                        : "bg-black/30 border-white/10 text-zinc-400 hover:border-white/20 hover:text-white"
+                    }`}
+                  >
+                    <Star
+                      className={`w-3.5 h-3.5 ${
+                        star <= selectedRating ? "fill-amber-400 text-amber-400" : "text-zinc-500"
+                      }`}
+                      aria-hidden="true"
+                    />
+                    <span>{star}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label htmlFor="publicReview" className="text-white/70 font-sans text-sm">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="publicReview"
+                className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider"
+              >
                 {t("review_label") || "Crítica / Reseña rápida (opcional)"}
               </label>
-              <textarea 
-                name="publicReview" 
+              <textarea
+                name="publicReview"
                 id="publicReview"
                 rows={3}
                 disabled={isPending}
-                placeholder={t("review_placeholder") || "Que che pareceu a experiencia? Que destacarías?..."}
-                className="rounded-lg border border-white/10 bg-black/40 p-3 text-white outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-colors font-sans resize-none text-sm placeholder-zinc-500"
+                placeholder={
+                  t("review_placeholder") || "Que che pareceu a experiencia? Que destacarías?..."
+                }
+                className="rounded-xl border border-white/10 bg-[#0b0b12]/80 p-3 text-zinc-100 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all font-sans resize-y text-sm placeholder-zinc-500 leading-relaxed"
               />
             </div>
           </div>
         )}
 
-        <Button type="submit" disabled={isPending} className="mt-2 w-full">
-          {isPending ? t("saving") : t("add_to_library")}
+        <Button type="submit" disabled={isPending} className="mt-1 w-full">
+          <Plus className="w-4 h-4" aria-hidden="true" />
+          <span>{isPending ? t("saving") : t("add_to_library")}</span>
         </Button>
       </form>
     </GlassPanel>

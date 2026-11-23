@@ -1,9 +1,30 @@
 "use client"
 
-import { useState, useTransition, useEffect, useRef } from "react"
+import { useState, useTransition, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import {
+  ArrowLeft,
+  BookOpen,
+  FileText,
+  Bold,
+  Italic,
+  Heading3,
+  List,
+  CheckSquare,
+  Code,
+  Save,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  X,
+  Lock,
+  Users,
+  Globe,
+  Maximize2,
+} from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { Button } from "@/components/ui/Button"
 import { saveCanvasText, saveCanvasImageRecord, deleteCanvasImage } from "@/lib/actions/canvas"
 import { uploadCanvasImage } from "@/lib/actions/storage"
 import { PrivacyLevel } from "@generated/prisma/enums"
@@ -50,7 +71,7 @@ export function CanvasEditor({
 
   const hasUnsavedChanges = content !== lastSavedContent
 
-  const handleSaveText = () => {
+  const handleSaveText = useCallback(() => {
     setTextMessage(null)
     startTransitionText(async () => {
       const result = await saveCanvasText(libraryEntryId, content)
@@ -62,21 +83,22 @@ export function CanvasEditor({
         setTextMessage({ type: "error", text: result.error || "Erro ao gardar." })
       }
     })
-  }
+  }, [content, libraryEntryId, t])
 
-  // Keyboard shortcut Ctrl+S / Cmd+S to save
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault()
         handleSaveText()
       }
+      if (e.key === "Escape") {
+        setSelectedImage(null)
+      }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [content, libraryEntryId])
+  }, [handleSaveText])
 
-  // Formatting helpers
   const insertFormatting = (prefix: string, suffix: string = "") => {
     const textarea = textareaRef.current
     if (!textarea) return
@@ -89,15 +111,16 @@ export function CanvasEditor({
     const newContent = content.substring(0, start) + replacement + content.substring(end)
     setContent(newContent)
 
-    // Focus & reselect
     setTimeout(() => {
       textarea.focus()
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length + (selected ? selected.length : 5))
+      textarea.setSelectionRange(
+        start + prefix.length,
+        start + prefix.length + (selected ? selected.length : 5)
+      )
     }, 0)
   }
 
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
-  const charCount = content.length
 
   const handleUploadImage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,42 +169,42 @@ export function CanvasEditor({
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-5xl">
+    <div className="flex flex-col gap-6 w-full">
       {/* Top navigation bar */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/[0.08]">
         <Link
           href={`/games/${gameId}`}
-          className="text-sm font-sans text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-sans text-zinc-400 hover:text-white transition-colors"
         >
-          <span>←</span>
-          <span>{t("back_to_game")}: <strong className="text-zinc-200">{gameTitle}</strong></span>
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+          <span>
+            {t("back_to_game")}: <strong className="text-zinc-200">{gameTitle}</strong>
+          </span>
         </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/games/${gameId}/journal`}
-            className="text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-primary border border-primary/30 transition-colors"
-          >
-            📖 {t("open_journal")}
-          </Link>
-        </div>
+        <Link
+          href={`/games/${gameId}/journal`}
+          className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-purple-200 border border-primary/30 transition-colors"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
+          <span>{t("open_journal")}</span>
+        </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
-        {/* Panel Izquierdo: Notas Canvas */}
-        <GlassPanel className="flex-1 flex flex-col min-h-[440px]">
-          <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-3 flex-wrap gap-2">
+        {/* Left Panel: Canvas Notes */}
+        <GlassPanel className="flex-1 flex flex-col min-h-[460px]">
+          <div className="flex items-center justify-between mb-3 border-b border-white/[0.08] pb-3.5 flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-medium text-white font-sans flex items-center gap-2">
-                <span>📝</span>
+              <h2 className="text-base sm:text-lg font-display font-semibold text-white flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary-hover" aria-hidden="true" />
                 <span>{t("canvas_notes_title")}</span>
               </h2>
 
-              {/* Edit / Preview Tabs */}
-              <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-0.5">
+              <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-0.5">
                 <button
                   type="button"
                   onClick={() => setActiveTab("edit")}
-                  className={`px-2.5 py-1 text-xs rounded-md font-sans transition-colors ${
+                  className={`px-3 py-1 text-xs rounded-lg font-sans transition-colors cursor-pointer ${
                     activeTab === "edit"
                       ? "bg-primary text-white font-medium shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -192,7 +215,7 @@ export function CanvasEditor({
                 <button
                   type="button"
                   onClick={() => setActiveTab("preview")}
-                  className={`px-2.5 py-1 text-xs rounded-md font-sans transition-colors ${
+                  className={`px-3 py-1 text-xs rounded-lg font-sans transition-colors cursor-pointer ${
                     activeTab === "preview"
                       ? "bg-primary text-white font-medium shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -203,13 +226,20 @@ export function CanvasEditor({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-mono">
-              <span className={`flex items-center gap-1 ${hasUnsavedChanges ? "text-amber-400" : "text-emerald-400"}`}>
+            <div className="flex items-center gap-2.5 text-xs font-mono">
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border ${
+                  hasUnsavedChanges
+                    ? "text-amber-300 bg-amber-950/40 border-amber-500/30"
+                    : "text-emerald-300 bg-emerald-950/40 border-emerald-500/30"
+                }`}
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                {hasUnsavedChanges ? t("canvas_unsaved") || "Non gardado" : t("canvas_saved") || "Gardado"}
+                <span>
+                  {hasUnsavedChanges ? t("canvas_unsaved") || "Non gardado" : t("canvas_saved") || "Gardado"}
+                </span>
               </span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-zinc-500">
+              <span className="text-zinc-500 tabular-nums">
                 {wordCount} {t("canvas_words") || "palabras"}
               </span>
             </div>
@@ -217,58 +247,64 @@ export function CanvasEditor({
 
           {/* Markdown Formatting Toolbar */}
           {activeTab === "edit" && (
-            <div className="flex flex-wrap items-center gap-1 mb-3 bg-black/30 border border-white/5 p-1.5 rounded-xl">
+            <div className="flex flex-wrap items-center gap-1 mb-3 bg-[#0b0b12]/70 border border-white/[0.07] p-1.5 rounded-xl">
               <button
                 type="button"
                 onClick={() => insertFormatting("**", "**")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors font-bold"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Negrita (**)"
+                aria-label="Negrita"
               >
-                B
+                <Bold className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => insertFormatting("*", "*")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors italic"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Cursiva (*)"
+                aria-label="Cursiva"
               >
-                I
+                <Italic className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => insertFormatting("### ")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Título (###)"
+                aria-label="Título"
               >
-                H3
+                <Heading3 className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
-              <span className="w-px h-4 bg-white/10 mx-1" />
+              <span className="w-px h-4 bg-white/10 mx-1" aria-hidden="true" />
               <button
                 type="button"
                 onClick={() => insertFormatting("- ")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Lista (- )"
+                aria-label="Lista"
               >
-                • Lista
+                <List className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => insertFormatting("- [ ] ")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Checklist (- [ ] )"
+                aria-label="Checklist"
               >
-                ☑ Checklist
+                <CheckSquare className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => insertFormatting("`", "`")}
-                className="px-2 py-1 rounded text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Código (`)"
+                aria-label="Código"
               >
-                &lt;/&gt;
+                <Code className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
-              <span className="ml-auto text-[11px] font-mono text-zinc-500 hidden sm:inline">
-                Cmd+S para gardar
+              <span className="ml-auto text-[11px] font-mono text-zinc-500 hidden sm:inline pr-2">
+                ⌘S para gardar
               </span>
             </div>
           )}
@@ -279,48 +315,57 @@ export function CanvasEditor({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={t("canvas_notes_placeholder")}
-              className="flex-1 min-h-[300px] w-full rounded-xl border border-white/10 bg-black/40 p-4 text-white placeholder-zinc-500 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all font-sans leading-relaxed resize-y font-mono text-sm"
+              className="flex-1 min-h-[320px] w-full rounded-xl border border-white/10 bg-[#0b0b12]/80 p-4 text-zinc-100 placeholder-zinc-500 outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all leading-relaxed resize-y font-mono text-sm"
               disabled={isPendingText}
             />
           ) : (
-            <div className="flex-1 min-h-[300px] w-full rounded-xl border border-white/10 bg-black/30 p-5 text-zinc-200 font-sans leading-relaxed overflow-y-auto whitespace-pre-wrap text-sm">
+            <div className="flex-1 min-h-[320px] w-full rounded-xl border border-white/[0.08] bg-[#0b0b12]/50 p-5 text-zinc-200 font-sans leading-relaxed overflow-y-auto whitespace-pre-wrap text-sm">
               {content ? (
                 content
               ) : (
-                <span className="text-zinc-500 italic">Sen contido aínda. Escribe notas no modo editor.</span>
+                <span className="text-zinc-500 italic">
+                  Sen contido aínda. Escribe notas no modo editor.
+                </span>
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-white/[0.08]">
             <div>
               {textMessage && (
-                <p className={`text-sm ${textMessage.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+                <p
+                  className={`text-xs font-mono ${
+                    textMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
                   {textMessage.text}
                 </p>
               )}
             </div>
-            <button
+            <Button
+              type="button"
               onClick={handleSaveText}
               disabled={isPendingText || !hasUnsavedChanges}
-              className="rounded-xl bg-primary px-6 py-2.5 text-white font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none text-sm flex items-center gap-1.5"
             >
-              <span>💾</span>
+              <Save className="w-4 h-4" aria-hidden="true" />
               <span>{isPendingText ? t("saving") : t("save")}</span>
-            </button>
+            </Button>
           </div>
         </GlassPanel>
 
-        {/* Panel Derecho: Subida de Imágenes */}
-        <GlassPanel className="w-full lg:w-80 flex flex-col h-fit">
-          <h2 className="text-xl font-medium text-white mb-4 font-sans flex items-center gap-2">
-            <span>📷</span>
+        {/* Right Panel: Image Upload */}
+        <GlassPanel className="w-full lg:w-80 shrink-0 flex flex-col h-fit">
+          <h2 className="text-base sm:text-lg font-display font-semibold text-white mb-4 flex items-center gap-2">
+            <Upload className="w-4 h-4 text-primary-hover" aria-hidden="true" />
             <span>{t("canvas_attach_title")}</span>
           </h2>
 
           <form onSubmit={handleUploadImage} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-zinc-400 font-sans uppercase tracking-wider">
+              <label
+                htmlFor="canvas-file-input"
+                className="text-[11px] text-zinc-400 font-mono uppercase tracking-wider"
+              >
                 Captura ou Imaxe
               </label>
               <input
@@ -328,37 +373,47 @@ export function CanvasEditor({
                 type="file"
                 accept="image/*"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="text-xs text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary/20 file:text-purple-300 hover:file:bg-primary/30 transition-colors cursor-pointer bg-black/40 rounded-lg p-2 border border-white/10"
+                className="text-xs text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primary/20 file:text-purple-200 hover:file:bg-primary/30 transition-colors cursor-pointer bg-[#0b0b12]/80 rounded-xl p-2.5 border border-dashed border-white/15 hover:border-primary/40"
                 disabled={isPendingImage}
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs text-zinc-400 font-sans uppercase tracking-wider">
+              <label
+                htmlFor="canvas-privacy"
+                className="text-[11px] text-zinc-400 font-mono uppercase tracking-wider"
+              >
                 Visibilidade
               </label>
               <select
+                id="canvas-privacy"
                 value={privacy}
                 onChange={(e) => setPrivacy(e.target.value as PrivacyLevel)}
-                className="rounded-lg border border-white/10 bg-black/50 p-2.5 text-white outline-none focus:border-primary/50 font-sans text-xs cursor-pointer"
+                className="rounded-xl border border-white/10 bg-[#0b0b12]/85 p-2.5 text-zinc-100 outline-none focus:border-primary/60 font-sans text-xs cursor-pointer"
                 disabled={isPendingImage}
               >
-                <option value={PrivacyLevel.PRIVATE}>🔒 {t("privacy_private")}</option>
-                <option value={PrivacyLevel.FOLLOWERS}>👥 {t("privacy_followers")}</option>
-                <option value={PrivacyLevel.PUBLIC}>🌐 {t("privacy_public")}</option>
+                <option value={PrivacyLevel.PRIVATE}>{t("privacy_private")}</option>
+                <option value={PrivacyLevel.FOLLOWERS}>{t("privacy_followers")}</option>
+                <option value={PrivacyLevel.PUBLIC}>{t("privacy_public")}</option>
               </select>
             </div>
 
-            <button
+            <Button
               type="submit"
+              variant="glass"
               disabled={isPendingImage || !file}
-              className="mt-2 w-full rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 text-white font-medium hover:bg-white/20 transition-all disabled:opacity-40 disabled:pointer-events-none text-sm"
+              className="mt-1 w-full"
             >
-              {isPendingImage ? t("uploading_btn") : t("upload_btn")}
-            </button>
+              <Upload className="w-4 h-4" aria-hidden="true" />
+              <span>{isPendingImage ? t("uploading_btn") : t("upload_btn")}</span>
+            </Button>
 
             {imgMessage && (
-              <p className={`text-xs text-center ${imgMessage.type === "success" ? "text-emerald-400" : "text-rose-400"}`}>
+              <p
+                className={`text-xs font-mono text-center ${
+                  imgMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
+                }`}
+              >
                 {imgMessage.text}
               </p>
             )}
@@ -366,14 +421,14 @@ export function CanvasEditor({
         </GlassPanel>
       </div>
 
-      {/* Galería de Imágenes */}
+      {/* Image Gallery */}
       {images.length > 0 && (
-        <div className="w-full mt-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-pixel text-white tracking-wider flex items-center gap-2">
-              <span>🖼️</span>
+        <section className="w-full mt-2">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 className="text-xl font-display font-semibold text-white tracking-tight flex items-center gap-2.5">
+              <ImageIcon className="w-5 h-5 text-primary-hover" aria-hidden="true" />
               <span>{t("canvas_gallery_title")}</span>
-              <span className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+              <span className="text-xs font-mono text-zinc-400 bg-white/[0.05] px-2.5 py-0.5 rounded-full border border-white/10 tabular-nums">
                 {images.length}
               </span>
             </h2>
@@ -381,70 +436,95 @@ export function CanvasEditor({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {images.map((img) => (
-              <GlassPanel
-                key={img.id}
-                className="p-2 relative aspect-square overflow-hidden group cursor-pointer border-white/10 hover:border-primary/40 transition-all"
-              >
-                <div
-                  className="w-full h-full relative"
-                  onClick={() => setSelectedImage(img)}
+            {images.map((img) => {
+              const PrivacyIcon =
+                img.privacy === "PRIVATE" ? Lock : img.privacy === "FOLLOWERS" ? Users : Globe
+              return (
+                <GlassPanel
+                  key={img.id}
+                  interactive
+                  className="p-2 relative aspect-square overflow-hidden group cursor-pointer"
                 >
-                  <Image
-                    src={img.url}
-                    alt="Canvas image"
-                    fill
-                    className="object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
-                    unoptimized
-                  />
-                </div>
+                  <button
+                    type="button"
+                    className="w-full h-full relative block rounded-xl overflow-hidden cursor-pointer"
+                    onClick={() => setSelectedImage(img)}
+                    aria-label="Ampliar captura"
+                  >
+                    <Image
+                      src={img.url}
+                      alt="Canvas image"
+                      fill
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      unoptimized
+                    />
+                    <span className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                      <Maximize2
+                        className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </button>
 
-                {/* Privacy Badge */}
-                <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/20 uppercase pointer-events-none">
-                  {img.privacy === "PRIVATE" ? "Privado" : img.privacy === "FOLLOWERS" ? "Seguidores" : "Público"}
-                </div>
+                  {/* Privacy Badge */}
+                  <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/15 uppercase pointer-events-none inline-flex items-center gap-1">
+                    <PrivacyIcon className="w-2.5 h-2.5 text-zinc-400" aria-hidden="true" />
+                    <span>
+                      {img.privacy === "PRIVATE"
+                        ? "Privado"
+                        : img.privacy === "FOLLOWERS"
+                        ? "Seguidores"
+                        : "Público"}
+                    </span>
+                  </div>
 
-                {/* Delete button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDeleteImage(img.id)
-                  }}
-                  disabled={isDeletingImageId === img.id}
-                  className="absolute top-3 right-3 bg-red-950/80 hover:bg-red-700 text-white rounded-lg p-1.5 border border-red-500/30 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title={t("delete")}
-                >
-                  {isDeletingImageId === img.id ? (
-                    <span className="text-[10px] px-1">...</span>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  )}
-                </button>
-              </GlassPanel>
-            ))}
+                  {/* Delete button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteImage(img.id)
+                    }}
+                    disabled={isDeletingImageId === img.id}
+                    className="absolute top-3 right-3 bg-rose-950/85 hover:bg-rose-600 text-white rounded-lg p-1.5 border border-rose-500/35 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all cursor-pointer"
+                    title={t("delete")}
+                    aria-label={t("delete")}
+                  >
+                    {isDeletingImageId === img.id ? (
+                      <span className="text-[10px] px-1">...</span>
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    )}
+                  </button>
+                </GlassPanel>
+              )
+            })}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Lightbox Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Captura ampliada"
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4"
           onClick={() => setSelectedImage(null)}
         >
           <div
-            className="relative max-w-4xl max-h-[90vh] w-full h-[80vh] flex flex-col items-center justify-center"
+            className="relative max-w-5xl max-h-[90vh] w-full h-[80vh] flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
               onClick={() => setSelectedImage(null)}
-              className="absolute -top-10 right-0 text-white/70 hover:text-white text-sm font-mono flex items-center gap-1"
+              className="absolute -top-11 right-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono border border-white/15 transition-colors cursor-pointer"
             >
-              ✕ Pechar
+              <X className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Pechar (Esc)</span>
             </button>
-            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/20">
+            <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/15 bg-[#0a0a12] shadow-2xl">
               <Image
                 src={selectedImage.url}
                 alt="Captura ampliada"

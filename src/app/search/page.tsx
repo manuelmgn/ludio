@@ -2,9 +2,20 @@
 
 import { useState, useTransition, useEffect, useMemo, Suspense, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import {
+  Search,
+  Clock,
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  AlertCircle,
+  Compass,
+} from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
+import { Button } from "@/components/ui/Button"
 import { searchGames, type SearchGameItem } from "@/lib/api/games"
 import { GameCard } from "@/components/ui/GameCard"
 
@@ -38,16 +49,18 @@ function SearchContent() {
   })
   const [recentSearches, setRecentSearches] = useState<string[]>([])
 
-  // Load recent searches from localStorage
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("ludio_recent_searches")
-      if (saved) {
-        setRecentSearches(JSON.parse(saved))
+    const timer = setTimeout(() => {
+      try {
+        const saved = localStorage.getItem("ludio_recent_searches")
+        if (saved) {
+          setRecentSearches(JSON.parse(saved))
+        }
+      } catch {
+        // Ignore localStorage errors
       }
-    } catch {
-      // Ignore localStorage errors
-    }
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   const saveRecentSearch = (term: string) => {
@@ -126,7 +139,6 @@ function SearchContent() {
     }
   }
 
-  // Sorted games
   const sortedGames = useMemo(() => {
     const items = [...state.results]
     switch (sortBy) {
@@ -152,7 +164,6 @@ function SearchContent() {
     }
   }, [state.results, sortBy])
 
-  // Pagination calculation
   const totalPages = Math.ceil(sortedGames.length / ITEMS_PER_PAGE)
   const paginatedGames = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
@@ -164,24 +175,34 @@ function SearchContent() {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
-  return (
-    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
-      {/* Background decoration */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-1/3 right-1/4 w-[500px] h-[500px] bg-blue-900/15 rounded-full blur-[140px] -z-10" />
+  const sortButtons: { id: SortOption; label: string }[] = [
+    { id: "relevance", label: t("sort_relevance") },
+    { id: "release_desc", label: t("sort_release_desc") },
+    { id: "release_asc", label: t("sort_release_asc") },
+    { id: "rating_desc", label: t("sort_rating") },
+    { id: "title_asc", label: t("sort_title") },
+  ]
 
-      <h1 className="text-4xl font-pixel text-white mb-2 tracking-wider mt-6 flex items-center gap-3">
-        <span>🔍</span>
-        <span>{t("search")}</span>
-      </h1>
-      <p className="text-xs text-zinc-400 font-sans mb-8">
-        Base de datos global con máis de 250.000 videoxogos & biblioteca local
-      </p>
+  return (
+    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
+      {/* Header */}
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-purple-200 text-[11px] font-mono uppercase tracking-widest mb-4">
+          <Compass className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
+          <span>IGDB + Biblioteca Local</span>
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight mb-2">
+          {t("search")}
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400 font-sans">
+          Base de datos global con máis de 250.000 videoxogos & biblioteca local
+        </p>
+      </div>
 
       {/* Search Input Bar */}
-      <GlassPanel className="w-full max-w-2xl mb-6 p-3">
+      <GlassPanel variant="elevated" className="w-full max-w-2xl mb-8 p-2.5">
         <div className="flex gap-2 items-center">
-          <div className="flex-1">
+          <div className="flex-1 relative">
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -190,144 +211,121 @@ function SearchContent() {
               aria-label={t("search_placeholder")}
               disabled={isPending}
               autoFocus
-              icon={<span className="text-sm">🔍</span>}
+              icon={<Search className="w-4 h-4" aria-hidden="true" />}
+              className="pr-9"
             />
+            {query && !isPending && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Limpar busca"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-200 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            )}
           </div>
-          <button
+          <Button
+            type="button"
             onClick={handleSearch}
             disabled={isPending || query.trim().length < 2}
-            className="rounded-xl bg-primary px-6 py-2.5 text-white text-sm font-medium hover:bg-primary-hover shadow-[0_0_15px_rgba(157,0,255,0.3)] transition-all disabled:opacity-40 disabled:pointer-events-none h-[42px]"
+            className="h-[42px] px-6 shrink-0"
           >
             {isPending ? t("search_loading") : t("search")}
-          </button>
+          </Button>
         </div>
       </GlassPanel>
 
       {/* Sorting & Filter Bar */}
       {state.hasSearched && state.results.length > 0 && !isPending && (
-        <div ref={resultsRef} className="w-full max-w-5xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-zinc-400">
+        <div
+          ref={resultsRef}
+          className="w-full max-w-6xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-white/[0.08]"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-mono text-zinc-300 tabular-nums">
               {state.results.length} {t("results_count")}
             </span>
             {totalPages > 1 && (
-              <span className="text-[11px] font-mono text-primary bg-primary/10 border border-primary/30 px-2 py-0.5 rounded-full">
+              <span className="text-[11px] font-mono text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full tabular-nums">
                 Páxina {currentPage} {t("page_of")} {totalPages}
               </span>
             )}
           </div>
 
-          {/* Sort Selector Buttons */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-zinc-500 font-sans mr-1">{t("sort_by")}:</span>
-            
-            <button
-              onClick={() => {
-                setSortBy("relevance")
-                setCurrentPage(1)
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-sans transition-all ${
-                sortBy === "relevance"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.3)] font-medium"
-                  : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {t("sort_relevance")}
-            </button>
-
-            <button
-              onClick={() => {
-                setSortBy("release_desc")
-                setCurrentPage(1)
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-sans transition-all ${
-                sortBy === "release_desc"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.3)] font-medium"
-                  : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {t("sort_release_desc")}
-            </button>
-
-            <button
-              onClick={() => {
-                setSortBy("release_asc")
-                setCurrentPage(1)
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-sans transition-all ${
-                sortBy === "release_asc"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.3)] font-medium"
-                  : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {t("sort_release_asc")}
-            </button>
-
-            <button
-              onClick={() => {
-                setSortBy("rating_desc")
-                setCurrentPage(1)
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-sans transition-all ${
-                sortBy === "rating_desc"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.3)] font-medium"
-                  : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {t("sort_rating")}
-            </button>
-
-            <button
-              onClick={() => {
-                setSortBy("title_asc")
-                setCurrentPage(1)
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-sans transition-all ${
-                sortBy === "title_asc"
-                  ? "bg-primary text-white border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.3)] font-medium"
-                  : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {t("sort_title")}
-            </button>
+            {sortButtons.map((btn) => (
+              <button
+                key={btn.id}
+                type="button"
+                onClick={() => {
+                  setSortBy(btn.id)
+                  setCurrentPage(1)
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                  sortBy === btn.id
+                    ? "bg-primary text-white border-purple-400/40 shadow-[0_2px_12px_rgba(168,85,247,0.4)] font-medium"
+                    : "bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.09]"
+                }`}
+              >
+                {btn.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {state.error !== null && (
-        <GlassPanel className="w-full max-w-2xl mb-6 border-rose-500/30 bg-rose-950/20">
-          <p className="text-rose-400 text-center font-sans text-sm">{state.error}</p>
+        <GlassPanel className="w-full max-w-2xl mb-6 border-rose-500/30 bg-rose-950/20 flex items-center gap-3 p-4">
+          <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
+          <p className="text-rose-200 font-sans text-sm">{state.error}</p>
         </GlassPanel>
       )}
 
-      {/* Loading Skeleton */}
+      {/* Loading Shimmer Grid */}
       {isPending && (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-zinc-400 font-mono text-sm animate-pulse">
-          <span className="text-3xl animate-spin">🌀</span>
-          <span>{t("search_loading")}</span>
-          <span className="text-xs text-zinc-500">Analizando títulos, variantes e datas de lanzamento...</span>
+        <div className="w-full max-w-6xl flex flex-col gap-5">
+          <p className="text-center text-xs font-mono text-zinc-400">
+            {t("search_loading")} — Analizando títulos, variantes e datas de lanzamento...
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <GlassPanel key={i} className="p-2.5 flex flex-col gap-2.5">
+                <div className="w-full aspect-[3/4] rounded-xl skeleton-shimmer" />
+                <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
+              </GlassPanel>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Empty Results */}
       {state.hasSearched && state.results.length === 0 && state.error === null && !isPending && (
-        <div className="text-center py-16">
-          <p className="text-zinc-300 font-sans text-base">{t("search_empty")}</p>
-          <p className="text-zinc-500 text-xs mt-1">Proba con outro termo ou o título orixinal do xogo</p>
-        </div>
+        <GlassPanel className="max-w-md w-full text-center py-12 px-6 flex flex-col items-center gap-2">
+          <Search className="w-8 h-8 text-zinc-500 mb-2" aria-hidden="true" />
+          <p className="text-zinc-200 font-display font-medium text-base">{t("search_empty")}</p>
+          <p className="text-zinc-500 text-xs">
+            Proba con outro termo ou o título orixinal do xogo
+          </p>
+        </GlassPanel>
       )}
 
       {/* Search Hints & Popular Suggestions */}
       {!state.hasSearched && !isPending && (
-        <div className="text-center py-12 text-zinc-500 font-sans text-sm max-w-lg flex flex-col items-center gap-6">
+        <div className="w-full max-w-xl py-8 flex flex-col items-center gap-8 text-center">
           {recentSearches.length > 0 && (
-            <div className="w-full flex flex-col items-center gap-2">
-              <div className="flex items-center justify-between w-full px-2 text-xs font-mono text-zinc-400">
-                <span>🕒 Buscas recentes</span>
+            <div className="w-full flex flex-col items-center gap-3">
+              <div className="flex items-center justify-between w-full px-1 text-xs font-mono text-zinc-400">
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
+                  <span>Buscas recentes</span>
+                </span>
                 <button
+                  type="button"
                   onClick={clearRecentSearches}
-                  className="text-zinc-500 hover:text-rose-400 transition-colors"
+                  className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
                 >
                   Limpar
                 </button>
@@ -336,6 +334,7 @@ function SearchContent() {
                 {recentSearches.map((term) => (
                   <button
                     key={term}
+                    type="button"
                     onClick={() => {
                       setQuery(term)
                       const params = new URLSearchParams()
@@ -343,7 +342,7 @@ function SearchContent() {
                       router.replace(`/search?${params.toString()}`)
                       performSearch(term)
                     }}
-                    className="text-xs px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/30 text-purple-200 hover:bg-primary/20 transition-all font-sans"
+                    className="text-xs px-3.5 py-1.5 rounded-xl bg-primary/10 border border-primary/30 text-purple-200 hover:bg-primary/20 hover:border-primary/50 transition-all font-sans cursor-pointer"
                   >
                     {term}
                   </button>
@@ -352,26 +351,35 @@ function SearchContent() {
             </div>
           )}
 
-          <div>
-            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-3">{t("search_hint")}</p>
+          <div className="w-full flex flex-col items-center gap-3">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-widest text-zinc-500">
+              <Flame className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+              <span>{t("search_hint")}</span>
+            </p>
             <div className="flex flex-wrap justify-center gap-2">
-              {["Pokémon", "The Legend of Zelda", "Final Fantasy", "Metroid", "Elden Ring", "Chrono Trigger"].map(
-                (popular) => (
-                  <button
-                    key={popular}
-                    onClick={() => {
-                      setQuery(popular)
-                      const params = new URLSearchParams()
-                      params.set("q", popular)
-                      router.replace(`/search?${params.toString()}`)
-                      performSearch(popular)
-                    }}
-                    className="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 hover:text-white transition-colors text-zinc-400"
-                  >
-                    {popular}
-                  </button>
-                )
-              )}
+              {[
+                "Pokémon",
+                "The Legend of Zelda",
+                "Final Fantasy",
+                "Metroid",
+                "Elden Ring",
+                "Chrono Trigger",
+              ].map((popular) => (
+                <button
+                  key={popular}
+                  type="button"
+                  onClick={() => {
+                    setQuery(popular)
+                    const params = new URLSearchParams()
+                    params.set("q", popular)
+                    router.replace(`/search?${params.toString()}`)
+                    performSearch(popular)
+                  }}
+                  className="text-xs px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 hover:border-primary/50 hover:bg-white/[0.08] hover:text-white transition-all text-zinc-300 cursor-pointer"
+                >
+                  {popular}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -380,7 +388,7 @@ function SearchContent() {
       {/* Game Cards Grid */}
       {paginatedGames.length > 0 && !isPending && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full max-w-5xl mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full max-w-6xl mb-10">
             {paginatedGames.map((game) => (
               <GameCard
                 key={game.id}
@@ -395,26 +403,33 @@ function SearchContent() {
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4 mb-12 flex-wrap">
+            <nav
+              aria-label="Paxinación de resultados"
+              className="flex items-center justify-center gap-2 mt-2 mb-12 flex-wrap"
+            >
               <button
+                type="button"
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-sans border border-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-sans border border-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
               >
-                {t("page_prev")}
+                <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{t("page_prev")}</span>
               </button>
 
-              {/* Page Number Buttons */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((page) => {
-                    // Show first, last, and window around current page
                     if (page === 1 || page === totalPages) return true
                     if (Math.abs(page - currentPage) <= 2) return true
                     return false
                   })
                   .reduce<(number | string)[]>((acc, page, idx, arr) => {
-                    if (idx > 0 && typeof arr[idx - 1] === "number" && (page as number) - (arr[idx - 1] as number) > 1) {
+                    if (
+                      idx > 0 &&
+                      typeof arr[idx - 1] === "number" &&
+                      (page as number) - (arr[idx - 1] as number) > 1
+                    ) {
                       acc.push("...")
                     }
                     acc.push(page)
@@ -435,11 +450,13 @@ function SearchContent() {
                     return (
                       <button
                         key={pageNum}
+                        type="button"
+                        aria-current={isActive ? "page" : undefined}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`w-9 h-9 rounded-xl font-mono text-xs flex items-center justify-center transition-all ${
+                        className={`w-9 h-9 rounded-xl font-mono text-xs flex items-center justify-center transition-all cursor-pointer tabular-nums ${
                           isActive
-                            ? "bg-primary text-white font-bold border border-primary/50 shadow-[0_0_10px_rgba(157,0,255,0.4)]"
-                            : "bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/5"
+                            ? "bg-primary text-white font-semibold border border-purple-400/50 shadow-[0_2px_14px_rgba(168,85,247,0.45)]"
+                            : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.09] border border-white/[0.06]"
                         }`}
                       >
                         {pageNum}
@@ -449,13 +466,15 @@ function SearchContent() {
               </div>
 
               <button
+                type="button"
                 onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-sans border border-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 text-xs font-sans border border-white/10 transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
               >
-                {t("page_next")}
+                <span>{t("page_next")}</span>
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
-            </div>
+            </nav>
           )}
         </>
       )}
@@ -465,7 +484,13 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white text-center">Cargando busca...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-12 text-zinc-400 text-center font-mono text-xs">
+          Cargando busca...
+        </div>
+      }
+    >
       <SearchContent />
     </Suspense>
   )

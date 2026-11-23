@@ -3,26 +3,153 @@
 @variant dark (&:is(.dark *));
 
 :root {
-  --background: #121212; /* Anthracite dark */
-  --foreground: #ededed;
-  --primary: #9d00ff; /* Electric purple */
-  --primary-hover: #b84dff;
+  color-scheme: dark;
+
+  --background: #08080d;
+  --surface: #11111a;
+  --surface-elevated: #171724;
+  --foreground: #f4f4f7;
+  --muted: #9898ad;
+  --primary: #a855f7;
+  --primary-hover: #c084fc;
+  --primary-deep: #7e22ce;
+  --accent-cyan: #22d3ee;
+
+  --scrollbar-thumb: #585873;
+  --scrollbar-track: #10101a;
+
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-pixel: "VT323", monospace;
+
+  accent-color: var(--primary);
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+@supports not (scrollbar-color: auto) {
+  :root::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  :root::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid var(--scrollbar-track);
+  }
+
+  :root::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
 }
 
 @theme {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-deep: var(--primary-deep);
+  --color-accent-cyan: var(--accent-cyan);
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
   --font-pixel: var(--font-pixel);
+}
+
+::selection {
+  background-color: rgba(168, 85, 247, 0.35);
+  color: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--background);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: clip;
   @apply antialiased;
+}
+
+/* Global focus-visible ring for keyboard accessibility */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary-hover);
+  outline-offset: 2px;
+}
+
+/* Subtle ambient dot grid background */
+.bg-obsidian-grid {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.045) 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* Shimmer loading skeleton */
+@keyframes ludio-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(168, 85, 247, 0.09) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: ludio-shimmer 1.8s ease-in-out infinite;
+}
+
+/* Slow ambient float for hero glow orbs */
+@keyframes ambient-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(14px, -18px, 0) scale(1.06);
+    opacity: 0.78;
+  }
+}
+
+.animate-ambient-float {
+  animation: ambient-float 14s ease-in-out infinite;
+}
+
+.animate-ambient-float-delayed {
+  animation: ambient-float 18s ease-in-out 4s infinite reverse;
+}
+
+/* Hide scrollbars cleanly where horizontal pill strips scroll */
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-ambient-float,
+  .animate-ambient-float-delayed,
+  .skeleton-shimmer {
+    animation: none;
+  }
 }

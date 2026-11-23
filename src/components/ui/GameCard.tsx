@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { Gamepad2, Star } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 
 export interface GameCardProps {
@@ -28,20 +29,30 @@ export function GameCard({
 
   return (
     <Link href={`/games/${id}`} className="block w-full group">
-      <GlassPanel className="flex flex-col items-center gap-2 hover:border-primary/40 transition-all p-3 overflow-hidden h-full">
-        <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-zinc-900/50 relative">
+      <GlassPanel
+        interactive
+        className="flex flex-col gap-2.5 p-2.5 overflow-hidden h-full"
+      >
+        <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative ring-1 ring-white/[0.06]">
           {coverUrl && !imgError ? (
-            <Image
-              src={coverUrl}
-              alt={title}
-              fill
-              unoptimized
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              onError={() => setImgError(true)}
-            />
+            <>
+              <Image
+                src={coverUrl}
+                alt={title}
+                fill
+                unoptimized
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                onError={() => setImgError(true)}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"
+              />
+            </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-[#4a0080] p-4 border border-primary/30">
-              <span className="text-purple-100 text-center font-medium line-clamp-3 text-xs">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2.5 bg-gradient-to-br from-purple-950/90 via-[#1b1030] to-[#0c0c16] p-4 border border-primary/20">
+              <Gamepad2 className="w-7 h-7 text-primary-hover/60" aria-hidden="true" />
+              <span className="text-purple-100/90 text-center font-medium line-clamp-3 text-xs leading-snug">
                 {title}
               </span>
             </div>
@@ -49,21 +60,22 @@ export function GameCard({
 
           {/* Release Year Badge */}
           {year && (
-            <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-white/10">
+            <div className="absolute top-2 left-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono font-medium text-zinc-200 border border-white/10">
               {year}
             </div>
           )}
 
           {/* Rating Badge */}
-          {rating && (
-            <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded text-[10px] font-mono text-amber-400 border border-white/10">
-              ⭐ {Math.round(rating)}
+          {rating !== null && rating !== undefined && (
+            <div className="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-1.5 py-0.5 rounded-md text-[10px] font-mono font-medium text-amber-300 border border-amber-400/20 flex items-center gap-1">
+              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+              <span>{Math.round(rating)}</span>
             </div>
           )}
         </div>
 
-        <div className="w-full flex flex-col mt-auto pt-1">
-          <h3 className="font-medium text-white font-sans text-xs text-center leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+        <div className="w-full flex flex-col mt-auto px-0.5 pb-0.5">
+          <h3 className="font-medium text-zinc-100 font-sans text-xs leading-snug line-clamp-2 group-hover:text-primary-hover transition-colors">
             {title}
           </h3>
         </div>

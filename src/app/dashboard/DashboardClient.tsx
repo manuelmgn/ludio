@@ -2,6 +2,23 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import {
+  Settings,
+  LogOut,
+  Library,
+  Trophy,
+  Gamepad2,
+  Star,
+  Wallet,
+  TrendingDown,
+  TrendingUp,
+  Scale,
+  Clock,
+  Palette,
+  BookOpen,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
@@ -19,89 +36,159 @@ interface DashboardClientProps {
 export function DashboardClient({ user, stats, signOutAction }: DashboardClientProps) {
   const { language, setLanguage, t } = useLanguage()
 
-  const statusBadges: Record<string, { label: string; color: string }> = {
-    PLAYING: { label: t("filter_playing") || "Xogando", color: "bg-blue-950/80 text-blue-300 border-blue-500/40" },
-    COMPLETED: { label: t("filter_completed") || "Completado", color: "bg-emerald-950/80 text-emerald-300 border-emerald-500/40" },
-    ON_HOLD: { label: t("filter_on_hold") || "En Pausa", color: "bg-amber-950/80 text-amber-300 border-amber-500/40" },
-    ABANDONED: { label: t("filter_abandoned") || "Abandonado", color: "bg-rose-950/80 text-rose-300 border-rose-500/40" },
-    WISH: { label: t("filter_wish") || "Desexado", color: "bg-purple-950/80 text-purple-300 border-purple-500/40" },
+  const statusBadges: Record<string, { label: string; dot: string; color: string }> = {
+    PLAYING: {
+      label: t("filter_playing") || "Xogando",
+      dot: "bg-sky-400",
+      color: "bg-sky-950/80 text-sky-200 border-sky-400/35",
+    },
+    COMPLETED: {
+      label: t("filter_completed") || "Completado",
+      dot: "bg-emerald-400",
+      color: "bg-emerald-950/80 text-emerald-200 border-emerald-400/35",
+    },
+    ON_HOLD: {
+      label: t("filter_on_hold") || "En Pausa",
+      dot: "bg-amber-400",
+      color: "bg-amber-950/80 text-amber-200 border-amber-400/35",
+    },
+    ABANDONED: {
+      label: t("filter_abandoned") || "Abandonado",
+      dot: "bg-rose-400",
+      color: "bg-rose-950/80 text-rose-200 border-rose-400/35",
+    },
+    WISH: {
+      label: t("filter_wish") || "Desexado",
+      dot: "bg-purple-400",
+      color: "bg-purple-950/80 text-purple-200 border-purple-400/35",
+    },
   }
 
+  const completionPct =
+    stats.totalGames > 0 ? Math.round((stats.completedCount / stats.totalGames) * 100) : 0
+  const playerLevel = Math.max(1, Math.floor((stats.completedCount * 2 + stats.totalGames) / 5) + 1)
+
+  const distributionSegments = [
+    {
+      key: "PLAYING",
+      label: t("filter_playing") || "Xogando",
+      count: stats.playingCount,
+      barColor: "bg-sky-400",
+      dotColor: "bg-sky-400",
+      tileClass: "bg-sky-950/25 border-sky-500/20 text-sky-200",
+    },
+    {
+      key: "COMPLETED",
+      label: t("filter_completed") || "Completado",
+      count: stats.completedCount,
+      barColor: "bg-emerald-400",
+      dotColor: "bg-emerald-400",
+      tileClass: "bg-emerald-950/25 border-emerald-500/20 text-emerald-200",
+    },
+    {
+      key: "ON_HOLD",
+      label: t("filter_on_hold") || "En Pausa",
+      count: stats.onHoldCount,
+      barColor: "bg-amber-400",
+      dotColor: "bg-amber-400",
+      tileClass: "bg-amber-950/25 border-amber-500/20 text-amber-200",
+    },
+    {
+      key: "ABANDONED",
+      label: t("filter_abandoned") || "Abandonado",
+      count: stats.abandonedCount,
+      barColor: "bg-rose-400",
+      dotColor: "bg-rose-400",
+      tileClass: "bg-rose-950/25 border-rose-500/20 text-rose-200",
+    },
+    {
+      key: "WISH",
+      label: t("filter_wish") || "Desexado",
+      count: stats.wishlistCount,
+      barColor: "bg-purple-400",
+      dotColor: "bg-purple-400",
+      tileClass: "bg-purple-950/25 border-purple-500/20 text-purple-200",
+    },
+  ]
+
   return (
-    <div className="flex min-h-screen flex-col items-center p-4 sm:p-8 relative">
-      {/* Background decoration */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-900/15 rounded-full blur-[140px] -z-10" />
-
-      <div className="w-full max-w-5xl mt-6 flex flex-col gap-8">
-        
-        {/* Header Profile Section */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 p-0.5 shadow-[0_0_20px_rgba(157,0,255,0.4)]">
-              <div className="w-full h-full rounded-[14px] bg-zinc-950 flex items-center justify-center text-2xl font-pixel text-purple-200">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : "LU"}
+    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
+      <div className="w-full max-w-6xl flex flex-col gap-7">
+        {/* Header Profile Card */}
+        <GlassPanel variant="elevated" className="p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 via-primary to-cyan-400 p-[2px] shadow-[0_0_26px_rgba(168,85,247,0.4)] shrink-0">
+                <div className="w-full h-full rounded-[14px] bg-[#0b0b13] flex items-center justify-center text-2xl font-pixel text-purple-100 tracking-wider">
+                  {user?.name ? user.name.slice(0, 2).toUpperCase() : "LU"}
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
+                    {user?.name || "Xogador"}
+                  </h1>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-primary/15 text-purple-200 border border-primary/35">
+                    <Sparkles className="w-3 h-3 text-primary-hover" aria-hidden="true" />
+                    <span>Nivel {playerLevel}</span>
+                  </span>
+                </div>
+                <p className="text-xs font-mono text-zinc-400 mt-1">{user?.email}</p>
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-pixel text-white tracking-wider">
-                  {user?.name || "Xogador"}
-                </h1>
-                <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/20 text-purple-300 border border-primary/30">
-                  Nivel 1
-                </span>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setLanguage("gl")}
+                  aria-pressed={language === "gl"}
+                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
+                    language === "gl" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  GL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage("pt")}
+                  aria-pressed={language === "pt"}
+                  className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg transition-colors cursor-pointer ${
+                    language === "pt" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  PT
+                </button>
               </div>
-              <p className="text-xs font-mono text-zinc-400 mt-1">
-                {user?.email}
-              </p>
+
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs font-sans border border-white/10 transition-colors"
+              >
+                <Settings className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+                <span>{t("settings")}</span>
+              </Link>
+
+              <form action={signOutAction}>
+                <Button type="submit" variant="glass" size="sm" className="py-2">
+                  <LogOut className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+                  <span>{t("logout")}</span>
+                </Button>
+              </form>
             </div>
           </div>
+        </GlassPanel>
 
-          <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <div className="flex items-center bg-black/40 border border-white/10 rounded-lg p-0.5 backdrop-blur-md">
-              <button
-                onClick={() => setLanguage("gl")}
-                className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
-                  language === "gl" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                GL
-              </button>
-              <button
-                onClick={() => setLanguage("pt")}
-                className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors ${
-                  language === "pt" ? "bg-primary text-white" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                PT
-              </button>
-            </div>
-
-            <Link
-              href="/settings"
-              className="px-3.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-sans border border-white/10 transition-colors"
-            >
-              ⚙️ {t("settings")}
-            </Link>
-
-            <form action={signOutAction}>
-              <Button type="submit" variant="glass" className="text-xs py-1.5 px-3">
-                {t("logout")}
-              </Button>
-            </form>
-          </div>
-        </div>
-
-        {/* Stats Grid */}
+        {/* KPI Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <GlassPanel className="p-5 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-sans">
-              <span>Colección Total</span>
-              <span className="text-lg">📚</span>
+          <GlassPanel className="p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-sans text-zinc-400">Colección Total</span>
+              <span className="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-400/25 flex items-center justify-center text-purple-300">
+                <Library className="w-4 h-4" aria-hidden="true" />
+              </span>
             </div>
-            <span className="text-3xl font-pixel text-white tracking-wider">
+            <span className="text-3xl font-display font-bold text-white tabular-nums tracking-tight">
               {stats.totalGames}
             </span>
             <span className="text-[11px] font-mono text-zinc-500">
@@ -109,130 +196,178 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
             </span>
           </GlassPanel>
 
-          <GlassPanel className="p-5 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-sans">
-              <span>Xogos Completados</span>
-              <span className="text-lg">🏆</span>
+          <GlassPanel className="p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-sans text-zinc-400">Xogos Completados</span>
+              <span className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-400/25 flex items-center justify-center text-emerald-300">
+                <Trophy className="w-4 h-4" aria-hidden="true" />
+              </span>
             </div>
-            <span className="text-3xl font-pixel text-emerald-400 tracking-wider">
-              {stats.completedCount}
-            </span>
-            <span className="text-[11px] font-mono text-zinc-500">
-              {stats.totalGames > 0
-                ? `${Math.round((stats.completedCount / stats.totalGames) * 100)}% da colección`
-                : "0% da colección"}
-            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-display font-bold text-emerald-400 tabular-nums tracking-tight">
+                {stats.completedCount}
+              </span>
+              <span className="text-xs font-mono text-emerald-300/70 tabular-nums">
+                {completionPct}%
+              </span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-300 transition-all duration-500"
+                style={{ width: `${completionPct}%` }}
+              />
+            </div>
           </GlassPanel>
 
-          <GlassPanel className="p-5 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-sans">
-              <span>Actualmente Xogando</span>
-              <span className="text-lg">🕹️</span>
+          <GlassPanel className="p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-sans text-zinc-400">Actualmente Xogando</span>
+              <span className="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-400/25 flex items-center justify-center text-sky-300">
+                <Gamepad2 className="w-4 h-4" aria-hidden="true" />
+              </span>
             </div>
-            <span className="text-3xl font-pixel text-blue-400 tracking-wider">
+            <span className="text-3xl font-display font-bold text-sky-400 tabular-nums tracking-tight">
               {stats.playingCount}
             </span>
-            <span className="text-[11px] font-mono text-zinc-500">
-              Partidas en curso
-            </span>
+            <span className="text-[11px] font-mono text-zinc-500">Partidas en curso</span>
           </GlassPanel>
 
-          <GlassPanel className="p-5 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-zinc-400 text-xs font-sans">
-              <span>Valoración Media</span>
-              <span className="text-lg">⭐</span>
+          <GlassPanel className="p-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-sans text-zinc-400">Valoración Media</span>
+              <span className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-400/25 flex items-center justify-center text-amber-300">
+                <Star className="w-4 h-4" aria-hidden="true" />
+              </span>
             </div>
-            <span className="text-3xl font-pixel text-amber-400 tracking-wider">
+            <span className="text-3xl font-display font-bold text-amber-400 tabular-nums tracking-tight">
               {stats.averageRating ? `${stats.averageRating} / 5` : "—"}
             </span>
             <span className="text-[11px] font-mono text-zinc-500">
-              {stats.ratedGamesCount > 0 ? `${stats.ratedGamesCount} con puntuación` : "Sen valorar aínda"}
+              {stats.ratedGamesCount > 0
+                ? `${stats.ratedGamesCount} con puntuación`
+                : "Sen valorar aínda"}
             </span>
           </GlassPanel>
         </div>
 
-        {/* Status Distribution Pills */}
-        <GlassPanel className="p-5 flex flex-col gap-4">
-          <h2 className="text-sm font-sans text-zinc-300 font-medium uppercase tracking-wider">
-            Distribución da Biblioteca
-          </h2>
+        {/* Status Distribution with Visual Stacked Bar */}
+        <GlassPanel className="p-5 sm:p-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-mono text-zinc-300 font-medium uppercase tracking-wider">
+              Distribución da Biblioteca
+            </h2>
+            <span className="text-[11px] font-mono text-zinc-500 tabular-nums">
+              {stats.totalGames} total
+            </span>
+          </div>
+
+          {stats.totalGames > 0 && (
+            <div
+              className="w-full h-2.5 rounded-full bg-white/[0.05] overflow-hidden flex gap-0.5"
+              aria-hidden="true"
+            >
+              {distributionSegments.map((seg) => {
+                const pct = (seg.count / stats.totalGames) * 100
+                if (pct <= 0) return null
+                return (
+                  <div
+                    key={seg.key}
+                    className={`h-full ${seg.barColor} first:rounded-l-full last:rounded-r-full transition-all duration-500`}
+                    style={{ width: `${pct}%` }}
+                    title={`${seg.label}: ${seg.count}`}
+                  />
+                )
+              })}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-blue-950/30 border border-blue-500/20 text-xs font-sans">
-              <span className="text-blue-300">🕹️ {t("filter_playing")}</span>
-              <strong className="text-white font-mono text-sm">{stats.playingCount}</strong>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/20 text-xs font-sans">
-              <span className="text-emerald-300">🏆 {t("filter_completed")}</span>
-              <strong className="text-white font-mono text-sm">{stats.completedCount}</strong>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-amber-950/30 border border-amber-500/20 text-xs font-sans">
-              <span className="text-amber-300">⏸️ {t("filter_on_hold")}</span>
-              <strong className="text-white font-mono text-sm">{stats.onHoldCount}</strong>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-rose-950/30 border border-rose-500/20 text-xs font-sans">
-              <span className="text-rose-300">🛑 {t("filter_abandoned")}</span>
-              <strong className="text-white font-mono text-sm">{stats.abandonedCount}</strong>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-xl bg-purple-950/30 border border-purple-500/20 text-xs font-sans col-span-2 sm:col-span-1">
-              <span className="text-purple-300">⭐ {t("filter_wish")}</span>
-              <strong className="text-white font-mono text-sm">{stats.wishlistCount}</strong>
-            </div>
+            {distributionSegments.map((seg, idx) => (
+              <div
+                key={seg.key}
+                className={`flex items-center justify-between p-3 rounded-xl border text-xs font-sans ${seg.tileClass} ${
+                  idx === 4 ? "col-span-2 sm:col-span-1" : ""
+                }`}
+              >
+                <span className="inline-flex items-center gap-2 truncate">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${seg.dotColor}`} />
+                  <span className="truncate">{seg.label}</span>
+                </span>
+                <strong className="text-white font-mono text-sm tabular-nums ml-2">
+                  {seg.count}
+                </strong>
+              </div>
+            ))}
           </div>
         </GlassPanel>
 
         {/* Gamer Economy / Financial Section */}
-        <GlassPanel className="p-5 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+        <GlassPanel className="p-5 sm:p-6 flex flex-col gap-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-lg">💶</span>
-              <h2 className="text-sm font-sans text-zinc-300 font-medium uppercase tracking-wider">
+              <Wallet className="w-4 h-4 text-primary-hover" aria-hidden="true" />
+              <h2 className="text-xs font-mono text-zinc-300 font-medium uppercase tracking-wider">
                 {t("economy_title") || "Economía Gamer & Prezos"}
               </h2>
             </div>
-            <span className="text-xs font-mono text-zinc-500">
-              {stats.pricingGamesCount} {t("pricing_games_tracked") || "xogos con prezos rexistrados"}
+            <span className="text-[11px] font-mono text-zinc-500 tabular-nums">
+              {stats.pricingGamesCount}{" "}
+              {t("pricing_games_tracked") || "xogos con prezos rexistrados"}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-500/20 flex flex-col gap-1">
-              <span className="text-xs text-rose-300/80 font-sans flex items-center gap-1.5">
-                <span>💸</span> {t("total_spent") || "Total Invertido (Compras)"}
+            <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-500/20 flex flex-col gap-1.5">
+              <span className="text-xs text-rose-300/85 font-sans flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
+                <span>{t("total_spent") || "Total Invertido (Compras)"}</span>
               </span>
-              <span className="text-2xl font-pixel text-rose-400 tracking-wider">
+              <span className="text-2xl font-display font-bold text-rose-300 tabular-nums tracking-tight">
                 {stats.totalSpent.toFixed(2)}€
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-1">
-              <span className="text-xs text-emerald-300/80 font-sans flex items-center gap-1.5">
-                <span>💰</span> {t("total_earned") || "Total Recuperado (Vendas)"}
+            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 flex flex-col gap-1.5">
+              <span className="text-xs text-emerald-300/85 font-sans flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+                <span>{t("total_earned") || "Total Recuperado (Vendas)"}</span>
               </span>
-              <span className="text-2xl font-pixel text-emerald-400 tracking-wider">
+              <span className="text-2xl font-display font-bold text-emerald-300 tabular-nums tracking-tight">
                 {stats.totalEarned.toFixed(2)}€
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/20 flex flex-col gap-1">
-              <span className="text-xs text-purple-300/80 font-sans flex items-center gap-1.5">
-                <span>⚖️</span> {t("net_balance") || "Balance Neto"}
+            <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/20 flex flex-col gap-1.5">
+              <span className="text-xs text-purple-300/85 font-sans flex items-center gap-1.5">
+                <Scale className="w-3.5 h-3.5 text-purple-300" aria-hidden="true" />
+                <span>{t("net_balance") || "Balance Neto"}</span>
               </span>
-              <span className={`text-2xl font-pixel tracking-wider ${stats.netBalance >= 0 ? "text-emerald-400" : "text-zinc-200"}`}>
-                {stats.netBalance >= 0 ? `+${stats.netBalance.toFixed(2)}€` : `${stats.netBalance.toFixed(2)}€`}
+              <span
+                className={`text-2xl font-display font-bold tabular-nums tracking-tight ${
+                  stats.netBalance >= 0 ? "text-emerald-300" : "text-zinc-100"
+                }`}
+              >
+                {stats.netBalance >= 0
+                  ? `+${stats.netBalance.toFixed(2)}€`
+                  : `${stats.netBalance.toFixed(2)}€`}
               </span>
             </div>
           </div>
         </GlassPanel>
 
         {/* Recent Activity Section */}
-        <div className="flex flex-col gap-4">
+        <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-pixel text-white tracking-wider flex items-center gap-2">
-              <span>⏱️</span>
+            <h2 className="text-xl font-display font-semibold text-white tracking-tight flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary-hover" aria-hidden="true" />
               <span>Actividade Recente</span>
             </h2>
-            <Link href="/library" className="text-xs font-mono text-primary hover:underline">
-              Ver toda a biblioteca →
+            <Link
+              href="/library"
+              className="inline-flex items-center gap-1 text-xs font-mono text-primary-hover hover:text-white transition-colors"
+            >
+              <span>Ver toda a biblioteca</span>
+              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
             </Link>
           </div>
 
@@ -243,46 +378,54 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                 return (
                   <GlassPanel
                     key={entry.id}
-                    className="p-4 flex gap-4 items-center group hover:border-primary/40 transition-all"
+                    interactive
+                    className="p-3.5 flex gap-3.5 items-center group"
                   >
-                    <div className="w-16 h-20 rounded-xl overflow-hidden bg-zinc-900/60 relative flex-shrink-0">
+                    <Link
+                      href={`/games/${entry.game.id}`}
+                      className="w-16 h-20 rounded-xl overflow-hidden bg-[#0c0c14] relative shrink-0 ring-1 ring-white/[0.08]"
+                    >
                       {entry.game.coverUrl ? (
                         <Image
                           src={entry.game.coverUrl}
                           alt={entry.game.title}
                           fill
                           unoptimized
-                          className="object-cover group-hover:scale-105 transition-transform"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-[#3c006b] text-[10px] text-purple-200 text-center p-1">
-                          {entry.game.title}
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-950 to-[#11111a] p-1">
+                          <Gamepad2 className="w-5 h-5 text-primary-hover/60" aria-hidden="true" />
                         </div>
                       )}
-                    </div>
+                    </Link>
 
                     <div className="flex flex-col flex-1 min-w-0">
                       <Link
                         href={`/games/${entry.game.id}`}
-                        className="text-sm font-medium text-white hover:text-primary transition-colors line-clamp-1"
+                        className="text-sm font-medium text-zinc-100 hover:text-primary-hover transition-colors line-clamp-1"
                       >
                         {entry.game.title}
                       </Link>
 
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         {badge && (
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${badge.color}`}>
-                            {badge.label}
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono border ${badge.color}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                            <span>{badge.label}</span>
                           </span>
                         )}
                         {entry.game.firstReleaseDate && (
-                          <span className="text-zinc-400 text-[10px] font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+                          <span className="text-zinc-400 text-[10px] font-mono bg-white/[0.05] px-1.5 py-0.5 rounded-md border border-white/10">
                             {new Date(entry.game.firstReleaseDate).getFullYear()}
                           </span>
                         )}
                         {entry.rating ? (
-                          <span className="text-amber-400 text-xs font-mono">
-                            ⭐ {entry.rating}
+                          <span className="inline-flex items-center gap-0.5 text-amber-300 text-[11px] font-mono">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" aria-hidden="true" />
+                            <span>{entry.rating}</span>
                           </span>
                         ) : entry.game.igdbRating !== null ? (
                           <span className="text-zinc-400 text-[10px] font-mono">
@@ -291,18 +434,20 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                         ) : null}
                       </div>
 
-                      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-white/5 text-[11px] font-mono">
+                      <div className="flex items-center gap-4 mt-3 pt-2 border-t border-white/[0.06] text-[11px] font-mono">
                         <Link
                           href={`/games/${entry.game.id}/canvas`}
-                          className="text-primary hover:underline"
+                          className="inline-flex items-center gap-1 text-primary-hover hover:text-white transition-colors"
                         >
-                          🎨 Canvas
+                          <Palette className="w-3 h-3" aria-hidden="true" />
+                          <span>Canvas</span>
                         </Link>
                         <Link
                           href={`/games/${entry.game.id}/journal`}
-                          className="text-zinc-400 hover:text-white"
+                          className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors"
                         >
-                          📖 Diario
+                          <BookOpen className="w-3 h-3" aria-hidden="true" />
+                          <span>Diario</span>
                         </Link>
                       </div>
                     </div>
@@ -311,21 +456,23 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
               })}
             </div>
           ) : (
-            <GlassPanel className="p-8 text-center flex flex-col items-center justify-center">
-              <span className="text-4xl mb-3">🎮</span>
-              <p className="text-sm text-zinc-300 font-sans mb-4">
+            <GlassPanel className="p-10 text-center flex flex-col items-center justify-center gap-3">
+              <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
+                <Gamepad2 className="w-6 h-6" aria-hidden="true" />
+              </span>
+              <p className="text-sm text-zinc-300 font-sans">
                 Aínda non tes xogos na túa biblioteca. Comeza explorando xogos!
               </p>
               <Link
                 href="/search"
-                className="text-xs font-medium px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-hover transition-colors"
+                className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white hover:from-purple-400 hover:to-purple-600 transition-all"
               >
-                Buscar Xogos →
+                <span>Buscar Xogos</span>
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
               </Link>
             </GlassPanel>
           )}
-        </div>
-
+        </section>
       </div>
     </div>
   )
