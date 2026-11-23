@@ -54,10 +54,10 @@ La app estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ## Producción con Docker
 
-El archivo `docker-compose.yml` orquesta tres servicios:
-1. **`db`**: PostgreSQL 15 con `healthcheck`.
-2. **`ludio-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy`.
-3. **`app`**: Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `ludio-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `ludio_uploads`.
+El archivo `docker-compose.yml` orquesta tres servicios (reutilizando el mismo contenedor `ludio_postgres` y volumen `ludio_pgdata` que el entorno local):
+1. **`db`** (`ludio_postgres`): PostgreSQL 15 con `healthcheck`.
+2. **`ludio-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy && npm run db:seed`.
+3. **`app`** (`ludio_app`): Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `ludio-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `ludio_uploads`.
 
 Para construir y levantar todo el stack en producción:
 

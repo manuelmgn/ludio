@@ -57,8 +57,10 @@ async function main() {
   const adminUsername = process.env.ADMIN_USERNAME || "admin"
   const adminPassword = process.env.ADMIN_PASSWORD || "ludio_admin_123"
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email: adminEmail },
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ email: adminEmail }, { username: adminUsername }],
+    },
   })
 
   if (!existingUser) {
@@ -72,9 +74,8 @@ async function main() {
       },
     })
     console.log(`✓ Usuario creado con éxito: ${adminEmail}`)
-    console.log(`  (Contrasinal configurada: ${adminPassword})`)
   } else {
-    console.log(`ℹ️ O usuario ${adminEmail} xa existe na base de datos.`)
+    console.log(`ℹ️ O usuario inicial (${existingUser.email} / ${existingUser.username}) xa existe na base de datos.`)
   }
 
   console.log("✅ Inicialización completada con éxito.")

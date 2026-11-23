@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ludio_postgres_prod
+    container_name: ludio_postgres
     restart: unless-stopped
     env_file:
       - .env
@@ -42,9 +42,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       AUTH_TRUST_HOST: "true"
-      PORT: 5020
+      PORT: ${PORT:-5020}
     ports:
-      - "5020:5020"
+      - "${PORT:-5020}:${PORT:-5020}"
     volumes:
       - ludio_uploads:/app/public/uploads
     depends_on:
