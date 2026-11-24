@@ -55,12 +55,13 @@ La app estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ## Producción con Docker
 
-El archivo `docker-compose.yml` orquesta tres servicios (reutilizando el mismo contenedor `flux_postgres` y volumen `flux_pgdata` que el entorno local):
-1. **`db`** (`flux_postgres`): PostgreSQL 15 con `healthcheck`.
-2. **`flux-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy && npm run db:seed`.
-3. **`app`** (`flux_app`): Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `flux-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `flux_uploads`.
+Flux **no levanta su propia base de datos PostgreSQL** en producción: se conecta a la instancia PostgreSQL compartida indicada en `DATABASE_URL` dentro de `.env` (por ejemplo `postgresql://usuario:contraseña@host.docker.internal:5432/flux_db` o la IP de tu servidor/NAS).
 
-Para construir y levantar todo el stack en producción:
+El archivo `docker-compose.yml` orquesta dos servicios:
+1. **`flux-init`**: Contenedor de inicialización que aplica las migraciones y el seed contra `DATABASE_URL` (`npx prisma migrate deploy && npm run db:seed`).
+2. **`app`** (`flux_app`): Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `flux-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `flux_uploads`.
+
+Para construir y levantar el stack en producción:
 
 ```bash
 docker compose up -d --build
@@ -69,8 +70,6 @@ docker compose up -d --build
 ### Puertos públicos en producción
 - **`5020`**: Aplicación web principal ([http://localhost:5020](http://localhost:5020)).
 - **`5022`**: Prisma Studio (`npm run db:studio` abre en [http://localhost:5022](http://localhost:5022)).
-- **`5023 - 5029`**: Rango reservado para otros servicios públicos adicionales.
-- **PostgreSQL (`db`)**: solo accesible internamente dentro de la red de Docker (`db:5432`), sin exponer puertos al host.
 
 Para ver los logs de inicialización o de la aplicación:
 

@@ -1,18 +1,4 @@
 services:
-  db:
-    image: postgres:15-alpine
-    container_name: flux_postgres
-    restart: unless-stopped
-    env_file:
-      - .env
-    volumes:
-      - flux_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   flux-init:
     build:
       context: .
@@ -21,11 +7,8 @@ services:
     container_name: flux_init
     env_file:
       - .env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-    depends_on:
-      db:
-        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: "no"
 
   app:
@@ -38,9 +21,10 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       AUTH_TRUST_HOST: "true"
       PORT: ${PORT:-5020}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${PORT:-5020}:${PORT:-5020}"
     volumes:
@@ -50,5 +34,4 @@ services:
         condition: service_completed_successfully
 
 volumes:
-  flux_pgdata:
   flux_uploads:
