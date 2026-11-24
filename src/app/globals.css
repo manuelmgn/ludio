@@ -116,6 +116,14 @@ body {
   outline-offset: 2px;
 }
 
+/* Ensure current-page navigation indicator stays visible in forced-colors mode */
+@media (forced-colors: active) {
+  .nav-link-item[aria-current="page"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+
 /* Subtle ambient dot grid background */
 .bg-obsidian-grid {
   background-image:
@@ -155,7 +163,146 @@ body {
     0 12px 36px -8px rgba(0, 0, 0, 0.75);
 }
 
-/* Compositor-only fluid page entrance */
+/* Opt-in to Cross-Document View Transitions (hard navigations / redirects) */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* Keep the page interactive while view transitions run */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Anchor persistent chrome so header, mobile nav, and progress bar stay rock-solid */
+::view-transition-group(site-header),
+::view-transition-group(site-bottom-nav),
+::view-transition-group(nav-progress) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-bottom-nav),
+::view-transition-old(nav-progress) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-bottom-nav),
+::view-transition-new(nav-progress) {
+  animation: none;
+}
+
+/* Unified View Transition keyframes (compositor-only: opacity + translate) */
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-lift-in {
+  from {
+    translate: 0 10px;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes vt-drop-out {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -6px;
+  }
+}
+
+@keyframes vt-slide-x {
+  from {
+    translate: var(--vt-slide-offset, 32px) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes vt-skeleton-out {
+  from {
+    opacity: 1;
+    translate: 0 0;
+  }
+  to {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Default unified page transition (peer routes / lateral navigation) */
+  ::view-transition-old(.page-transition) {
+    animation:
+      140ms ease-out both vt-fade reverse,
+      140ms ease-out both vt-drop-out;
+  }
+
+  ::view-transition-new(.page-transition) {
+    animation:
+      220ms var(--ease-fluid) 70ms both vt-fade,
+      300ms var(--ease-fluid) both vt-lift-in;
+  }
+
+  /* Directional forward navigation (drilling deeper: list -> detail -> sub-view) */
+  ::view-transition-old(.nav-forward) {
+    --vt-slide-offset: -36px;
+    animation:
+      140ms ease-in both vt-fade reverse,
+      280ms var(--ease-fluid) both vt-slide-x reverse;
+  }
+
+  ::view-transition-new(.nav-forward) {
+    --vt-slide-offset: 36px;
+    animation:
+      210ms var(--ease-fluid) 80ms both vt-fade,
+      320ms var(--ease-fluid) both vt-slide-x;
+  }
+
+  /* Directional back navigation (returning to parent view) */
+  ::view-transition-old(.nav-back) {
+    --vt-slide-offset: 36px;
+    animation:
+      140ms ease-in both vt-fade reverse,
+      280ms var(--ease-fluid) both vt-slide-x reverse;
+  }
+
+  ::view-transition-new(.nav-back) {
+    --vt-slide-offset: -36px;
+    animation:
+      210ms var(--ease-fluid) 80ms both vt-fade,
+      320ms var(--ease-fluid) both vt-slide-x;
+  }
+
+  /* Suspense loading skeleton -> real content handoff */
+  ::view-transition-old(.skeleton-exit) {
+    animation: 150ms ease-out both vt-skeleton-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* Compositor-only fluid page entrance fallback for browsers without View Transitions */
 @keyframes page-enter {
   from {
     opacity: 0;
@@ -169,7 +316,76 @@ body {
 
 .animate-page-enter {
   @media (prefers-reduced-motion: no-preference) {
-    animation: page-enter 0.34s var(--ease-fluid) backwards;
+    animation: page-enter 0.28s var(--ease-fluid) backwards;
+  }
+}
+
+@supports not (view-transition-name: none) {
+  .page-enter-fallback {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: page-enter 0.28s var(--ease-fluid) backwards;
+    }
+  }
+}
+
+/* Delayed gentle fade-in for loading skeletons so cached/instant navigations never flash */
+@keyframes skeleton-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.skeleton-delay-enter {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: skeleton-reveal 0.2s var(--ease-fluid) 80ms backwards;
+  }
+}
+
+/* Subtle inline pending hint for Next.js Link useLinkStatus (zero layout shift) */
+@keyframes nav-hint-fade {
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes nav-hint-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.nav-link-pending-dot {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.nav-link-pending-dot[data-pending="true"] {
+  visibility: visible;
+  opacity: 0.85;
+  @media (prefers-reduced-motion: no-preference) {
+    opacity: 0;
+    animation:
+      nav-hint-fade 180ms ease 120ms forwards,
+      nav-hint-pulse 1.1s ease-in-out 120ms infinite;
+  }
+}
+
+/* Indeterminate shimmer for the top navigation progress bar */
+@keyframes nav-bar-sheen {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(200%, 0, 0);
+  }
+}
+
+.nav-progress-sheen {
+  @media (prefers-reduced-motion: no-preference) {
+    animation: nav-bar-sheen 1.2s var(--ease-fluid) infinite;
   }
 }
 

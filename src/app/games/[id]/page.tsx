@@ -265,11 +265,12 @@ export default async function GamePage({ params }: GamePageProps) {
         </div>
       )}
 
-      <div className="w-full max-w-5xl px-4 sm:px-8 pt-6 flex flex-col gap-7">
+      <div className="w-full max-w-6xl px-3 sm:px-6 pt-6 sm:pt-8 flex flex-col gap-7">
         {/* Top Breadcrumb */}
         <div className="flex items-center justify-between">
           <Link
             href="/library"
+            transitionTypes={["nav-back"]}
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-sans text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -449,6 +450,7 @@ export default async function GamePage({ params }: GamePageProps) {
 
                 <Link
                   href={`/games/${id}/canvas`}
+                  transitionTypes={["nav-forward"]}
                   className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.03] hover:bg-primary/15 border border-white/[0.07] hover:border-primary/35 transition-all group"
                 >
                   <span className="flex items-center gap-2.5 text-xs font-medium text-zinc-100">
@@ -471,6 +473,7 @@ export default async function GamePage({ params }: GamePageProps) {
                       ? `/games/${id}/playthroughs/${latestPlaythrough.id}`
                       : `/games/${id}/journal`
                   }
+                  transitionTypes={["nav-forward"]}
                   className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.07] hover:border-white/20 transition-all group"
                 >
                   <span className="flex items-center gap-2.5 text-xs font-medium text-zinc-100">

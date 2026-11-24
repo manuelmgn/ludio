@@ -21,6 +21,8 @@ import {
 } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
+import { Button, buttonVariants } from "@/components/ui/Button"
+import { PageHeader } from "@/components/ui/PageShell"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { sortAlphabetically } from "@/lib/game-utils"
 
@@ -262,35 +264,27 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
   return (
     <div className="w-full flex flex-col gap-6">
       {/* Header and In-Library Search */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
-              <Library className="w-5 h-5" aria-hidden="true" />
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
-              {t("library")}
-            </h1>
-            <span className="text-xs font-mono text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full tabular-nums">
-              {entries.length} {entries.length === 1 ? "xogo" : "xogos"}
-            </span>
+      <PageHeader
+        icon={<Library className="w-5 h-5" aria-hidden="true" />}
+        title={t("library")}
+        description="Explora a túa colección persoal, notas e progreso."
+        badge={
+          <span className="text-xs font-mono text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full tabular-nums">
+            {entries.length} {entries.length === 1 ? "xogo" : "xogos"}
+          </span>
+        }
+        actions={
+          <div className="w-full sm:w-72">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("library_search")}
+              aria-label={t("library_search")}
+              icon={<Search className="w-4 h-4" aria-hidden="true" />}
+            />
           </div>
-          <p className="text-sm text-zinc-400 font-sans mt-1">
-            Explora a túa colección persoal, notas e progreso.
-          </p>
-        </div>
-
-        {/* Search within library */}
-        <div className="w-full sm:w-72">
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("library_search")}
-            aria-label={t("library_search")}
-            icon={<Search className="w-4 h-4" aria-hidden="true" />}
-          />
-        </div>
-      </div>
+        }
+      />
 
       {/* Status Filter Tabs */}
       <div
@@ -633,18 +627,19 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
               : "Busca calquera videoxogo e engádeo para comezar o teu diario e caderno de capturas."}
           </p>
           {hasActiveFilters ? (
-            <button
+            <Button
               type="button"
+              variant="glass"
+              size="sm"
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 border border-white/15 px-5 py-2.5 text-white font-medium hover:bg-white/15 transition-all text-xs cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Limpar Filtros</span>
-            </button>
+            </Button>
           ) : (
             <Link
               href="/search"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 px-6 py-2.5 text-white font-medium hover:from-purple-400 hover:to-purple-600 shadow-[0_6px_20px_-4px_rgba(168,85,247,0.5)] transition-all text-sm"
+              className={buttonVariants({ variant: "primary", size: "md" })}
             >
               <span>{t("library_explore_cta")}</span>
               <ArrowRight className="w-4 h-4" aria-hidden="true" />

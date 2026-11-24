@@ -21,6 +21,7 @@ import { usePwa } from "@/contexts/PwaContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
+import { PageContainer, PageHeader } from "@/components/ui/PageShell"
 import { sortByNameAlphabetically } from "@/lib/game-utils"
 import {
   addCustomPlatform,
@@ -236,22 +237,14 @@ export default function SettingsPage() {
   const customPlans = sortByNameAlphabetically(plansList.filter((p) => !p.isDefault))
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
-      <div className="w-full max-w-3xl flex flex-col gap-6">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
-            <Settings className="w-5 h-5" aria-hidden="true" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-display font-bold text-white tracking-tight">
-              {t("settings")}
-            </h1>
-            <p className="text-xs text-zinc-400 font-sans">
-              Personaliza idioma, plataformas, tendas, plans e copias de seguridade.
-            </p>
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader
+        icon={<Settings className="w-5 h-5" aria-hidden="true" />}
+        title={t("settings")}
+        description="Personaliza idioma, plataformas, tendas, plans e copias de seguridade."
+      />
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Section 1: Language */}
         <GlassPanel>
           <div className="flex items-center gap-2.5 mb-1.5">
@@ -268,7 +261,7 @@ export default function SettingsPage() {
               aria-pressed={language === "gl"}
               className={`py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer border ${
                 language === "gl"
-                  ? "bg-primary/20 text-white border-primary/60 shadow-[0_0_20px_rgba(168,85,247,0.28)]"
+                  ? "bg-gradient-to-b from-purple-500/30 to-purple-700/30 text-white border-purple-400/55 shadow-[0_0_20px_rgba(168,85,247,0.28),inset_0_1px_0_rgba(255,255,255,0.2)]"
                   : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:bg-white/[0.08] hover:text-white"
               }`}
             >
@@ -281,7 +274,7 @@ export default function SettingsPage() {
               aria-pressed={language === "pt"}
               className={`py-3 px-4 rounded-xl font-sans text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer border ${
                 language === "pt"
-                  ? "bg-primary/20 text-white border-primary/60 shadow-[0_0_20px_rgba(168,85,247,0.28)]"
+                  ? "bg-gradient-to-b from-purple-500/30 to-purple-700/30 text-white border-purple-400/55 shadow-[0_0_20px_rgba(168,85,247,0.28),inset_0_1px_0_rgba(255,255,255,0.2)]"
                   : "bg-white/[0.03] text-zinc-400 border-white/[0.08] hover:bg-white/[0.08] hover:text-white"
               }`}
             >
@@ -625,6 +618,6 @@ export default function SettingsPage() {
           </Button>
         </GlassPanel>
       </div>
-    </div>
+    </PageContainer>
   )
 }

@@ -114,12 +114,13 @@ export default async function PlaythroughPage({ params }: PlaythroughPageProps) 
 
   return (
     <div className="flex flex-1 flex-col items-center pb-14">
-      <div className="w-full max-w-5xl px-4 sm:px-8 pt-6 flex flex-col gap-6">
+      <div className="w-full max-w-6xl px-3 sm:px-6 pt-6 sm:pt-8 flex flex-col gap-6">
         {/* Top Breadcrumb + Playthrough Switcher */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400">
           <div className="flex items-center gap-2 min-w-0">
             <Link
               href={`/games/${id}`}
+              transitionTypes={["nav-back"]}
               className="inline-flex items-center gap-1.5 hover:text-white transition-colors shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
@@ -173,6 +174,7 @@ export default async function PlaythroughPage({ params }: PlaythroughPageProps) 
           <div className="flex items-center gap-4 min-w-0">
             <Link
               href={`/games/${id}`}
+              transitionTypes={["nav-back"]}
               className="w-12 h-16 rounded-xl overflow-hidden shrink-0 ring-1 ring-white/15 bg-[#0c0c14] relative"
             >
               {game.coverUrl ? (

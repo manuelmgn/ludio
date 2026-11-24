@@ -21,7 +21,8 @@ import {
 } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { Button } from "@/components/ui/Button"
+import { Button, buttonVariants } from "@/components/ui/Button"
+import { PageContainer } from "@/components/ui/PageShell"
 import type { UserStats } from "./page"
 
 interface DashboardClientProps {
@@ -112,8 +113,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
   ]
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
-      <div className="w-full max-w-6xl flex flex-col gap-7">
+    <PageContainer innerClassName="gap-7">
         {/* Header Profile Card */}
         <GlassPanel variant="elevated" className="p-5 sm:p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -140,7 +140,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
             <div className="flex items-center gap-2.5 flex-wrap">
               <Link
                 href="/settings"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 hover:text-white text-xs font-sans border border-white/10 transition-colors"
+                className={buttonVariants({ variant: "glass", size: "sm" })}
               >
                 <Settings className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                 <span>{t("settings")}</span>
@@ -156,7 +156,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                   }
                 }}
               >
-                <Button type="submit" variant="glass" size="sm" className="py-2">
+                <Button type="submit" variant="glass" size="sm">
                   <LogOut className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                   <span>{t("logout")}</span>
                 </Button>
@@ -451,7 +451,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
               </p>
               <Link
                 href="/search"
-                className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white hover:from-purple-400 hover:to-purple-600 transition-all"
+                className={buttonVariants({ variant: "primary", size: "sm", className: "mt-1" })}
               >
                 <span>Buscar Xogos</span>
                 <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -459,7 +459,6 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
             </GlassPanel>
           )}
         </section>
-      </div>
-    </div>
+    </PageContainer>
   )
 }

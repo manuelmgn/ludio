@@ -15,6 +15,7 @@ import {
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { buttonVariants } from "@/components/ui/Button"
 
 export const dynamic = "force-dynamic"
 
@@ -69,9 +70,9 @@ export default async function HomePage() {
       : []
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-between px-4 sm:px-8 py-8 relative">
+    <div className="flex flex-1 flex-col items-center justify-between px-3 sm:px-6 py-6 sm:py-8 relative">
       {/* Hero Section */}
-      <section className="w-full max-w-5xl flex flex-col items-center text-center mt-4 sm:mt-8 mb-20 relative">
+      <section className="w-full max-w-6xl flex flex-col items-center text-center mt-4 sm:mt-8 mb-16 sm:mb-20 relative">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/30 mb-7 backdrop-blur-md shadow-[0_0_24px_rgba(168,85,247,0.18)]">
           <Sparkles className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
           <span className="text-[11px] font-mono uppercase tracking-widest text-purple-200">
@@ -118,35 +119,35 @@ export default async function HomePage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/library"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white text-sm font-medium border border-purple-400/30 shadow-[0_8px_24px_-4px_rgba(168,85,247,0.5)] transition-all font-sans"
+            className={buttonVariants({ variant: "primary", size: "lg" })}
           >
             <Library className="w-4 h-4" aria-hidden="true" />
             <span>Biblioteca</span>
             {libraryCount > 0 && (
-              <span className="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-mono bg-black/25 text-purple-100">
+              <span className="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-mono bg-black/25 text-purple-100 tabular-nums">
                 {libraryCount}
               </span>
             )}
           </Link>
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.11] text-zinc-100 text-sm font-medium border border-white/10 hover:border-white/20 backdrop-blur-md transition-all font-sans"
+            className={buttonVariants({ variant: "glass", size: "lg" })}
           >
             <Compass className="w-4 h-4 text-primary-hover" aria-hidden="true" />
             <span>Explorar Xogos</span>
           </Link>
           <Link
             href="/settings"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-white text-sm font-medium border border-white/[0.08] transition-all font-sans"
+            className={buttonVariants({ variant: "secondary", size: "lg" })}
           >
-            <Settings className="w-4 h-4" aria-hidden="true" />
+            <Settings className="w-4 h-4 text-zinc-400" aria-hidden="true" />
             <span>Axustes</span>
           </Link>
         </div>
       </section>
 
       {/* User's Recent Games or Suggested Games */}
-      <section className="w-full max-w-5xl mb-20">
+      <section className="w-full max-w-6xl mb-16 sm:mb-20">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
             <span className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
@@ -177,7 +178,7 @@ export default async function HomePage() {
                   interactive
                   className="p-2.5 flex flex-col justify-between group"
                 >
-                  <Link href={`/games/${entry.game.id}`} className="block">
+                  <Link href={`/games/${entry.game.id}`} transitionTypes={["nav-forward"]} className="block">
                     <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-3 ring-1 ring-white/[0.06]">
                       {entry.game.coverUrl ? (
                         <>
@@ -252,7 +253,7 @@ export default async function HomePage() {
         ) : suggestedGames.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
             {suggestedGames.map((game) => (
-              <Link key={game.id} href={`/games/${game.id}`} className="block group">
+              <Link key={game.id} href={`/games/${game.id}`} transitionTypes={["nav-forward"]} className="block group">
                 <GlassPanel variant="card" interactive className="p-2.5 flex flex-col h-full">
                   <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-3 ring-1 ring-white/[0.06]">
                     {game.coverUrl ? (
@@ -298,7 +299,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/search"
-              className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white hover:from-purple-400 hover:to-purple-600 transition-all shadow-[0_6px_20px_-4px_rgba(168,85,247,0.5)]"
+              className={buttonVariants({ variant: "primary", size: "sm", className: "mt-2" })}
             >
               <span>Buscar Xogos</span>
               <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -308,7 +309,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features Bento Grid */}
-      <section className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-5 mb-20">
+      <section className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-5 mb-16 sm:mb-20">
         <GlassPanel interactive className="p-6 flex flex-col gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300">
             <Library className="w-5 h-5" aria-hidden="true" />
@@ -347,7 +348,7 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full max-w-5xl py-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 font-mono gap-4">
+      <footer className="w-full max-w-6xl py-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 font-mono gap-4">
         <div className="flex items-center gap-2">
           <Gamepad2 className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
           <span>FLUX © 2026 — O teu santuario gamer</span>

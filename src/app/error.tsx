@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { AlertTriangle, RotateCcw, Home } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { Button } from "@/components/ui/Button"
+import { Button, buttonVariants } from "@/components/ui/Button"
 
 export default function GlobalError({
   error,
@@ -44,7 +44,7 @@ export default function GlobalError({
           </Button>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.14] text-zinc-100 text-sm font-sans border border-white/10 transition-colors"
+            className={buttonVariants({ variant: "glass", size: "md" })}
           >
             <Home className="w-4 h-4" aria-hidden="true" />
             <span>Inicio</span>

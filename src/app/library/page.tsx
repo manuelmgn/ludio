@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
+import { PageContainer } from "@/components/ui/PageShell"
 import { LibraryFilter, type LibraryEntryWithDetails } from "./LibraryFilter"
 
 export const dynamic = "force-dynamic"
@@ -43,10 +44,8 @@ export default async function LibraryPage() {
   })
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
-      <div className="w-full max-w-6xl">
-        <LibraryFilter entries={entries} />
-      </div>
-    </div>
+    <PageContainer>
+      <LibraryFilter entries={entries} />
+    </PageContainer>
   )
 }

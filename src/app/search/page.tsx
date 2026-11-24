@@ -17,6 +17,7 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
+import { PageContainer, PageHeader } from "@/components/ui/PageShell"
 import { searchGames, type SearchGameItem } from "@/lib/api/games"
 import { GAME_TYPE_ORDER, GAME_TYPE_STYLES, type GameType } from "@/lib/game-types"
 import { GameCard } from "@/components/ui/GameCard"
@@ -384,23 +385,21 @@ function SearchContent() {
   ]
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
+    <PageContainer>
       {/* Header */}
-      <div className="flex flex-col items-center text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-purple-200 text-[11px] font-mono uppercase tracking-widest mb-4">
-          <Compass className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
-          <span>IGDB + Biblioteca Local</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight mb-2">
-          {t("search")}
-        </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 font-sans">
-          Base de datos global con máis de 250.000 videoxogos & biblioteca local
-        </p>
-      </div>
+      <PageHeader
+        icon={<Compass className="w-5 h-5" aria-hidden="true" />}
+        title={t("search")}
+        description="Base de datos global con máis de 250.000 videoxogos e biblioteca local."
+        badge={
+          <span className="text-[11px] font-mono uppercase tracking-wider text-purple-200 bg-primary/15 border border-primary/30 px-2.5 py-0.5 rounded-full">
+            IGDB + Local
+          </span>
+        }
+      />
 
       {/* Search Input Bar (Liquid Glass) */}
-      <div className="w-full max-w-2xl mb-8 p-2 rounded-2xl liquid-glass-pill focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-[border-color,box-shadow] duration-200">
+      <div className="w-full p-2 rounded-2xl liquid-glass-pill focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-[border-color,box-shadow] duration-200">
         <div className="flex gap-2 items-center">
           <div className="flex-1 relative">
             <Input
@@ -453,7 +452,7 @@ function SearchContent() {
       {state.hasSearched && state.results.length > 0 && (
         <div
           ref={resultsRef}
-          className="w-full max-w-6xl flex flex-col gap-3 mb-6 pb-4 border-b border-white/[0.08]"
+          className="w-full flex flex-col gap-3 pb-4 border-b border-white/[0.08]"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
@@ -479,9 +478,9 @@ function SearchContent() {
                     setSortBy(btn.id)
                     setCurrentPage(1)
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-sans transition-all cursor-pointer border ${
                     sortBy === btn.id
-                      ? "bg-primary text-white border-purple-400/40 shadow-[0_2px_12px_rgba(168,85,247,0.4)] font-medium"
+                      ? "bg-gradient-to-b from-purple-500/90 to-purple-700/90 text-white border-purple-300/35 shadow-[0_2px_14px_rgba(168,85,247,0.45),inset_0_1px_0_rgba(255,255,255,0.28)] font-medium"
                       : "bg-white/[0.04] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.09]"
                   }`}
                 >
@@ -503,7 +502,7 @@ function SearchContent() {
                   setTypeFilter("all")
                   setCurrentPage(1)
                 }}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-sans transition-all cursor-pointer border ${
                   typeFilter === "all"
                     ? "bg-white/15 text-white border-white/25 font-medium"
                     : "bg-white/[0.03] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.08]"
@@ -526,7 +525,7 @@ function SearchContent() {
                       setTypeFilter(isActive ? "all" : type)
                       setCurrentPage(1)
                     }}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-sans transition-all cursor-pointer border ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-sans transition-all cursor-pointer border ${
                       isActive
                         ? `${style.activePillClass} font-medium`
                         : "bg-white/[0.03] text-zinc-400 border-white/[0.06] hover:text-white hover:bg-white/[0.08]"
@@ -544,7 +543,7 @@ function SearchContent() {
 
       {/* Error Message */}
       {state.error !== null && (
-        <GlassPanel className="w-full max-w-2xl mb-6 border-rose-500/30 bg-rose-950/20 flex items-center gap-3 p-4">
+        <GlassPanel className="w-full max-w-2xl mx-auto border-rose-500/30 bg-rose-950/20 flex items-center gap-3 p-4">
           <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" aria-hidden="true" />
           <p className="text-rose-200 font-sans text-sm">{state.error}</p>
         </GlassPanel>
@@ -552,12 +551,12 @@ function SearchContent() {
 
       {/* Loading Shimmer Grid (only when no existing results are shown) */}
       {isSearching && state.results.length === 0 && (
-        <div className="w-full max-w-6xl flex flex-col gap-5">
+        <div className="w-full flex flex-col gap-5">
           <p className="text-center text-xs font-mono text-zinc-400">
             {t("search_loading")} — Analizando títulos, variantes e datas de lanzamento...
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {Array.from({ length: 12 }).map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
               <GlassPanel key={i} variant="card" className="p-2.5 flex flex-col gap-2.5">
                 <div className="w-full aspect-[3/4] rounded-xl skeleton-shimmer" />
                 <div className="h-3.5 w-4/5 rounded skeleton-shimmer" />
@@ -569,7 +568,7 @@ function SearchContent() {
 
       {/* Empty Results */}
       {state.hasSearched && state.results.length === 0 && state.error === null && !isSearching && (
-        <GlassPanel className="max-w-md w-full text-center py-12 px-6 flex flex-col items-center gap-2">
+        <GlassPanel className="max-w-md w-full mx-auto text-center py-12 px-6 flex flex-col items-center gap-2">
           <Search className="w-8 h-8 text-zinc-500 mb-2" aria-hidden="true" />
           <p className="text-zinc-200 font-display font-medium text-base">{t("search_empty")}</p>
           <p className="text-zinc-500 text-xs">
@@ -580,7 +579,7 @@ function SearchContent() {
 
       {/* Search Hints & Popular Suggestions */}
       {!state.hasSearched && !isSearching && (
-        <div className="w-full max-w-xl py-8 flex flex-col items-center gap-8 text-center">
+        <div className="w-full max-w-2xl mx-auto py-6 flex flex-col items-center gap-8 text-center">
           {recentSearches.length > 0 && (
             <div className="w-full flex flex-col items-center gap-3">
               <div className="flex items-center justify-between w-full px-1 text-xs font-mono text-zinc-400">
@@ -645,7 +644,7 @@ function SearchContent() {
         sortedGames.length === 0 &&
         state.error === null &&
         !isSearching && (
-          <GlassPanel className="max-w-md w-full text-center py-10 px-6 flex flex-col items-center gap-3">
+          <GlassPanel className="max-w-md w-full mx-auto text-center py-10 px-6 flex flex-col items-center gap-3">
             <p className="text-zinc-200 font-display font-medium text-sm">
               {t("filter_type_empty")}
             </p>
@@ -667,7 +666,7 @@ function SearchContent() {
       {paginatedGames.length > 0 && (
         <>
           <div
-            className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 w-full max-w-6xl mb-10 transition-opacity duration-200 ${
+            className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full mb-4 transition-opacity duration-200 ${
               isSearching ? "opacity-55 pointer-events-none" : "opacity-100"
             }`}
           >
@@ -680,7 +679,7 @@ function SearchContent() {
                 releaseYear={game.releaseYear}
                 rating={game.rating}
                 gameType={game.gameType}
-                deferRender={idx >= 12}
+                deferRender={idx >= 10}
               />
             ))}
           </div>
@@ -689,7 +688,7 @@ function SearchContent() {
           {totalPages > 1 && (
             <nav
               aria-label="Paxinación de resultados"
-              className="flex items-center justify-center gap-2 mt-2 mb-12 flex-wrap"
+              className="flex items-center justify-center gap-2 mt-2 mb-8 flex-wrap"
             >
               <button
                 type="button"
@@ -739,7 +738,7 @@ function SearchContent() {
                         onClick={() => handlePageChange(pageNum)}
                         className={`w-9 h-9 rounded-xl font-mono text-xs flex items-center justify-center transition-all cursor-pointer tabular-nums ${
                           isActive
-                            ? "bg-primary text-white font-semibold border border-purple-400/50 shadow-[0_2px_14px_rgba(168,85,247,0.45)]"
+                            ? "bg-gradient-to-b from-purple-500/90 to-purple-700/90 text-white font-semibold border border-purple-300/35 shadow-[0_2px_14px_rgba(168,85,247,0.45),inset_0_1px_0_rgba(255,255,255,0.28)]"
                             : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.09] border border-white/[0.06]"
                         }`}
                       >
@@ -762,7 +761,7 @@ function SearchContent() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   )
 }
 

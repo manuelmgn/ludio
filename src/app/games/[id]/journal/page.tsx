@@ -14,6 +14,8 @@ import {
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { buttonVariants } from "@/components/ui/Button"
+import { PageContainer } from "@/components/ui/PageShell"
 import { JournalEditor } from "@/components/journal/JournalEditor"
 
 export const dynamic = "force-dynamic"
@@ -68,7 +70,7 @@ export default async function JournalPage({ params }: JournalPageProps) {
           </p>
           <Link
             href={`/games/${id}`}
-            className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 text-white text-xs font-medium font-sans"
+            className={buttonVariants({ variant: "primary", size: "sm", className: "mt-2" })}
           >
             <span>Ir á ficha do xogo</span>
             <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -81,11 +83,11 @@ export default async function JournalPage({ params }: JournalPageProps) {
   const journal = libraryEntry.journalEntry
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
-      <div className="w-full max-w-4xl flex flex-col">
+    <PageContainer innerClassName="gap-0">
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08] flex-wrap gap-3">
           <Link
             href={`/games/${id}`}
+            transitionTypes={["nav-back"]}
             className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-sans"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />
@@ -175,7 +177,6 @@ export default async function JournalPage({ params }: JournalPageProps) {
             Aínda non escribiches ningunha entrada no diario para este xogo.
           </GlassPanel>
         )}
-      </div>
-    </div>
+    </PageContainer>
   )
 }

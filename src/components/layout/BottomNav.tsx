@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Home, Search, Library, LayoutDashboard, Settings } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { NavLinkHint } from "@/components/layout/NavLinkHint"
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -27,6 +28,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegación móbil"
+      style={{ viewTransitionName: "site-bottom-nav" }}
       className="md:hidden fixed inset-x-0 bottom-0 z-50 pl-[max(0.75rem,env(safe-area-inset-left,0px))] pr-[max(0.75rem,env(safe-area-inset-right,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] pt-2 pointer-events-none"
     >
       <div className="pointer-events-auto liquid-glass-pill mx-auto max-w-md rounded-[24px] p-1.5 grid grid-cols-5 gap-1">
@@ -38,7 +40,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-2 px-1 rounded-[18px] transition-[background-color,color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95 ${
+              className={`nav-link-item relative flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-2 px-1 rounded-[18px] transition-[background-color,color,transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95 ${
                 active
                   ? "bg-gradient-to-b from-purple-500/85 to-purple-700/85 text-white shadow-[0_4px_18px_-2px_rgba(168,85,247,0.55),inset_0_1px_0_rgba(255,255,255,0.32)]"
                   : "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.06]"
@@ -53,6 +55,7 @@ export function BottomNav() {
               <span className="text-[10px] font-sans font-medium leading-tight truncate max-w-full">
                 {item.label}
               </span>
+              <NavLinkHint className="absolute top-1.5 right-2" />
             </Link>
           )
         })}

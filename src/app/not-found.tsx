@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Home, Library } from "lucide-react"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { buttonVariants } from "@/components/ui/Button"
 
 export default function NotFound() {
   return (
@@ -18,14 +19,14 @@ export default function NotFound() {
         <div className="flex items-center gap-3 mt-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white text-sm font-sans font-medium shadow-[0_6px_20px_-4px_rgba(168,85,247,0.5)] transition-all"
+            className={buttonVariants({ variant: "primary", size: "md" })}
           >
             <Home className="w-4 h-4" aria-hidden="true" />
             <span>Inicio</span>
           </Link>
           <Link
             href="/library"
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 hover:text-white text-sm font-sans border border-white/10 transition-colors"
+            className={buttonVariants({ variant: "glass", size: "md" })}
           >
             <Library className="w-4 h-4" aria-hidden="true" />
             <span>Biblioteca</span>
