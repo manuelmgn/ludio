@@ -68,9 +68,9 @@ docker compose up -d --build
 
 ### Puertos públicos en producción
 - **`5020`**: Aplicación web principal ([http://localhost:5020](http://localhost:5020)).
-- **`5021`**: Base de datos PostgreSQL (`localhost:5021`, mapeada al puerto 5432 del contenedor).
 - **`5022`**: Prisma Studio (`npm run db:studio` abre en [http://localhost:5022](http://localhost:5022)).
 - **`5023 - 5029`**: Rango reservado para otros servicios públicos adicionales.
+- **PostgreSQL (`db`)**: solo accesible internamente dentro de la red de Docker (`db:5432`), sin exponer puertos al host.
 
 Para ver los logs de inicialización o de la aplicación:
 
