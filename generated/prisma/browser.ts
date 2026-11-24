@@ -87,3 +87,8 @@ export type CanvasImage = Prisma.CanvasImageModel
  * 
  */
 export type Store = Prisma.StoreModel
+/**
+ * Model Plan
+ * 
+ */
+export type Plan = Prisma.PlanModel

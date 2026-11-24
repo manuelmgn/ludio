@@ -31,6 +31,10 @@ export default async function LibraryPage() {
           saleStore: {
             select: { name: true },
           },
+          includedInPlan: true,
+          plan: {
+            select: { name: true },
+          },
         },
         orderBy: { updatedAt: "desc" },
       },

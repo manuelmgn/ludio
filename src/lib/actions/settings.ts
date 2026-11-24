@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"
 import { getAuthenticatedUser } from "@/lib/auth-user"
+import { sortByNameAlphabetically } from "@/lib/game-utils"
 import { revalidatePath } from "next/cache"
 
 // ==================== Custom Platforms ====================
@@ -12,9 +13,9 @@ export async function getCustomPlatforms() {
     if (!user) return { success: false, data: [] }
     const platforms = await prisma.customPlatform.findMany({
       where: { userId: user.id },
-      orderBy: { createdAt: "desc" }
+      orderBy: { name: "asc" },
     })
-    return { success: true, data: platforms }
+    return { success: true, data: sortByNameAlphabetically(platforms) }
   } catch (error) {
     console.error("Error fetching custom platforms:", error)
     return { success: false, data: [] }
@@ -143,9 +144,9 @@ export async function getStores() {
           { userId: user.id },
         ]
       },
-      orderBy: [{ isDefault: "desc" }, { name: "asc" }]
+      orderBy: { name: "asc" }
     })
-    return { success: true, data: stores }
+    return { success: true, data: sortByNameAlphabetically(stores) }
   } catch (error) {
     console.error("Error fetching stores:", error)
     return { success: false, data: [] }
@@ -225,6 +226,137 @@ export async function deleteStore(storeId: string) {
   }
 }
 
+// ==================== Plans (Planes de Subscrición) ====================
+
+const DEFAULT_PLANS = [
+  "Apple Arcade",
+  "EA Play",
+  "Game Pass",
+  "GeForce Now",
+  "Humble Bundle",
+  "Netflix",
+  "Nintendo Switch Online",
+  "PlayStation Plus",
+  "Ubisoft+",
+]
+
+let defaultPlansEnsured = false
+
+export async function ensureDefaultPlans() {
+  if (defaultPlansEnsured) return
+
+  const existingCount = await prisma.plan.count({
+    where: { isDefault: true },
+  })
+
+  if (existingCount === 0) {
+    await prisma.plan.createMany({
+      data: DEFAULT_PLANS.map((name) => ({
+        name,
+        isDefault: true,
+        userId: null,
+      })),
+      skipDuplicates: true,
+    })
+  }
+
+  defaultPlansEnsured = true
+}
+
+export async function getPlans() {
+  try {
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, data: [] }
+
+    await ensureDefaultPlans()
+
+    const plans = await prisma.plan.findMany({
+      where: {
+        OR: [
+          { isDefault: true },
+          { userId: user.id },
+        ],
+      },
+      orderBy: { name: "asc" },
+    })
+    return { success: true, data: sortByNameAlphabetically(plans) }
+  } catch (error) {
+    console.error("Error fetching plans:", error)
+    return { success: false, data: [] }
+  }
+}
+
+export async function addPlan(name: string) {
+  if (!name || name.trim().length === 0) {
+    return { success: false, error: "O nome do plan é obrigatorio." }
+  }
+
+  try {
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
+
+    const existing = await prisma.plan.findFirst({
+      where: {
+        name: {
+          equals: name.trim(),
+          mode: "insensitive",
+        },
+        OR: [
+          { isDefault: true },
+          { userId: user.id },
+        ],
+      },
+    })
+
+    if (existing) {
+      return { success: false, error: "Este plan xa existe." }
+    }
+
+    const plan = await prisma.plan.create({
+      data: {
+        name: name.trim(),
+        isDefault: false,
+        userId: user.id,
+      },
+    })
+
+    revalidatePath("/settings")
+    return { success: true, data: plan }
+  } catch (error) {
+    console.error("Error adding plan:", error)
+    return { success: false, error: "Ocorreu un erro ao engadir o plan." }
+  }
+}
+
+export async function deletePlan(planId: string) {
+  try {
+    const user = await getAuthenticatedUser()
+    if (!user) return { success: false, error: "Debes iniciar sesión." }
+
+    const plan = await prisma.plan.findFirst({
+      where: {
+        id: planId,
+        isDefault: false,
+        userId: user.id,
+      },
+    })
+
+    if (!plan) {
+      return { success: false, error: "Non se pode eliminar un plan predefinido." }
+    }
+
+    await prisma.plan.delete({
+      where: { id: planId },
+    })
+
+    revalidatePath("/settings")
+    return { success: true }
+  } catch (error) {
+    console.error("Error deleting plan:", error)
+    return { success: false, error: "Erro ao eliminar o plan." }
+  }
+}
+
 // ==================== Export Data ====================
 
 export async function exportUserData() {
@@ -239,6 +371,7 @@ export async function exportUserData() {
         createdAt: true,
         customPlatforms: { select: { name: true } },
         stores: { select: { name: true } },
+        plans: { select: { name: true } },
         libraryEntries: {
           select: {
             rating: true,
@@ -263,6 +396,8 @@ export async function exportUserData() {
                 salePrice: true,
                 saleDate: true,
                 saleStore: { select: { name: true } },
+                includedInPlan: true,
+                plan: { select: { name: true } },
               },
             },
             gameCanvas: {

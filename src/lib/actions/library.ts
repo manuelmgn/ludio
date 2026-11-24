@@ -25,6 +25,9 @@ export interface AddGameData {
   salePrice?: number
   saleStoreId?: string
   saleDate?: string
+  // Subscription plan
+  includedInPlan?: boolean
+  planId?: string
 }
 
 function toNullableString(value: string | null | undefined): string | null {
@@ -82,6 +85,7 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
     // 2. Create the Playthrough only if status is NOT "WISHED"
     let createdPlaythroughId: string | undefined
     if (data.status !== "WISHED") {
+      const includedInPlan = Boolean(data.includedInPlan)
       const created = await prisma.playthrough.create({
         data: {
           libraryEntryId: libraryEntry.id,
@@ -91,12 +95,14 @@ export async function addGameToLibrary(gameId: string, data: AddGameData): Promi
           endDate: toNullableString(data.endDate),
           rating: normalizedRating,
           review: normalizedReview,
-          purchasePrice: toNullableFiniteNumber(data.purchasePrice),
-          purchaseStoreId: toNullableString(data.purchaseStoreId),
-          purchaseDate: toNullableString(data.purchaseDate),
-          salePrice: toNullableFiniteNumber(data.salePrice),
-          saleStoreId: toNullableString(data.saleStoreId),
-          saleDate: toNullableString(data.saleDate),
+          purchasePrice: includedInPlan ? null : toNullableFiniteNumber(data.purchasePrice),
+          purchaseStoreId: includedInPlan ? null : toNullableString(data.purchaseStoreId),
+          purchaseDate: includedInPlan ? null : toNullableString(data.purchaseDate),
+          salePrice: includedInPlan ? null : toNullableFiniteNumber(data.salePrice),
+          saleStoreId: includedInPlan ? null : toNullableString(data.saleStoreId),
+          saleDate: includedInPlan ? null : toNullableString(data.saleDate),
+          includedInPlan,
+          planId: includedInPlan ? toNullableString(data.planId) : null,
         },
       })
       createdPlaythroughId = created.id
@@ -205,6 +211,8 @@ export interface UpdatePlaythroughData {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
 }
 
 export async function updatePlaythrough(
@@ -227,6 +235,9 @@ export async function updatePlaythrough(
       return { success: false, error: "Non tes permisos para modificar esta partida." }
     }
 
+    const nextIncludedInPlan =
+      data.includedInPlan !== undefined ? data.includedInPlan : playthrough.includedInPlan
+
     await prisma.playthrough.update({
       where: { id: playthroughId },
       data: {
@@ -236,28 +247,40 @@ export async function updatePlaythrough(
         endDate: data.endDate !== undefined ? toNullableString(data.endDate) : playthrough.endDate,
         rating: data.rating !== undefined ? toNullableFiniteNumber(data.rating) : playthrough.rating,
         review: data.review !== undefined ? toNullableString(data.review) : playthrough.review,
-        purchasePrice:
-          data.purchasePrice !== undefined
+        includedInPlan: nextIncludedInPlan,
+        planId: nextIncludedInPlan
+          ? data.planId !== undefined
+            ? toNullableString(data.planId)
+            : playthrough.planId
+          : null,
+        purchasePrice: nextIncludedInPlan
+          ? null
+          : data.purchasePrice !== undefined
             ? toNullableFiniteNumber(data.purchasePrice)
             : playthrough.purchasePrice,
-        purchaseStoreId:
-          data.purchaseStoreId !== undefined
+        purchaseStoreId: nextIncludedInPlan
+          ? null
+          : data.purchaseStoreId !== undefined
             ? toNullableString(data.purchaseStoreId)
             : playthrough.purchaseStoreId,
-        purchaseDate:
-          data.purchaseDate !== undefined
+        purchaseDate: nextIncludedInPlan
+          ? null
+          : data.purchaseDate !== undefined
             ? toNullableString(data.purchaseDate)
             : playthrough.purchaseDate,
-        salePrice:
-          data.salePrice !== undefined
+        salePrice: nextIncludedInPlan
+          ? null
+          : data.salePrice !== undefined
             ? toNullableFiniteNumber(data.salePrice)
             : playthrough.salePrice,
-        saleStoreId:
-          data.saleStoreId !== undefined
+        saleStoreId: nextIncludedInPlan
+          ? null
+          : data.saleStoreId !== undefined
             ? toNullableString(data.saleStoreId)
             : playthrough.saleStoreId,
-        saleDate:
-          data.saleDate !== undefined
+        saleDate: nextIncludedInPlan
+          ? null
+          : data.saleDate !== undefined
             ? toNullableString(data.saleDate)
             : playthrough.saleDate,
       },

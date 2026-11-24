@@ -53,6 +53,8 @@ export type PlaythroughMinAggregateOutputType = {
   salePrice: number | null
   saleStoreId: string | null
   saleDate: string | null
+  includedInPlan: boolean | null
+  planId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +74,8 @@ export type PlaythroughMaxAggregateOutputType = {
   salePrice: number | null
   saleStoreId: string | null
   saleDate: string | null
+  includedInPlan: boolean | null
+  planId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -91,6 +95,8 @@ export type PlaythroughCountAggregateOutputType = {
   salePrice: number
   saleStoreId: number
   saleDate: number
+  includedInPlan: number
+  planId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -124,6 +130,8 @@ export type PlaythroughMinAggregateInputType = {
   salePrice?: true
   saleStoreId?: true
   saleDate?: true
+  includedInPlan?: true
+  planId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -143,6 +151,8 @@ export type PlaythroughMaxAggregateInputType = {
   salePrice?: true
   saleStoreId?: true
   saleDate?: true
+  includedInPlan?: true
+  planId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -162,6 +172,8 @@ export type PlaythroughCountAggregateInputType = {
   salePrice?: true
   saleStoreId?: true
   saleDate?: true
+  includedInPlan?: true
+  planId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -268,6 +280,8 @@ export type PlaythroughGroupByOutputType = {
   salePrice: number | null
   saleStoreId: string | null
   saleDate: string | null
+  includedInPlan: boolean
+  planId: string | null
   createdAt: Date
   updatedAt: Date
   _count: PlaythroughCountAggregateOutputType | null
@@ -310,11 +324,14 @@ export type PlaythroughWhereInput = {
   salePrice?: Prisma.FloatNullableFilter<"Playthrough"> | number | null
   saleStoreId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   saleDate?: Prisma.StringNullableFilter<"Playthrough"> | string | null
+  includedInPlan?: Prisma.BoolFilter<"Playthrough"> | boolean
+  planId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
   libraryEntry?: Prisma.XOR<Prisma.LibraryEntryScalarRelationFilter, Prisma.LibraryEntryWhereInput>
   purchaseStore?: Prisma.XOR<Prisma.StoreNullableScalarRelationFilter, Prisma.StoreWhereInput> | null
   saleStore?: Prisma.XOR<Prisma.StoreNullableScalarRelationFilter, Prisma.StoreWhereInput> | null
+  plan?: Prisma.XOR<Prisma.PlanNullableScalarRelationFilter, Prisma.PlanWhereInput> | null
   journalEntries?: Prisma.PlaythroughJournalEntryListRelationFilter
 }
 
@@ -333,11 +350,14 @@ export type PlaythroughOrderByWithRelationInput = {
   salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   saleStoreId?: Prisma.SortOrderInput | Prisma.SortOrder
   saleDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  includedInPlan?: Prisma.SortOrder
+  planId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   libraryEntry?: Prisma.LibraryEntryOrderByWithRelationInput
   purchaseStore?: Prisma.StoreOrderByWithRelationInput
   saleStore?: Prisma.StoreOrderByWithRelationInput
+  plan?: Prisma.PlanOrderByWithRelationInput
   journalEntries?: Prisma.PlaythroughJournalEntryOrderByRelationAggregateInput
 }
 
@@ -359,11 +379,14 @@ export type PlaythroughWhereUniqueInput = Prisma.AtLeast<{
   salePrice?: Prisma.FloatNullableFilter<"Playthrough"> | number | null
   saleStoreId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   saleDate?: Prisma.StringNullableFilter<"Playthrough"> | string | null
+  includedInPlan?: Prisma.BoolFilter<"Playthrough"> | boolean
+  planId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
   libraryEntry?: Prisma.XOR<Prisma.LibraryEntryScalarRelationFilter, Prisma.LibraryEntryWhereInput>
   purchaseStore?: Prisma.XOR<Prisma.StoreNullableScalarRelationFilter, Prisma.StoreWhereInput> | null
   saleStore?: Prisma.XOR<Prisma.StoreNullableScalarRelationFilter, Prisma.StoreWhereInput> | null
+  plan?: Prisma.XOR<Prisma.PlanNullableScalarRelationFilter, Prisma.PlanWhereInput> | null
   journalEntries?: Prisma.PlaythroughJournalEntryListRelationFilter
 }, "id">
 
@@ -382,6 +405,8 @@ export type PlaythroughOrderByWithAggregationInput = {
   salePrice?: Prisma.SortOrderInput | Prisma.SortOrder
   saleStoreId?: Prisma.SortOrderInput | Prisma.SortOrder
   saleDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  includedInPlan?: Prisma.SortOrder
+  planId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PlaythroughCountOrderByAggregateInput
@@ -409,6 +434,8 @@ export type PlaythroughScalarWhereWithAggregatesInput = {
   salePrice?: Prisma.FloatNullableWithAggregatesFilter<"Playthrough"> | number | null
   saleStoreId?: Prisma.StringNullableWithAggregatesFilter<"Playthrough"> | string | null
   saleDate?: Prisma.StringNullableWithAggregatesFilter<"Playthrough"> | string | null
+  includedInPlan?: Prisma.BoolWithAggregatesFilter<"Playthrough"> | boolean
+  planId?: Prisma.StringNullableWithAggregatesFilter<"Playthrough"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Playthrough"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Playthrough"> | Date | string
 }
@@ -425,11 +452,13 @@ export type PlaythroughCreateInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntry: Prisma.LibraryEntryCreateNestedOneWithoutPlaythroughsInput
   purchaseStore?: Prisma.StoreCreateNestedOneWithoutPurchasePlaythroughsInput
   saleStore?: Prisma.StoreCreateNestedOneWithoutSalePlaythroughsInput
+  plan?: Prisma.PlanCreateNestedOneWithoutPlaythroughsInput
   journalEntries?: Prisma.PlaythroughJournalEntryCreateNestedManyWithoutPlaythroughInput
 }
 
@@ -448,6 +477,8 @@ export type PlaythroughUncheckedCreateInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedCreateNestedManyWithoutPlaythroughInput
@@ -465,11 +496,13 @@ export type PlaythroughUpdateInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntry?: Prisma.LibraryEntryUpdateOneRequiredWithoutPlaythroughsNestedInput
   purchaseStore?: Prisma.StoreUpdateOneWithoutPurchasePlaythroughsNestedInput
   saleStore?: Prisma.StoreUpdateOneWithoutSalePlaythroughsNestedInput
+  plan?: Prisma.PlanUpdateOneWithoutPlaythroughsNestedInput
   journalEntries?: Prisma.PlaythroughJournalEntryUpdateManyWithoutPlaythroughNestedInput
 }
 
@@ -488,6 +521,8 @@ export type PlaythroughUncheckedUpdateInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedUpdateManyWithoutPlaythroughNestedInput
@@ -508,6 +543,8 @@ export type PlaythroughCreateManyInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -524,6 +561,7 @@ export type PlaythroughUpdateManyMutationInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -543,6 +581,8 @@ export type PlaythroughUncheckedUpdateManyInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -572,6 +612,8 @@ export type PlaythroughCountOrderByAggregateInput = {
   salePrice?: Prisma.SortOrder
   saleStoreId?: Prisma.SortOrder
   saleDate?: Prisma.SortOrder
+  includedInPlan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -597,6 +639,8 @@ export type PlaythroughMaxOrderByAggregateInput = {
   salePrice?: Prisma.SortOrder
   saleStoreId?: Prisma.SortOrder
   saleDate?: Prisma.SortOrder
+  includedInPlan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -616,6 +660,8 @@ export type PlaythroughMinOrderByAggregateInput = {
   salePrice?: Prisma.SortOrder
   saleStoreId?: Prisma.SortOrder
   saleDate?: Prisma.SortOrder
+  includedInPlan?: Prisma.SortOrder
+  planId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -683,6 +729,10 @@ export type NullableFloatFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type PlaythroughCreateNestedOneWithoutJournalEntriesInput = {
@@ -783,6 +833,48 @@ export type PlaythroughUncheckedUpdateManyWithoutSaleStoreNestedInput = {
   deleteMany?: Prisma.PlaythroughScalarWhereInput | Prisma.PlaythroughScalarWhereInput[]
 }
 
+export type PlaythroughCreateNestedManyWithoutPlanInput = {
+  create?: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput> | Prisma.PlaythroughCreateWithoutPlanInput[] | Prisma.PlaythroughUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.PlaythroughCreateOrConnectWithoutPlanInput | Prisma.PlaythroughCreateOrConnectWithoutPlanInput[]
+  createMany?: Prisma.PlaythroughCreateManyPlanInputEnvelope
+  connect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+}
+
+export type PlaythroughUncheckedCreateNestedManyWithoutPlanInput = {
+  create?: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput> | Prisma.PlaythroughCreateWithoutPlanInput[] | Prisma.PlaythroughUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.PlaythroughCreateOrConnectWithoutPlanInput | Prisma.PlaythroughCreateOrConnectWithoutPlanInput[]
+  createMany?: Prisma.PlaythroughCreateManyPlanInputEnvelope
+  connect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+}
+
+export type PlaythroughUpdateManyWithoutPlanNestedInput = {
+  create?: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput> | Prisma.PlaythroughCreateWithoutPlanInput[] | Prisma.PlaythroughUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.PlaythroughCreateOrConnectWithoutPlanInput | Prisma.PlaythroughCreateOrConnectWithoutPlanInput[]
+  upsert?: Prisma.PlaythroughUpsertWithWhereUniqueWithoutPlanInput | Prisma.PlaythroughUpsertWithWhereUniqueWithoutPlanInput[]
+  createMany?: Prisma.PlaythroughCreateManyPlanInputEnvelope
+  set?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  disconnect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  delete?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  connect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  update?: Prisma.PlaythroughUpdateWithWhereUniqueWithoutPlanInput | Prisma.PlaythroughUpdateWithWhereUniqueWithoutPlanInput[]
+  updateMany?: Prisma.PlaythroughUpdateManyWithWhereWithoutPlanInput | Prisma.PlaythroughUpdateManyWithWhereWithoutPlanInput[]
+  deleteMany?: Prisma.PlaythroughScalarWhereInput | Prisma.PlaythroughScalarWhereInput[]
+}
+
+export type PlaythroughUncheckedUpdateManyWithoutPlanNestedInput = {
+  create?: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput> | Prisma.PlaythroughCreateWithoutPlanInput[] | Prisma.PlaythroughUncheckedCreateWithoutPlanInput[]
+  connectOrCreate?: Prisma.PlaythroughCreateOrConnectWithoutPlanInput | Prisma.PlaythroughCreateOrConnectWithoutPlanInput[]
+  upsert?: Prisma.PlaythroughUpsertWithWhereUniqueWithoutPlanInput | Prisma.PlaythroughUpsertWithWhereUniqueWithoutPlanInput[]
+  createMany?: Prisma.PlaythroughCreateManyPlanInputEnvelope
+  set?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  disconnect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  delete?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  connect?: Prisma.PlaythroughWhereUniqueInput | Prisma.PlaythroughWhereUniqueInput[]
+  update?: Prisma.PlaythroughUpdateWithWhereUniqueWithoutPlanInput | Prisma.PlaythroughUpdateWithWhereUniqueWithoutPlanInput[]
+  updateMany?: Prisma.PlaythroughUpdateManyWithWhereWithoutPlanInput | Prisma.PlaythroughUpdateManyWithWhereWithoutPlanInput[]
+  deleteMany?: Prisma.PlaythroughScalarWhereInput | Prisma.PlaythroughScalarWhereInput[]
+}
+
 export type PlaythroughCreateWithoutLibraryEntryInput = {
   id?: string
   status: $Enums.PlaythroughStatus
@@ -795,10 +887,12 @@ export type PlaythroughCreateWithoutLibraryEntryInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseStore?: Prisma.StoreCreateNestedOneWithoutPurchasePlaythroughsInput
   saleStore?: Prisma.StoreCreateNestedOneWithoutSalePlaythroughsInput
+  plan?: Prisma.PlanCreateNestedOneWithoutPlaythroughsInput
   journalEntries?: Prisma.PlaythroughJournalEntryCreateNestedManyWithoutPlaythroughInput
 }
 
@@ -816,6 +910,8 @@ export type PlaythroughUncheckedCreateWithoutLibraryEntryInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedCreateNestedManyWithoutPlaythroughInput
@@ -865,6 +961,8 @@ export type PlaythroughScalarWhereInput = {
   salePrice?: Prisma.FloatNullableFilter<"Playthrough"> | number | null
   saleStoreId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   saleDate?: Prisma.StringNullableFilter<"Playthrough"> | string | null
+  includedInPlan?: Prisma.BoolFilter<"Playthrough"> | boolean
+  planId?: Prisma.StringNullableFilter<"Playthrough"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Playthrough"> | Date | string
 }
@@ -881,11 +979,13 @@ export type PlaythroughCreateWithoutJournalEntriesInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntry: Prisma.LibraryEntryCreateNestedOneWithoutPlaythroughsInput
   purchaseStore?: Prisma.StoreCreateNestedOneWithoutPurchasePlaythroughsInput
   saleStore?: Prisma.StoreCreateNestedOneWithoutSalePlaythroughsInput
+  plan?: Prisma.PlanCreateNestedOneWithoutPlaythroughsInput
 }
 
 export type PlaythroughUncheckedCreateWithoutJournalEntriesInput = {
@@ -903,6 +1003,8 @@ export type PlaythroughUncheckedCreateWithoutJournalEntriesInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -935,11 +1037,13 @@ export type PlaythroughUpdateWithoutJournalEntriesInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntry?: Prisma.LibraryEntryUpdateOneRequiredWithoutPlaythroughsNestedInput
   purchaseStore?: Prisma.StoreUpdateOneWithoutPurchasePlaythroughsNestedInput
   saleStore?: Prisma.StoreUpdateOneWithoutSalePlaythroughsNestedInput
+  plan?: Prisma.PlanUpdateOneWithoutPlaythroughsNestedInput
 }
 
 export type PlaythroughUncheckedUpdateWithoutJournalEntriesInput = {
@@ -957,6 +1061,8 @@ export type PlaythroughUncheckedUpdateWithoutJournalEntriesInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -973,10 +1079,12 @@ export type PlaythroughCreateWithoutPurchaseStoreInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntry: Prisma.LibraryEntryCreateNestedOneWithoutPlaythroughsInput
   saleStore?: Prisma.StoreCreateNestedOneWithoutSalePlaythroughsInput
+  plan?: Prisma.PlanCreateNestedOneWithoutPlaythroughsInput
   journalEntries?: Prisma.PlaythroughJournalEntryCreateNestedManyWithoutPlaythroughInput
 }
 
@@ -994,6 +1102,8 @@ export type PlaythroughUncheckedCreateWithoutPurchaseStoreInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedCreateNestedManyWithoutPlaythroughInput
@@ -1021,10 +1131,12 @@ export type PlaythroughCreateWithoutSaleStoreInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   libraryEntry: Prisma.LibraryEntryCreateNestedOneWithoutPlaythroughsInput
   purchaseStore?: Prisma.StoreCreateNestedOneWithoutPurchasePlaythroughsInput
+  plan?: Prisma.PlanCreateNestedOneWithoutPlaythroughsInput
   journalEntries?: Prisma.PlaythroughJournalEntryCreateNestedManyWithoutPlaythroughInput
 }
 
@@ -1042,6 +1154,8 @@ export type PlaythroughUncheckedCreateWithoutSaleStoreInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedCreateNestedManyWithoutPlaythroughInput
@@ -1089,6 +1203,74 @@ export type PlaythroughUpdateManyWithWhereWithoutSaleStoreInput = {
   data: Prisma.XOR<Prisma.PlaythroughUpdateManyMutationInput, Prisma.PlaythroughUncheckedUpdateManyWithoutSaleStoreInput>
 }
 
+export type PlaythroughCreateWithoutPlanInput = {
+  id?: string
+  status: $Enums.PlaythroughStatus
+  platform: string
+  startDate?: string | null
+  endDate?: string | null
+  rating?: number | null
+  review?: string | null
+  purchasePrice?: number | null
+  purchaseDate?: string | null
+  salePrice?: number | null
+  saleDate?: string | null
+  includedInPlan?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  libraryEntry: Prisma.LibraryEntryCreateNestedOneWithoutPlaythroughsInput
+  purchaseStore?: Prisma.StoreCreateNestedOneWithoutPurchasePlaythroughsInput
+  saleStore?: Prisma.StoreCreateNestedOneWithoutSalePlaythroughsInput
+  journalEntries?: Prisma.PlaythroughJournalEntryCreateNestedManyWithoutPlaythroughInput
+}
+
+export type PlaythroughUncheckedCreateWithoutPlanInput = {
+  id?: string
+  libraryEntryId: string
+  status: $Enums.PlaythroughStatus
+  platform: string
+  startDate?: string | null
+  endDate?: string | null
+  rating?: number | null
+  review?: string | null
+  purchasePrice?: number | null
+  purchaseStoreId?: string | null
+  purchaseDate?: string | null
+  salePrice?: number | null
+  saleStoreId?: string | null
+  saleDate?: string | null
+  includedInPlan?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  journalEntries?: Prisma.PlaythroughJournalEntryUncheckedCreateNestedManyWithoutPlaythroughInput
+}
+
+export type PlaythroughCreateOrConnectWithoutPlanInput = {
+  where: Prisma.PlaythroughWhereUniqueInput
+  create: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput>
+}
+
+export type PlaythroughCreateManyPlanInputEnvelope = {
+  data: Prisma.PlaythroughCreateManyPlanInput | Prisma.PlaythroughCreateManyPlanInput[]
+  skipDuplicates?: boolean
+}
+
+export type PlaythroughUpsertWithWhereUniqueWithoutPlanInput = {
+  where: Prisma.PlaythroughWhereUniqueInput
+  update: Prisma.XOR<Prisma.PlaythroughUpdateWithoutPlanInput, Prisma.PlaythroughUncheckedUpdateWithoutPlanInput>
+  create: Prisma.XOR<Prisma.PlaythroughCreateWithoutPlanInput, Prisma.PlaythroughUncheckedCreateWithoutPlanInput>
+}
+
+export type PlaythroughUpdateWithWhereUniqueWithoutPlanInput = {
+  where: Prisma.PlaythroughWhereUniqueInput
+  data: Prisma.XOR<Prisma.PlaythroughUpdateWithoutPlanInput, Prisma.PlaythroughUncheckedUpdateWithoutPlanInput>
+}
+
+export type PlaythroughUpdateManyWithWhereWithoutPlanInput = {
+  where: Prisma.PlaythroughScalarWhereInput
+  data: Prisma.XOR<Prisma.PlaythroughUpdateManyMutationInput, Prisma.PlaythroughUncheckedUpdateManyWithoutPlanInput>
+}
+
 export type PlaythroughCreateManyLibraryEntryInput = {
   id?: string
   status: $Enums.PlaythroughStatus
@@ -1103,6 +1285,8 @@ export type PlaythroughCreateManyLibraryEntryInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1119,10 +1303,12 @@ export type PlaythroughUpdateWithoutLibraryEntryInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseStore?: Prisma.StoreUpdateOneWithoutPurchasePlaythroughsNestedInput
   saleStore?: Prisma.StoreUpdateOneWithoutSalePlaythroughsNestedInput
+  plan?: Prisma.PlanUpdateOneWithoutPlaythroughsNestedInput
   journalEntries?: Prisma.PlaythroughJournalEntryUpdateManyWithoutPlaythroughNestedInput
 }
 
@@ -1140,6 +1326,8 @@ export type PlaythroughUncheckedUpdateWithoutLibraryEntryInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedUpdateManyWithoutPlaythroughNestedInput
@@ -1159,6 +1347,8 @@ export type PlaythroughUncheckedUpdateManyWithoutLibraryEntryInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1177,6 +1367,8 @@ export type PlaythroughCreateManyPurchaseStoreInput = {
   salePrice?: number | null
   saleStoreId?: string | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1195,6 +1387,8 @@ export type PlaythroughCreateManySaleStoreInput = {
   purchaseDate?: string | null
   salePrice?: number | null
   saleDate?: string | null
+  includedInPlan?: boolean
+  planId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1211,10 +1405,12 @@ export type PlaythroughUpdateWithoutPurchaseStoreInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntry?: Prisma.LibraryEntryUpdateOneRequiredWithoutPlaythroughsNestedInput
   saleStore?: Prisma.StoreUpdateOneWithoutSalePlaythroughsNestedInput
+  plan?: Prisma.PlanUpdateOneWithoutPlaythroughsNestedInput
   journalEntries?: Prisma.PlaythroughJournalEntryUpdateManyWithoutPlaythroughNestedInput
 }
 
@@ -1232,6 +1428,8 @@ export type PlaythroughUncheckedUpdateWithoutPurchaseStoreInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedUpdateManyWithoutPlaythroughNestedInput
@@ -1251,6 +1449,8 @@ export type PlaythroughUncheckedUpdateManyWithoutPurchaseStoreInput = {
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1267,10 +1467,12 @@ export type PlaythroughUpdateWithoutSaleStoreInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   libraryEntry?: Prisma.LibraryEntryUpdateOneRequiredWithoutPlaythroughsNestedInput
   purchaseStore?: Prisma.StoreUpdateOneWithoutPurchasePlaythroughsNestedInput
+  plan?: Prisma.PlanUpdateOneWithoutPlaythroughsNestedInput
   journalEntries?: Prisma.PlaythroughJournalEntryUpdateManyWithoutPlaythroughNestedInput
 }
 
@@ -1288,6 +1490,8 @@ export type PlaythroughUncheckedUpdateWithoutSaleStoreInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   journalEntries?: Prisma.PlaythroughJournalEntryUncheckedUpdateManyWithoutPlaythroughNestedInput
@@ -1307,6 +1511,90 @@ export type PlaythroughUncheckedUpdateManyWithoutSaleStoreInput = {
   purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  planId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PlaythroughCreateManyPlanInput = {
+  id?: string
+  libraryEntryId: string
+  status: $Enums.PlaythroughStatus
+  platform: string
+  startDate?: string | null
+  endDate?: string | null
+  rating?: number | null
+  review?: string | null
+  purchasePrice?: number | null
+  purchaseStoreId?: string | null
+  purchaseDate?: string | null
+  salePrice?: number | null
+  saleStoreId?: string | null
+  saleDate?: string | null
+  includedInPlan?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PlaythroughUpdateWithoutPlanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPlaythroughStatusFieldUpdateOperationsInput | $Enums.PlaythroughStatus
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  review?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  libraryEntry?: Prisma.LibraryEntryUpdateOneRequiredWithoutPlaythroughsNestedInput
+  purchaseStore?: Prisma.StoreUpdateOneWithoutPurchasePlaythroughsNestedInput
+  saleStore?: Prisma.StoreUpdateOneWithoutSalePlaythroughsNestedInput
+  journalEntries?: Prisma.PlaythroughJournalEntryUpdateManyWithoutPlaythroughNestedInput
+}
+
+export type PlaythroughUncheckedUpdateWithoutPlanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  libraryEntryId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPlaythroughStatusFieldUpdateOperationsInput | $Enums.PlaythroughStatus
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  review?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  journalEntries?: Prisma.PlaythroughJournalEntryUncheckedUpdateManyWithoutPlaythroughNestedInput
+}
+
+export type PlaythroughUncheckedUpdateManyWithoutPlanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  libraryEntryId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPlaythroughStatusFieldUpdateOperationsInput | $Enums.PlaythroughStatus
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rating?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  review?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchasePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  purchaseStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  salePrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  saleStoreId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  saleDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includedInPlan?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1357,11 +1645,14 @@ export type PlaythroughSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   salePrice?: boolean
   saleStoreId?: boolean
   saleDate?: boolean
+  includedInPlan?: boolean
+  planId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
   journalEntries?: boolean | Prisma.Playthrough$journalEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.PlaythroughCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["playthrough"]>
@@ -1381,11 +1672,14 @@ export type PlaythroughSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   salePrice?: boolean
   saleStoreId?: boolean
   saleDate?: boolean
+  includedInPlan?: boolean
+  planId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
 }, ExtArgs["result"]["playthrough"]>
 
 export type PlaythroughSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1403,11 +1697,14 @@ export type PlaythroughSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   salePrice?: boolean
   saleStoreId?: boolean
   saleDate?: boolean
+  includedInPlan?: boolean
+  planId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
 }, ExtArgs["result"]["playthrough"]>
 
 export type PlaythroughSelectScalar = {
@@ -1425,15 +1722,18 @@ export type PlaythroughSelectScalar = {
   salePrice?: boolean
   saleStoreId?: boolean
   saleDate?: boolean
+  includedInPlan?: boolean
+  planId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PlaythroughOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "libraryEntryId" | "status" | "platform" | "startDate" | "endDate" | "rating" | "review" | "purchasePrice" | "purchaseStoreId" | "purchaseDate" | "salePrice" | "saleStoreId" | "saleDate" | "createdAt" | "updatedAt", ExtArgs["result"]["playthrough"]>
+export type PlaythroughOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "libraryEntryId" | "status" | "platform" | "startDate" | "endDate" | "rating" | "review" | "purchasePrice" | "purchaseStoreId" | "purchaseDate" | "salePrice" | "saleStoreId" | "saleDate" | "includedInPlan" | "planId" | "createdAt" | "updatedAt", ExtArgs["result"]["playthrough"]>
 export type PlaythroughInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
   journalEntries?: boolean | Prisma.Playthrough$journalEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.PlaythroughCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1441,11 +1741,13 @@ export type PlaythroughIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
 }
 export type PlaythroughIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   libraryEntry?: boolean | Prisma.LibraryEntryDefaultArgs<ExtArgs>
   purchaseStore?: boolean | Prisma.Playthrough$purchaseStoreArgs<ExtArgs>
   saleStore?: boolean | Prisma.Playthrough$saleStoreArgs<ExtArgs>
+  plan?: boolean | Prisma.Playthrough$planArgs<ExtArgs>
 }
 
 export type $PlaythroughPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1454,6 +1756,7 @@ export type $PlaythroughPayload<ExtArgs extends runtime.Types.Extensions.Interna
     libraryEntry: Prisma.$LibraryEntryPayload<ExtArgs>
     purchaseStore: Prisma.$StorePayload<ExtArgs> | null
     saleStore: Prisma.$StorePayload<ExtArgs> | null
+    plan: Prisma.$PlanPayload<ExtArgs> | null
     journalEntries: Prisma.$PlaythroughJournalEntryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1471,6 +1774,8 @@ export type $PlaythroughPayload<ExtArgs extends runtime.Types.Extensions.Interna
     salePrice: number | null
     saleStoreId: string | null
     saleDate: string | null
+    includedInPlan: boolean
+    planId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["playthrough"]>
@@ -1870,6 +2175,7 @@ export interface Prisma__PlaythroughClient<T, Null = never, ExtArgs extends runt
   libraryEntry<T extends Prisma.LibraryEntryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LibraryEntryDefaultArgs<ExtArgs>>): Prisma.Prisma__LibraryEntryClient<runtime.Types.Result.GetResult<Prisma.$LibraryEntryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   purchaseStore<T extends Prisma.Playthrough$purchaseStoreArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Playthrough$purchaseStoreArgs<ExtArgs>>): Prisma.Prisma__StoreClient<runtime.Types.Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   saleStore<T extends Prisma.Playthrough$saleStoreArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Playthrough$saleStoreArgs<ExtArgs>>): Prisma.Prisma__StoreClient<runtime.Types.Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  plan<T extends Prisma.Playthrough$planArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Playthrough$planArgs<ExtArgs>>): Prisma.Prisma__PlanClient<runtime.Types.Result.GetResult<Prisma.$PlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   journalEntries<T extends Prisma.Playthrough$journalEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Playthrough$journalEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlaythroughJournalEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1914,6 +2220,8 @@ export interface PlaythroughFieldRefs {
   readonly salePrice: Prisma.FieldRef<"Playthrough", 'Float'>
   readonly saleStoreId: Prisma.FieldRef<"Playthrough", 'String'>
   readonly saleDate: Prisma.FieldRef<"Playthrough", 'String'>
+  readonly includedInPlan: Prisma.FieldRef<"Playthrough", 'Boolean'>
+  readonly planId: Prisma.FieldRef<"Playthrough", 'String'>
   readonly createdAt: Prisma.FieldRef<"Playthrough", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Playthrough", 'DateTime'>
 }
@@ -2352,6 +2660,25 @@ export type Playthrough$saleStoreArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.StoreInclude<ExtArgs> | null
   where?: Prisma.StoreWhereInput
+}
+
+/**
+ * Playthrough.plan
+ */
+export type Playthrough$planArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Plan
+   */
+  select?: Prisma.PlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Plan
+   */
+  omit?: Prisma.PlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PlanInclude<ExtArgs> | null
+  where?: Prisma.PlanWhereInput
 }
 
 /**

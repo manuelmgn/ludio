@@ -432,10 +432,6 @@ export type StoreUpdateOneWithoutSalePlaythroughsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StoreUpdateToOneWithWhereWithoutSalePlaythroughsInput, Prisma.StoreUpdateWithoutSalePlaythroughsInput>, Prisma.StoreUncheckedUpdateWithoutSalePlaythroughsInput>
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type StoreCreateWithoutUserInput = {
   id?: string
   name: string

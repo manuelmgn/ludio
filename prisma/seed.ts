@@ -15,24 +15,36 @@ const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 const DEFAULT_STORES = [
-  "Amazon",
   "AliExpress",
-  "Wallapop",
-  "Vinted",
-  "GAME",
-  "PS Store",
-  "Nintendo eShop",
-  "Steam",
-  "Xbox Store",
+  "Amazon",
+  "Carrefour",
+  "Cash Converters",
+  "CeX",
+  "eBay",
+  "El Corte Inglés",
   "Epic Games Store",
+  "GAME",
   "GOG",
   "Humble Bundle",
-  "eBay",
-  "CeX",
   "MediaMarkt",
-  "Carrefour",
-  "El Corte Inglés",
-  "Cash Converters",
+  "Nintendo eShop",
+  "PS Store",
+  "Steam",
+  "Vinted",
+  "Wallapop",
+  "Xbox Store",
+]
+
+const DEFAULT_PLANS = [
+  "Apple Arcade",
+  "EA Play",
+  "Game Pass",
+  "GeForce Now",
+  "Humble Bundle",
+  "Netflix",
+  "Nintendo Switch Online",
+  "PlayStation Plus",
+  "Ubisoft+",
 ]
 
 async function main() {
@@ -49,6 +61,20 @@ async function main() {
         data: { name, isDefault: true, userId: null },
       })
       console.log(`   + Tenda: ${name}`)
+    }
+  }
+
+  // 2. Planes de suscripción por defecto
+  console.log("🎮 Verificando e insertando plans por defecto...")
+  for (const name of DEFAULT_PLANS) {
+    const existing = await prisma.plan.findFirst({
+      where: { name, isDefault: true },
+    })
+    if (!existing) {
+      await prisma.plan.create({
+        data: { name, isDefault: true, userId: null },
+      })
+      console.log(`   + Plan: ${name}`)
     }
   }
 

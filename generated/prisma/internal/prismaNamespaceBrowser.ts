@@ -64,7 +64,8 @@ export const ModelName = {
   CustomPlatform: 'CustomPlatform',
   GameCanvas: 'GameCanvas',
   CanvasImage: 'CanvasImage',
-  Store: 'Store'
+  Store: 'Store',
+  Plan: 'Plan'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -164,6 +165,8 @@ export const PlaythroughScalarFieldEnum = {
   salePrice: 'salePrice',
   saleStoreId: 'saleStoreId',
   saleDate: 'saleDate',
+  includedInPlan: 'includedInPlan',
+  planId: 'planId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -276,6 +279,18 @@ export const StoreScalarFieldEnum = {
 } as const
 
 export type StoreScalarFieldEnum = (typeof StoreScalarFieldEnum)[keyof typeof StoreScalarFieldEnum]
+
+
+export const PlanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  isDefault: 'isDefault',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
 
 
 export const SortOrder = {

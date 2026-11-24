@@ -1,19 +1,29 @@
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 
-export const STANDARD_PLATFORMS = [
-  "PC",
-  "Steam Deck",
-  "Nintendo Switch 2",
-  "Nintendo Switch",
-  "PlayStation 5",
-  "PlayStation 4",
-  "Xbox Series X/S",
-  "Xbox One",
+export function sortAlphabetically(items: string[]): string[] {
+  return [...items].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }))
+}
+
+export function sortByNameAlphabetically<T extends { name: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+}
+
+export const STANDARD_PLATFORMS = sortAlphabetically([
+  "Android",
+  "iOS",
   "Nintendo 3DS",
-  "PlayStation 3",
+  "Nintendo Switch",
+  "Nintendo Switch 2",
+  "PC",
   "PlayStation 2",
+  "PlayStation 3",
+  "PlayStation 4",
+  "PlayStation 5",
   "Retro / Emulador",
-]
+  "Steam Deck",
+  "Xbox One",
+  "Xbox Series X/S",
+])
 
 export const STATUS_META: Record<
   PlaythroughStatus,

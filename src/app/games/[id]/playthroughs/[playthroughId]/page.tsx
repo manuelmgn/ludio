@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ArrowLeft, Palette, ChevronRight, Gamepad2 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
-import { ensureDefaultStores } from "@/lib/actions/settings"
+import { ensureDefaultStores, ensureDefaultPlans } from "@/lib/actions/settings"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { PlaythroughJournalSection } from "@/components/game/PlaythroughJournalSection"
 import {
@@ -17,6 +17,8 @@ import {
   formatPlaythroughDateLabel,
   formatPlaythroughYearRange,
   getShortPlatformName,
+  sortAlphabetically,
+  sortByNameAlphabetically,
 } from "@/lib/game-utils"
 
 export const dynamic = "force-dynamic"
@@ -53,6 +55,7 @@ export default async function PlaythroughPage({ params }: PlaythroughPageProps) 
         include: {
           purchaseStore: true,
           saleStore: true,
+          plan: true,
           journalEntries: {
             orderBy: { createdAt: "desc" },
           },
@@ -76,19 +79,30 @@ export default async function PlaythroughPage({ params }: PlaythroughPageProps) 
   const statusMeta = STATUS_META[playthrough.status]
   const dateLabel = formatPlaythroughDateLabel(playthrough.startDate, playthrough.endDate)
 
-  const customPlatforms = await prisma.customPlatform.findMany({
-    where: { userId: user.id },
-  })
-  const customPlatformNames = customPlatforms.map((p) => p.name)
+  await Promise.all([ensureDefaultStores(), ensureDefaultPlans()])
 
-  await ensureDefaultStores()
-  const stores = await prisma.store.findMany({
-    where: {
-      OR: [{ isDefault: true }, { userId: user.id }],
-    },
-    orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-  })
-  const storeOptions = stores.map((s) => ({ id: s.id, name: s.name }))
+  const [customPlatforms, stores, plans] = await Promise.all([
+    prisma.customPlatform.findMany({
+      where: { userId: user.id },
+      orderBy: { name: "asc" },
+    }),
+    prisma.store.findMany({
+      where: {
+        OR: [{ isDefault: true }, { userId: user.id }],
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.plan.findMany({
+      where: {
+        OR: [{ isDefault: true }, { userId: user.id }],
+      },
+      orderBy: { name: "asc" },
+    }),
+  ])
+
+  const customPlatformNames = sortAlphabetically(customPlatforms.map((p) => p.name))
+  const storeOptions = sortByNameAlphabetically(stores.map((s) => ({ id: s.id, name: s.name })))
+  const planOptions = sortByNameAlphabetically(plans.map((p) => ({ id: p.id, name: p.name })))
 
   const serializedEntries = playthrough.journalEntries.map((entry) => ({
     id: entry.id,
@@ -231,8 +245,12 @@ export default async function PlaythroughPage({ params }: PlaythroughPageProps) 
                 saleStoreId: playthrough.saleStoreId,
                 saleStoreName: playthrough.saleStore?.name ?? null,
                 saleDate: playthrough.saleDate,
+                includedInPlan: playthrough.includedInPlan,
+                planId: playthrough.planId,
+                planName: playthrough.plan?.name ?? null,
               }}
               stores={storeOptions}
+              plans={planOptions}
               customPlatforms={customPlatformNames}
             />
 

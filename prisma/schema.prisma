@@ -54,6 +54,7 @@ model User {
   lists          List[]
   customPlatforms CustomPlatform[]
   stores         Store[]
+  plans          Plan[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,6 +147,11 @@ model Playthrough {
   saleStoreId String?
   saleStore   Store?   @relation("SaleStore", fields: [saleStoreId], references: [id], onDelete: SetNull)
   saleDate    String?
+
+  // Subscription plan access (alternative to purchase pricing)
+  includedInPlan Boolean @default(false)
+  planId         String?
+  plan           Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
 
   journalEntries PlaythroughJournalEntry[]
 
@@ -260,6 +266,19 @@ model Store {
 
   purchasePlaythroughs Playthrough[] @relation("PurchaseStore")
   salePlaythroughs     Playthrough[] @relation("SaleStore")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plan {
+  id        String   @id @default(uuid())
+  name      String
+  isDefault Boolean  @default(false) // true for built-in plans, false for user-created
+  userId    String?  // null for default/global plans
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  playthroughs Playthrough[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

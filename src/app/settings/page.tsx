@@ -6,6 +6,7 @@ import {
   Globe,
   Gamepad2,
   Store,
+  Layers,
   Download,
   Check,
   X,
@@ -20,6 +21,7 @@ import { usePwa } from "@/contexts/PwaContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
+import { sortByNameAlphabetically } from "@/lib/game-utils"
 import {
   addCustomPlatform,
   getCustomPlatforms,
@@ -27,6 +29,9 @@ import {
   getStores,
   addStore,
   deleteStore,
+  getPlans,
+  addPlan,
+  deletePlan,
   exportUserData,
 } from "@/lib/actions/settings"
 
@@ -37,6 +42,13 @@ interface CustomPlatform {
 }
 
 interface StoreItem {
+  id: string
+  name: string
+  isDefault: boolean
+  createdAt: Date
+}
+
+interface PlanItem {
   id: string
   name: string
   isDefault: boolean
@@ -64,6 +76,12 @@ export default function SettingsPage() {
   const [isStorePending, startStoreTransition] = useTransition()
   const [deletingStoreId, setDeletingStoreId] = useState<string | null>(null)
   const [storeMessage, setStoreMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  const [planName, setPlanName] = useState("")
+  const [plansList, setPlansList] = useState<PlanItem[]>([])
+  const [isPlanPending, startPlanTransition] = useTransition()
+  const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null)
+  const [planMessage, setPlanMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const [isExporting, setIsExporting] = useState(false)
 
@@ -98,12 +116,17 @@ export default function SettingsPage() {
     let isMounted = true
     getCustomPlatforms().then((res) => {
       if (isMounted && res.success && res.data) {
-        setPlatforms(res.data)
+        setPlatforms(sortByNameAlphabetically(res.data))
       }
     })
     getStores().then((res) => {
       if (isMounted && res.success && res.data) {
-        setStoresList(res.data as StoreItem[])
+        setStoresList(sortByNameAlphabetically(res.data as StoreItem[]))
+      }
+    })
+    getPlans().then((res) => {
+      if (isMounted && res.success && res.data) {
+        setPlansList(sortByNameAlphabetically(res.data as PlanItem[]))
       }
     })
     return () => {
@@ -120,7 +143,7 @@ export default function SettingsPage() {
       const result = await addCustomPlatform(platformName)
       if (result.success && result.data) {
         setMessage({ type: "success", text: "Plataforma engadida con éxito ✓" })
-        setPlatforms((prev) => [result.data as CustomPlatform, ...prev])
+        setPlatforms((prev) => sortByNameAlphabetically([...prev, result.data as CustomPlatform]))
         setPlatformName("")
         setTimeout(() => setMessage(null), 3000)
       } else {
@@ -152,7 +175,7 @@ export default function SettingsPage() {
       const result = await addStore(storeName)
       if (result.success && result.data) {
         setStoreMessage({ type: "success", text: t("store_added_success") })
-        setStoresList((prev) => [...prev, result.data as StoreItem])
+        setStoresList((prev) => sortByNameAlphabetically([...prev, result.data as StoreItem]))
         setStoreName("")
         setTimeout(() => setStoreMessage(null), 3000)
       } else {
@@ -175,8 +198,42 @@ export default function SettingsPage() {
     }
   }
 
-  const defaultStores = storesList.filter((s) => s.isDefault)
-  const customStores = storesList.filter((s) => !s.isDefault)
+  const handleAddPlan = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!planName.trim()) return
+
+    setPlanMessage(null)
+    startPlanTransition(async () => {
+      const result = await addPlan(planName)
+      if (result.success && result.data) {
+        setPlanMessage({ type: "success", text: t("plan_added_success") })
+        setPlansList((prev) => sortByNameAlphabetically([...prev, result.data as PlanItem]))
+        setPlanName("")
+        setTimeout(() => setPlanMessage(null), 3000)
+      } else {
+        setPlanMessage({ type: "error", text: result.error || t("plan_add_error") })
+      }
+    })
+  }
+
+  const handleDeletePlan = async (id: string) => {
+    if (!confirm(t("plan_delete_confirm"))) return
+
+    setDeletingPlanId(id)
+    const result = await deletePlan(id)
+    setDeletingPlanId(null)
+
+    if (result.success) {
+      setPlansList((prev) => prev.filter((p) => p.id !== id))
+    } else {
+      alert(result.error || t("plan_delete_error"))
+    }
+  }
+
+  const defaultStores = sortByNameAlphabetically(storesList.filter((s) => s.isDefault))
+  const customStores = sortByNameAlphabetically(storesList.filter((s) => !s.isDefault))
+  const defaultPlans = sortByNameAlphabetically(plansList.filter((p) => p.isDefault))
+  const customPlans = sortByNameAlphabetically(plansList.filter((p) => !p.isDefault))
 
   return (
     <div className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8">
@@ -190,7 +247,7 @@ export default function SettingsPage() {
               {t("settings")}
             </h1>
             <p className="text-xs text-zinc-400 font-sans">
-              Personaliza idioma, plataformas, tendas e copias de seguridade.
+              Personaliza idioma, plataformas, tendas, plans e copias de seguridade.
             </p>
           </div>
         </div>
@@ -393,7 +450,93 @@ export default function SettingsPage() {
           )}
         </GlassPanel>
 
-        {/* Section 4: Install as Mobile App (PWA) */}
+        {/* Section 4: Plans */}
+        <GlassPanel>
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <Layers className="w-5 h-5 text-primary-hover" aria-hidden="true" />
+            <h2 className="text-lg font-display font-semibold text-white">{t("plans_title")}</h2>
+          </div>
+          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">{t("plans_desc")}</p>
+
+          <form onSubmit={handleAddPlan} className="flex gap-2 mb-5 items-end">
+            <div className="flex-1">
+              <Input
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+                placeholder={t("plan_name_placeholder")}
+                disabled={isPlanPending}
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isPlanPending || planName.trim().length === 0}
+              className="h-[42px] shrink-0"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              <span>{isPlanPending ? t("saving") : t("add_plan_btn")}</span>
+            </Button>
+          </form>
+
+          {planMessage && (
+            <p
+              className={`mb-4 text-xs font-mono ${
+                planMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {planMessage.text}
+            </p>
+          )}
+
+          <div className="pt-4 border-t border-white/[0.08]">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+              {t("plans_default_label")} ({defaultPlans.length})
+            </span>
+            {defaultPlans.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {defaultPlans.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/[0.08] border border-purple-400/25 text-xs font-sans text-zinc-200"
+                  >
+                    <span>{p.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-zinc-500 italic mb-4">{t("no_plans")}</p>
+            )}
+          </div>
+
+          {customPlans.length > 0 && (
+            <div className="pt-3 border-t border-white/[0.08]">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
+                {t("plans_custom_label")} ({customPlans.length})
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {customPlans.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
+                  >
+                    <span>{p.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePlan(p.id)}
+                      disabled={deletingPlanId === p.id}
+                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
+                      title={t("delete")}
+                      aria-label={`${t("delete")} ${p.name}`}
+                    >
+                      {deletingPlanId === p.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </GlassPanel>
+
+        {/* Section 5: Install as Mobile App (PWA) */}
         <GlassPanel>
           <div className="flex items-center gap-2.5 mb-1.5">
             <Smartphone className="w-5 h-5 text-primary-hover" aria-hidden="true" />

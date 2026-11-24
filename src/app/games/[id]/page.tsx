@@ -17,9 +17,13 @@ import { GlassPanel } from "@/components/ui/GlassPanel"
 import { GameHeroActions } from "@/components/game/AddToLibraryModal"
 import { GameGallery, type GalleryImageItem } from "@/components/game/GameGallery"
 import { PlaythroughsWidget } from "@/components/game/PlaythroughsWidget"
-import { ensureDefaultStores } from "@/lib/actions/settings"
+import { ensureDefaultStores, ensureDefaultPlans } from "@/lib/actions/settings"
 import { syncGameMetadataIfMissing } from "@/lib/api/games"
-import { getShortPlatformName } from "@/lib/game-utils"
+import {
+  getShortPlatformName,
+  sortAlphabetically,
+  sortByNameAlphabetically,
+} from "@/lib/game-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -36,6 +40,7 @@ export default async function GamePage({ params }: GamePageProps) {
     prisma.game.findUnique({ where: { id } }),
     requireAuthenticatedUser(),
     ensureDefaultStores(),
+    ensureDefaultPlans(),
   ])
 
   let game = initialGame
@@ -66,7 +71,7 @@ export default async function GamePage({ params }: GamePageProps) {
       })
     : null
 
-  const [libraryEntry, customPlatforms, stores] = await Promise.all([
+  const [libraryEntry, customPlatforms, stores, plans] = await Promise.all([
     user
       ? prisma.libraryEntry.findUnique({
           where: {
@@ -81,6 +86,7 @@ export default async function GamePage({ params }: GamePageProps) {
               include: {
                 purchaseStore: true,
                 saleStore: true,
+                plan: true,
                 journalEntries: {
                   orderBy: { createdAt: "desc" },
                 },
@@ -107,6 +113,7 @@ export default async function GamePage({ params }: GamePageProps) {
       ? prisma.customPlatform.findMany({
           where: { userId: user.id },
           select: { name: true },
+          orderBy: { name: "asc" },
         })
       : Promise.resolve([]),
     prisma.store.findMany({
@@ -114,12 +121,20 @@ export default async function GamePage({ params }: GamePageProps) {
         OR: [{ isDefault: true }, ...(user ? [{ userId: user.id }] : [])],
       },
       select: { id: true, name: true },
-      orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+      orderBy: { name: "asc" },
+    }),
+    prisma.plan.findMany({
+      where: {
+        OR: [{ isDefault: true }, ...(user ? [{ userId: user.id }] : [])],
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
   ])
 
-  const customPlatformNames = customPlatforms.map((p) => p.name)
-  const storeOptions = stores.map((s) => ({ id: s.id, name: s.name }))
+  const customPlatformNames = sortAlphabetically(customPlatforms.map((p) => p.name))
+  const storeOptions = sortByNameAlphabetically(stores.map((s) => ({ id: s.id, name: s.name })))
+  const planOptions = sortByNameAlphabetically(plans.map((p) => ({ id: p.id, name: p.name })))
 
   // Compute playthrough numbers (chronological: oldest = #1, newest = #N)
   const totalPlaythroughs = libraryEntry?.playthroughs.length ?? 0
@@ -132,6 +147,8 @@ export default async function GamePage({ params }: GamePageProps) {
     endDate: pt.endDate,
     rating: pt.rating,
     entriesCount: pt.journalEntries.length,
+    includedInPlan: pt.includedInPlan,
+    planName: pt.plan?.name ?? null,
   }))
 
   const latestPlaythrough = libraryEntry?.playthroughs[0] ?? null
@@ -371,6 +388,7 @@ export default async function GamePage({ params }: GamePageProps) {
               overallRating={libraryEntry?.rating ?? null}
               customPlatforms={customPlatformNames}
               stores={storeOptions}
+              plans={planOptions}
             />
           </div>
         </section>
@@ -388,6 +406,7 @@ export default async function GamePage({ params }: GamePageProps) {
                 playthroughs={playthroughSummaries}
                 customPlatforms={customPlatformNames}
                 stores={storeOptions}
+                plans={planOptions}
               />
             )}
 

@@ -2,17 +2,22 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Star, Pencil, Check, X, Trash2, AlertTriangle, Loader2 } from "lucide-react"
+import { Star, Pencil, Check, X, Trash2, AlertTriangle, Loader2, Euro, Layers } from "lucide-react"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import {
   updatePlaythrough,
   updatePlaythroughRating,
   deletePlaythrough,
 } from "@/lib/actions/library"
-import { STANDARD_PLATFORMS, STATUS_META } from "@/lib/game-utils"
+import {
+  STANDARD_PLATFORMS,
+  STATUS_META,
+  sortAlphabetically,
+  sortByNameAlphabetically,
+} from "@/lib/game-utils"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
-import type { StoreOption } from "@/components/game/AddToLibraryModal"
+import type { StoreOption, PlanOption } from "@/components/game/AddToLibraryModal"
 
 /* ============================================================================
  * 1. Per-Playthrough Rating & Opinion Card
@@ -194,12 +199,16 @@ export interface PlaythroughDetailData {
   saleStoreId: string | null
   saleStoreName: string | null
   saleDate: string | null
+  includedInPlan: boolean
+  planId: string | null
+  planName: string | null
 }
 
 interface PlaythroughDetailsCardProps {
   gameId: string
   playthrough: PlaythroughDetailData
   stores: StoreOption[]
+  plans: PlanOption[]
   customPlatforms: string[]
 }
 
@@ -207,21 +216,35 @@ export function PlaythroughDetailsCard({
   gameId,
   playthrough,
   stores,
+  plans,
   customPlatforms,
 }: PlaythroughDetailsCardProps) {
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
+  const [acquisitionMode, setAcquisitionMode] = useState<"price" | "plan">(
+    playthrough.includedInPlan ? "plan" : "price"
+  )
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  const allPlatforms = Array.from(
-    new Set([...STANDARD_PLATFORMS, ...customPlatforms, playthrough.platform])
+  const allPlatforms = sortAlphabetically(
+    Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms, playthrough.platform]))
   )
+  const sortedStores = sortByNameAlphabetically(stores)
+  const sortedPlans = sortByNameAlphabetically(plans)
   const meta = STATUS_META[playthrough.status]
   const net =
-    playthrough.purchasePrice != null && playthrough.salePrice != null
+    !playthrough.includedInPlan &&
+    playthrough.purchasePrice != null &&
+    playthrough.salePrice != null
       ? playthrough.salePrice - playthrough.purchasePrice
       : null
+
+  const openEditMode = () => {
+    setAcquisitionMode(playthrough.includedInPlan ? "plan" : "price")
+    setError(null)
+    setIsEditing(true)
+  }
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -232,6 +255,9 @@ export function PlaythroughDetailsCard({
     const platform = (fd.get("platform") as string)?.trim() || playthrough.platform
     const startDate = (fd.get("startDate") as string)?.trim() || null
     const endDate = (fd.get("endDate") as string)?.trim() || null
+
+    const isPlan = acquisitionMode === "plan"
+    const planId = (fd.get("planId") as string)?.trim() || null
 
     const purchasePriceStr = (fd.get("purchasePrice") as string)?.trim()
     const purchaseStoreId = (fd.get("purchaseStoreId") as string)?.trim() || null
@@ -247,12 +273,14 @@ export function PlaythroughDetailsCard({
         platform,
         startDate,
         endDate,
-        purchasePrice: purchasePriceStr ? parseFloat(purchasePriceStr) : null,
-        purchaseStoreId,
-        purchaseDate,
-        salePrice: salePriceStr ? parseFloat(salePriceStr) : null,
-        saleStoreId,
-        saleDate,
+        includedInPlan: isPlan,
+        planId: isPlan ? planId : null,
+        purchasePrice: !isPlan && purchasePriceStr ? parseFloat(purchasePriceStr) : null,
+        purchaseStoreId: !isPlan ? purchaseStoreId : null,
+        purchaseDate: !isPlan ? purchaseDate : null,
+        salePrice: !isPlan && salePriceStr ? parseFloat(salePriceStr) : null,
+        saleStoreId: !isPlan ? saleStoreId : null,
+        saleDate: !isPlan ? saleDate : null,
       })
 
       if (res.success) {
@@ -333,73 +361,129 @@ export function PlaythroughDetailsCard({
             </div>
           </div>
 
-          {/* Pricing fields */}
+          {/* Pricing or Subscription Plan fields */}
           <div className="pt-2.5 mt-1 border-t border-white/[0.08] flex flex-col gap-2.5">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300">
-              Compra
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                name="purchasePrice"
-                placeholder="Prezo (€)"
-                defaultValue={playthrough.purchasePrice ?? ""}
-                className={inputClass}
-              />
-              <select
-                name="purchaseStoreId"
-                defaultValue={playthrough.purchaseStoreId || ""}
-                className={inputClass}
+            <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/35 border border-white/[0.08]">
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => setAcquisitionMode("price")}
+                aria-pressed={acquisitionMode === "price"}
+                className={`py-1.5 px-2 rounded-lg text-[11px] font-sans transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                  acquisitionMode === "price"
+                    ? "bg-amber-500/20 text-amber-100 border border-amber-400/40 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                }`}
               >
-                <option value="">Tenda...</option>
-                {stores.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                <Euro className="w-3 h-3" aria-hidden="true" />
+                <span>Compra / Venda</span>
+              </button>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => setAcquisitionMode("plan")}
+                aria-pressed={acquisitionMode === "plan"}
+                className={`py-1.5 px-2 rounded-lg text-[11px] font-sans transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                  acquisitionMode === "plan"
+                    ? "bg-purple-500/25 text-purple-100 border border-purple-400/45 font-medium"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                }`}
+              >
+                <Layers className="w-3 h-3" aria-hidden="true" />
+                <span>Incluído nun plan</span>
+              </button>
             </div>
-            <input
-              type="date"
-              name="purchaseDate"
-              defaultValue={playthrough.purchaseDate || ""}
-              className={inputClass}
-            />
 
-            <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-300 pt-1">
-              Venda
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                name="salePrice"
-                placeholder="Prezo (€)"
-                defaultValue={playthrough.salePrice ?? ""}
-                className={inputClass}
-              />
-              <select
-                name="saleStoreId"
-                defaultValue={playthrough.saleStoreId || ""}
-                className={inputClass}
-              >
-                <option value="">Tenda...</option>
-                {stores.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <input
-              type="date"
-              name="saleDate"
-              defaultValue={playthrough.saleDate || ""}
-              className={inputClass}
-            />
+            {acquisitionMode === "plan" ? (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-mono uppercase tracking-wider text-purple-200">
+                  Plan de subscrición (opcional)
+                </label>
+                <select
+                  name="planId"
+                  defaultValue={playthrough.planId || ""}
+                  className={inputClass}
+                >
+                  <option value="">Sen especificar (calquera plan)</option>
+                  {sortedPlans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Marcarase como xogado dentro dun plan de subscrición sen contabilizar prezo.
+                </p>
+              </div>
+            ) : (
+              <>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300">
+                  Compra
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="purchasePrice"
+                    placeholder="Prezo (€)"
+                    defaultValue={playthrough.purchasePrice ?? ""}
+                    className={inputClass}
+                  />
+                  <select
+                    name="purchaseStoreId"
+                    defaultValue={playthrough.purchaseStoreId || ""}
+                    className={inputClass}
+                  >
+                    <option value="">Tenda...</option>
+                    {sortedStores.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  type="date"
+                  name="purchaseDate"
+                  defaultValue={playthrough.purchaseDate || ""}
+                  className={inputClass}
+                />
+
+                <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-300 pt-1">
+                  Venda
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    name="salePrice"
+                    placeholder="Prezo (€)"
+                    defaultValue={playthrough.salePrice ?? ""}
+                    className={inputClass}
+                  />
+                  <select
+                    name="saleStoreId"
+                    defaultValue={playthrough.saleStoreId || ""}
+                    className={inputClass}
+                  >
+                    <option value="">Tenda...</option>
+                    {sortedStores.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  type="date"
+                  name="saleDate"
+                  defaultValue={playthrough.saleDate || ""}
+                  className={inputClass}
+                />
+              </>
+            )}
           </div>
 
           <Button type="submit" size="sm" disabled={isPending} className="mt-1 w-full">
@@ -430,7 +514,7 @@ export function PlaythroughDetailsCard({
           </h3>
           <button
             type="button"
-            onClick={() => setIsEditing(true)}
+            onClick={openEditMode}
             className="inline-flex items-center gap-1 text-xs font-mono text-primary-hover hover:text-white transition-colors cursor-pointer"
           >
             <Pencil className="w-3 h-3" aria-hidden="true" />
@@ -463,69 +547,85 @@ export function PlaythroughDetailsCard({
         </dl>
       </GlassPanel>
 
-      {/* Purchase & Sale Breakdown */}
+      {/* Purchase & Sale or Subscription Plan Breakdown */}
       <GlassPanel className="p-5 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-amber-300/90">
-            Compra e venda
+          <h3
+            className={`text-xs font-mono uppercase tracking-wider ${
+              playthrough.includedInPlan ? "text-purple-300" : "text-amber-300/90"
+            }`}
+          >
+            {playthrough.includedInPlan ? "Plan de subscrición" : "Compra e venda"}
           </h3>
-          {playthrough.purchasePrice == null && playthrough.salePrice == null && (
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="text-[11px] font-mono text-zinc-400 hover:text-white cursor-pointer"
-            >
-              + Engadir
-            </button>
-          )}
+          {!playthrough.includedInPlan &&
+            playthrough.purchasePrice == null &&
+            playthrough.salePrice == null && (
+              <button
+                type="button"
+                onClick={openEditMode}
+                className="text-[11px] font-mono text-zinc-400 hover:text-white cursor-pointer"
+              >
+                + Engadir
+              </button>
+            )}
         </div>
 
-        <div className="flex flex-col gap-2.5 text-xs">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-zinc-400">Compra</div>
-              {(playthrough.purchaseStoreName || playthrough.purchaseDate) && (
-                <div className="text-[11px] text-zinc-500">
-                  {[playthrough.purchaseStoreName, playthrough.purchaseDate]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </div>
-              )}
-            </div>
-            <span className="font-mono text-zinc-100 tabular-nums">
-              {playthrough.purchasePrice != null ? `${playthrough.purchasePrice.toFixed(2)}€` : "—"}
+        {playthrough.includedInPlan ? (
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-400/30 text-purple-100 font-medium">
+              <Layers className="w-3.5 h-3.5 text-purple-300" aria-hidden="true" />
+              <span>{playthrough.planName || "Incluído nun plan"}</span>
             </span>
+            <span className="text-[11px] font-mono text-zinc-500">Sen prezo</span>
           </div>
-
-          <div className="flex items-start justify-between pt-2 border-t border-white/[0.06]">
-            <div>
-              <div className="text-zinc-400">Venda</div>
-              {(playthrough.saleStoreName || playthrough.saleDate) && (
-                <div className="text-[11px] text-zinc-500">
-                  {[playthrough.saleStoreName, playthrough.saleDate].filter(Boolean).join(" · ")}
-                </div>
-              )}
-            </div>
-            <span
-              className={`font-mono tabular-nums ${
-                playthrough.salePrice != null ? "text-emerald-300" : "text-zinc-500"
-              }`}
-            >
-              {playthrough.salePrice != null
-                ? `${playthrough.salePrice.toFixed(2)}€`
-                : "Non vendida"}
-            </span>
-          </div>
-
-          {net !== null && (
-            <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
-              <span className="text-zinc-300 font-medium">Custo neto</span>
-              <span className="font-mono font-semibold text-white tabular-nums">
-                {net > 0 ? `+${net.toFixed(2)}€` : `${net.toFixed(2)}€`}
+        ) : (
+          <div className="flex flex-col gap-2.5 text-xs">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-zinc-400">Compra</div>
+                {(playthrough.purchaseStoreName || playthrough.purchaseDate) && (
+                  <div className="text-[11px] text-zinc-500">
+                    {[playthrough.purchaseStoreName, playthrough.purchaseDate]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                )}
+              </div>
+              <span className="font-mono text-zinc-100 tabular-nums">
+                {playthrough.purchasePrice != null ? `${playthrough.purchasePrice.toFixed(2)}€` : "—"}
               </span>
             </div>
-          )}
-        </div>
+
+            <div className="flex items-start justify-between pt-2 border-t border-white/[0.06]">
+              <div>
+                <div className="text-zinc-400">Venda</div>
+                {(playthrough.saleStoreName || playthrough.saleDate) && (
+                  <div className="text-[11px] text-zinc-500">
+                    {[playthrough.saleStoreName, playthrough.saleDate].filter(Boolean).join(" · ")}
+                  </div>
+                )}
+              </div>
+              <span
+                className={`font-mono tabular-nums ${
+                  playthrough.salePrice != null ? "text-emerald-300" : "text-zinc-500"
+                }`}
+              >
+                {playthrough.salePrice != null
+                  ? `${playthrough.salePrice.toFixed(2)}€`
+                  : "Non vendida"}
+              </span>
+            </div>
+
+            {net !== null && (
+              <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
+                <span className="text-zinc-300 font-medium">Custo neto</span>
+                <span className="font-mono font-semibold text-white tabular-nums">
+                  {net > 0 ? `+${net.toFixed(2)}€` : `${net.toFixed(2)}€`}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </GlassPanel>
     </>
   )

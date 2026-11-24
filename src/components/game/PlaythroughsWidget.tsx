@@ -2,10 +2,14 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Plus, Star } from "lucide-react"
+import { ArrowRight, Plus, Star, Layers } from "lucide-react"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { AddToLibraryModal, type StoreOption } from "@/components/game/AddToLibraryModal"
+import {
+  AddToLibraryModal,
+  type StoreOption,
+  type PlanOption,
+} from "@/components/game/AddToLibraryModal"
 import {
   STATUS_META,
   formatPlaythroughDateLabel,
@@ -20,6 +24,8 @@ export interface PlaythroughSummaryItem {
   endDate: string | null
   rating: number | null
   entriesCount: number
+  includedInPlan?: boolean
+  planName?: string | null
 }
 
 interface PlaythroughsWidgetProps {
@@ -29,6 +35,7 @@ interface PlaythroughsWidgetProps {
   playthroughs: PlaythroughSummaryItem[]
   customPlatforms: string[]
   stores: StoreOption[]
+  plans: PlanOption[]
 }
 
 export function PlaythroughsWidget({
@@ -38,6 +45,7 @@ export function PlaythroughsWidget({
   playthroughs,
   customPlatforms,
   stores,
+  plans,
 }: PlaythroughsWidgetProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -70,6 +78,7 @@ export function PlaythroughsWidget({
           mode="new-playthrough"
           customPlatforms={customPlatforms}
           stores={stores}
+          plans={plans}
         />
       </>
     )
@@ -120,6 +129,15 @@ export function PlaythroughsWidget({
                     <span>{meta.label}</span>
                     <span className="text-zinc-600">·</span>
                     <span className="font-mono text-[11px] text-zinc-500">{dateLabel}</span>
+                    {pt.includedInPlan && (
+                      <>
+                        <span className="text-zinc-600">·</span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono text-purple-300">
+                          <Layers className="w-3 h-3" aria-hidden="true" />
+                          <span>{pt.planName || "Plan"}</span>
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -154,6 +172,7 @@ export function PlaythroughsWidget({
         mode="new-playthrough"
         customPlatforms={customPlatforms}
         stores={stores}
+        plans={plans}
       />
     </>
   )

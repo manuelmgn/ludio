@@ -10,16 +10,27 @@ import {
   ChevronDown,
   ChevronRight,
   Euro,
+  Layers,
   Trash2,
   AlertTriangle,
   Loader2,
 } from "lucide-react"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { addGameToLibrary, removeGameFromLibrary } from "@/lib/actions/library"
-import { STANDARD_PLATFORMS, STATUS_META } from "@/lib/game-utils"
+import {
+  STANDARD_PLATFORMS,
+  STATUS_META,
+  sortAlphabetically,
+  sortByNameAlphabetically,
+} from "@/lib/game-utils"
 import { Button } from "@/components/ui/Button"
 
 export interface StoreOption {
+  id: string
+  name: string
+}
+
+export interface PlanOption {
   id: string
   name: string
 }
@@ -33,6 +44,7 @@ interface AddToLibraryModalProps {
   mode: "add" | "new-playthrough"
   customPlatforms: string[]
   stores: StoreOption[]
+  plans: PlanOption[]
 }
 
 export function AddToLibraryModal({
@@ -44,6 +56,7 @@ export function AddToLibraryModal({
   mode,
   customPlatforms,
   stores,
+  plans,
 }: AddToLibraryModalProps) {
   const router = useRouter()
   const idPrefix = useId()
@@ -56,9 +69,14 @@ export function AddToLibraryModal({
   const [status, setStatus] = useState<PlaythroughStatus>("PLAYING")
   const [selectedRating, setSelectedRating] = useState<number>(0)
   const [showPricing, setShowPricing] = useState(false)
+  const [acquisitionMode, setAcquisitionMode] = useState<"price" | "plan">("price")
   const [error, setError] = useState<string | null>(null)
 
-  const allPlatforms = Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms]))
+  const allPlatforms = sortAlphabetically(
+    Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms]))
+  )
+  const sortedStores = sortByNameAlphabetically(stores)
+  const sortedPlans = sortByNameAlphabetically(plans)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -120,6 +138,9 @@ export function AddToLibraryModal({
     const endDate = (formData.get("endDate") as string)?.trim()
     const publicReview = (formData.get("publicReview") as string)?.trim()
 
+    const isPlan = showPricing && acquisitionMode === "plan"
+    const planId = (formData.get("planId") as string)?.trim()
+
     const purchasePriceStr = (formData.get("purchasePrice") as string)?.trim()
     const purchaseStoreId = (formData.get("purchaseStoreId") as string)?.trim()
     const purchaseDate = (formData.get("purchaseDate") as string)?.trim()
@@ -132,8 +153,8 @@ export function AddToLibraryModal({
       return
     }
 
-    const purchasePrice = purchasePriceStr ? parseFloat(purchasePriceStr) : undefined
-    const salePrice = salePriceStr ? parseFloat(salePriceStr) : undefined
+    const purchasePrice = !isPlan && purchasePriceStr ? parseFloat(purchasePriceStr) : undefined
+    const salePrice = !isPlan && salePriceStr ? parseFloat(salePriceStr) : undefined
 
     startTransition(async () => {
       const res = await addGameToLibrary(gameId, {
@@ -144,11 +165,13 @@ export function AddToLibraryModal({
         rating: selectedRating > 0 ? selectedRating : undefined,
         publicReview: publicReview || undefined,
         purchasePrice,
-        purchaseStoreId: purchaseStoreId || undefined,
-        purchaseDate: purchaseDate || undefined,
+        purchaseStoreId: !isPlan ? purchaseStoreId || undefined : undefined,
+        purchaseDate: !isPlan ? purchaseDate || undefined : undefined,
         salePrice,
-        saleStoreId: saleStoreId || undefined,
-        saleDate: saleDate || undefined,
+        saleStoreId: !isPlan ? saleStoreId || undefined : undefined,
+        saleDate: !isPlan ? saleDate || undefined : undefined,
+        includedInPlan: isPlan,
+        planId: isPlan ? planId || undefined : undefined,
       })
 
       if (res.success) {
@@ -177,6 +200,7 @@ export function AddToLibraryModal({
     setStatus("PLAYING")
     setSelectedRating(0)
     setShowPricing(false)
+    setAcquisitionMode("price")
     setError(null)
     if (open) {
       onClose()
@@ -341,7 +365,7 @@ export function AddToLibraryModal({
             )}
           </div>
 
-          {/* Optional Pricing Toggle */}
+          {/* Optional Pricing or Subscription Plan Toggle */}
           <div className="flex flex-col gap-2">
             <button
               type="button"
@@ -353,59 +377,121 @@ export function AddToLibraryModal({
               ) : (
                 <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               )}
-              <Euro className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-              <span>Prezo de compra / venda (opcional)</span>
+              {acquisitionMode === "plan" ? (
+                <Layers className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
+              ) : (
+                <Euro className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+              )}
+              <span>Prezo ou plan de subscrición (opcional)</span>
             </button>
 
             {showPricing && (
-              <div className="p-3.5 rounded-xl bg-amber-500/[0.04] border border-amber-500/20 flex flex-col gap-3">
-                <div className="space-y-1.5">
-                  <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">Compra</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      name="purchasePrice"
-                      placeholder="Prezo (€)"
-                      disabled={isPending}
-                      className={inputClass}
-                    />
-                    <select name="purchaseStoreId" disabled={isPending} className={inputClass}>
-                      <option value="">Tenda...</option>
-                      {stores.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                    <input type="date" name="purchaseDate" disabled={isPending} className={inputClass} />
-                  </div>
+              <div
+                className={`p-3.5 rounded-xl border flex flex-col gap-3 ${
+                  acquisitionMode === "plan"
+                    ? "bg-purple-500/[0.05] border-purple-400/25"
+                    : "bg-amber-500/[0.04] border-amber-500/20"
+                }`}
+              >
+                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/35 border border-white/[0.08]">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => setAcquisitionMode("price")}
+                    aria-pressed={acquisitionMode === "price"}
+                    className={`py-1.5 px-2.5 rounded-lg text-xs font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      acquisitionMode === "price"
+                        ? "bg-amber-500/20 text-amber-100 border border-amber-400/40 font-medium"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                    }`}
+                  >
+                    <Euro className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>Compra / Venda</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => setAcquisitionMode("plan")}
+                    aria-pressed={acquisitionMode === "plan"}
+                    className={`py-1.5 px-2.5 rounded-lg text-xs font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      acquisitionMode === "plan"
+                        ? "bg-purple-500/25 text-purple-100 border border-purple-400/45 font-medium"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>Incluído nun plan</span>
+                  </button>
                 </div>
 
-                <div className="space-y-1.5 pt-2.5 border-t border-white/[0.06]">
-                  <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">Venda</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      name="salePrice"
-                      placeholder="Prezo (€)"
-                      disabled={isPending}
-                      className={inputClass}
-                    />
-                    <select name="saleStoreId" disabled={isPending} className={inputClass}>
-                      <option value="">Tenda...</option>
-                      {stores.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
+                {acquisitionMode === "plan" ? (
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-mono text-purple-200 uppercase tracking-wider block">
+                      Plan de subscrición (opcional)
+                    </label>
+                    <select name="planId" disabled={isPending} className={inputClass}>
+                      <option value="">Sen especificar (calquera plan)</option>
+                      {sortedPlans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
                         </option>
                       ))}
                     </select>
-                    <input type="date" name="saleDate" disabled={isPending} className={inputClass} />
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      Marcarase como xogado dentro dun plan de subscrición sen contabilizar prezo.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">Compra</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          name="purchasePrice"
+                          placeholder="Prezo (€)"
+                          disabled={isPending}
+                          className={inputClass}
+                        />
+                        <select name="purchaseStoreId" disabled={isPending} className={inputClass}>
+                          <option value="">Tenda...</option>
+                          {sortedStores.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                        <input type="date" name="purchaseDate" disabled={isPending} className={inputClass} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2.5 border-t border-white/[0.06]">
+                      <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">Venda</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          name="salePrice"
+                          placeholder="Prezo (€)"
+                          disabled={isPending}
+                          className={inputClass}
+                        />
+                        <select name="saleStoreId" disabled={isPending} className={inputClass}>
+                          <option value="">Tenda...</option>
+                          {sortedStores.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                        <input type="date" name="saleDate" disabled={isPending} className={inputClass} />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -446,6 +532,7 @@ interface GameHeroActionsProps {
   overallRating?: number | null
   customPlatforms: string[]
   stores: StoreOption[]
+  plans: PlanOption[]
 }
 
 export function GameHeroActions({
@@ -459,6 +546,7 @@ export function GameHeroActions({
   overallRating,
   customPlatforms,
   stores,
+  plans,
 }: GameHeroActionsProps) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
@@ -525,6 +613,7 @@ export function GameHeroActions({
           mode="add"
           customPlatforms={customPlatforms}
           stores={stores}
+          plans={plans}
         />
       </>
     )
@@ -619,6 +708,7 @@ export function GameHeroActions({
         mode="new-playthrough"
         customPlatforms={customPlatforms}
         stores={stores}
+        plans={plans}
       />
     </>
   )

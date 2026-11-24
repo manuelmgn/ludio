@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import {
   Gamepad2,
   Euro,
+  Layers,
   ChevronDown,
   ChevronRight,
   Star,
@@ -18,8 +19,18 @@ import { Select } from "@/components/ui/Select"
 import { addGameToLibrary } from "@/lib/actions/library"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { useLanguage } from "@/contexts/LanguageContext"
+import {
+  STANDARD_PLATFORMS,
+  sortAlphabetically,
+  sortByNameAlphabetically,
+} from "@/lib/game-utils"
 
 interface StoreOption {
+  id: string
+  name: string
+}
+
+interface PlanOption {
   id: string
   name: string
 }
@@ -28,36 +39,32 @@ interface AddGameFormProps {
   gameId: string
   customPlatforms?: string[]
   stores?: StoreOption[]
+  plans?: PlanOption[]
 }
 
-export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGameFormProps) {
+export function AddGameForm({
+  gameId,
+  customPlatforms = [],
+  stores = [],
+  plans = [],
+}: AddGameFormProps) {
   const router = useRouter()
   const { t } = useLanguage()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [showPricing, setShowPricing] = useState(false)
+  const [acquisitionMode, setAcquisitionMode] = useState<"price" | "plan">("price")
   const [status, setStatus] = useState<"WISHED" | PlaythroughStatus>("WISHED")
   const [selectedRating, setSelectedRating] = useState<number>(0)
 
   const isPlaythrough = status !== "WISHED"
   const isCompleted = status === "COMPLETED"
 
-  const standardPlatforms = [
-    "PC",
-    "Steam Deck",
-    "Nintendo Switch 2",
-    "Nintendo Switch",
-    "PlayStation 5",
-    "PlayStation 4",
-    "Xbox Series X/S",
-    "Xbox One",
-    "Nintendo 3DS",
-    "PlayStation 3",
-    "PlayStation 2",
-    "Retro / Emulador",
-  ]
-
-  const allPlatforms = Array.from(new Set([...standardPlatforms, ...customPlatforms]))
+  const allPlatforms = sortAlphabetically(
+    Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms]))
+  )
+  const sortedStores = sortByNameAlphabetically(stores)
+  const sortedPlans = sortByNameAlphabetically(plans)
 
   const statusOptions: { id: "WISHED" | PlaythroughStatus; label: string; dot: string }[] = [
     { id: "WISHED", label: t("filter_wish") || "Desexado", dot: "bg-purple-400" },
@@ -77,6 +84,9 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
     const endDate = formData.get("endDate") as string
     const publicReview = formData.get("publicReview") as string
 
+    const isPlan = showPricing && acquisitionMode === "plan"
+    const planId = (formData.get("planId") as string)?.trim()
+
     const purchasePriceStr = formData.get("purchasePrice") as string
     const purchaseStoreId = formData.get("purchaseStoreId") as string
     const purchaseDate = formData.get("purchaseDate") as string
@@ -95,8 +105,8 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
     }
 
     const rating = isCompleted && selectedRating > 0 ? selectedRating : undefined
-    const purchasePrice = purchasePriceStr?.trim() ? parseFloat(purchasePriceStr) : undefined
-    const salePrice = salePriceStr?.trim() ? parseFloat(salePriceStr) : undefined
+    const purchasePrice = !isPlan && purchasePriceStr?.trim() ? parseFloat(purchasePriceStr) : undefined
+    const salePrice = !isPlan && salePriceStr?.trim() ? parseFloat(salePriceStr) : undefined
 
     startTransition(async () => {
       const result = await addGameToLibrary(gameId, {
@@ -107,11 +117,13 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
         rating,
         publicReview: publicReview?.trim() || undefined,
         purchasePrice,
-        purchaseStoreId: purchaseStoreId?.trim() || undefined,
-        purchaseDate: purchaseDate?.trim() || undefined,
+        purchaseStoreId: !isPlan ? purchaseStoreId?.trim() || undefined : undefined,
+        purchaseDate: !isPlan ? purchaseDate?.trim() || undefined : undefined,
         salePrice,
-        saleStoreId: saleStoreId?.trim() || undefined,
-        saleDate: saleDate?.trim() || undefined,
+        saleStoreId: !isPlan ? saleStoreId?.trim() || undefined : undefined,
+        saleDate: !isPlan ? saleDate?.trim() || undefined : undefined,
+        includedInPlan: isPlan,
+        planId: isPlan ? planId || undefined : undefined,
       })
 
       if (result.success) {
@@ -217,7 +229,7 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
               </div>
             </div>
 
-            {/* Pricing toggle */}
+            {/* Pricing or Plan toggle */}
             <button
               type="button"
               onClick={() => setShowPricing(!showPricing)}
@@ -229,12 +241,73 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
               ) : (
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               )}
-              <Euro className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-              <span>{t("pricing_toggle")}</span>
+              {acquisitionMode === "plan" ? (
+                <Layers className="w-3.5 h-3.5 text-purple-400" aria-hidden="true" />
+              ) : (
+                <Euro className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+              )}
+              <span>{t("pricing_or_plan_toggle") || t("pricing_toggle")}</span>
             </button>
 
             {showPricing && (
-              <div className="p-4 border border-amber-500/20 bg-amber-500/[0.04] rounded-2xl flex flex-col gap-4">
+              <div
+                className={`p-4 border rounded-2xl flex flex-col gap-4 ${
+                  acquisitionMode === "plan"
+                    ? "border-purple-400/25 bg-purple-500/[0.05]"
+                    : "border-amber-500/20 bg-amber-500/[0.04]"
+                }`}
+              >
+                <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/35 border border-white/[0.08]">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => setAcquisitionMode("price")}
+                    aria-pressed={acquisitionMode === "price"}
+                    className={`py-1.5 px-2.5 rounded-lg text-xs font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      acquisitionMode === "price"
+                        ? "bg-amber-500/20 text-amber-100 border border-amber-400/40 font-medium"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                    }`}
+                  >
+                    <Euro className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>{t("acquisition_price_tab") || "Compra / Venda"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => setAcquisitionMode("plan")}
+                    aria-pressed={acquisitionMode === "plan"}
+                    className={`py-1.5 px-2.5 rounded-lg text-xs font-sans transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                      acquisitionMode === "plan"
+                        ? "bg-purple-500/25 text-purple-100 border border-purple-400/45 font-medium"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>{t("acquisition_plan_tab") || "Incluído nun plan"}</span>
+                  </button>
+                </div>
+
+                {acquisitionMode === "plan" ? (
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="planId" className="text-[11px] font-mono uppercase tracking-wider text-purple-200">
+                      {t("plan_label") || "Plan de subscrición (opcional)"}
+                    </label>
+                    <select name="planId" id="planId" disabled={isPending} className={inputClass}>
+                      <option value="">{t("select_plan_optional") || "Sen especificar (calquera plan)"}</option>
+                      {sortedPlans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {t("plan_included_hint") ||
+                        "Marcarase como xogado dentro dun plan de subscrición sen contabilizar prezo."}
+                    </p>
+                  </div>
+                ) : (
+                  <>
                 <span className="text-[11px] font-mono uppercase tracking-wider text-amber-300">
                   {t("pricing_section_title")}
                 </span>
@@ -272,7 +345,7 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         className={inputClass}
                       >
                         <option value="">{t("select_store")}</option>
-                        {stores.map((s) => (
+                        {sortedStores.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
@@ -327,7 +400,7 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                         className={inputClass}
                       >
                         <option value="">{t("select_store")}</option>
-                        {stores.map((s) => (
+                        {sortedStores.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
@@ -348,6 +421,8 @@ export function AddGameForm({ gameId, customPlatforms = [], stores = [] }: AddGa
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
               </div>
             )}
           </>

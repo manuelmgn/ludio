@@ -8,6 +8,7 @@ import {
   Search,
   Gamepad2,
   Euro,
+  Layers,
   RotateCcw,
   Star,
   Palette,
@@ -21,6 +22,7 @@ import {
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { sortAlphabetically } from "@/lib/game-utils"
 
 type PlaythroughStatus = "PLAYING" | "COMPLETED" | "ABANDONED" | "ON_HOLD"
 type FilterTab = PlaythroughStatus | "WISH" | "ALL"
@@ -52,6 +54,8 @@ export interface LibraryEntryWithDetails {
     salePrice?: number | null
     purchaseStore?: { name: string } | null
     saleStore?: { name: string } | null
+    includedInPlan?: boolean
+    plan?: { name: string } | null
   }[]
 }
 
@@ -66,6 +70,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const [selectedPlatform, setSelectedPlatform] = useState("ALL")
   const [selectedStore, setSelectedStore] = useState("ALL")
+  const [selectedPlan, setSelectedPlan] = useState("ALL")
   const [sortBy, setSortBy] = useState<SortOption>("updated_desc")
   const [onlyWithPrice, setOnlyWithPrice] = useState(false)
 
@@ -76,7 +81,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
         if (p.platform) set.add(p.platform)
       })
     })
-    return Array.from(set).sort()
+    return sortAlphabetically(Array.from(set))
   }, [entries])
 
   const availableStores = useMemo(() => {
@@ -87,7 +92,22 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
         if (p.saleStore?.name) set.add(p.saleStore.name)
       })
     })
-    return Array.from(set).sort()
+    return sortAlphabetically(Array.from(set))
+  }, [entries])
+
+  const hasAnyPlanEntries = useMemo(
+    () => entries.some((e) => e.playthroughs.some((p) => p.includedInPlan)),
+    [entries]
+  )
+
+  const availablePlans = useMemo(() => {
+    const set = new Set<string>()
+    entries.forEach((e) => {
+      e.playthroughs.forEach((p) => {
+        if (p.includedInPlan && p.plan?.name) set.add(p.plan.name)
+      })
+    })
+    return sortAlphabetically(Array.from(set))
   }, [entries])
 
   const counts = useMemo(() => {
@@ -114,6 +134,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     searchQuery.trim() !== "" ||
     selectedPlatform !== "ALL" ||
     selectedStore !== "ALL" ||
+    selectedPlan !== "ALL" ||
     onlyWithPrice ||
     sortBy !== "updated_desc"
 
@@ -121,6 +142,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     setSearchQuery("")
     setSelectedPlatform("ALL")
     setSelectedStore("ALL")
+    setSelectedPlan("ALL")
     setSortBy("updated_desc")
     setOnlyWithPrice(false)
   }
@@ -164,6 +186,16 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
           (p) => p.purchaseStore?.name === selectedStore || p.saleStore?.name === selectedStore
         )
         if (!hasStore) return false
+      }
+
+      if (selectedPlan === "ANY_PLAN") {
+        const hasPlan = entry.playthroughs.some((p) => p.includedInPlan)
+        if (!hasPlan) return false
+      } else if (selectedPlan !== "ALL") {
+        const hasPlan = entry.playthroughs.some(
+          (p) => p.includedInPlan && p.plan?.name === selectedPlan
+        )
+        if (!hasPlan) return false
       }
 
       if (onlyWithPrice) {
@@ -225,7 +257,7 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
     })
 
     return result
-  }, [entries, activeTab, deferredSearchQuery, selectedPlatform, selectedStore, onlyWithPrice, sortBy, releaseTimestamps])
+  }, [entries, activeTab, deferredSearchQuery, selectedPlatform, selectedStore, selectedPlan, onlyWithPrice, sortBy, releaseTimestamps])
 
   return (
     <div className="w-full flex flex-col gap-6">
@@ -333,6 +365,29 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                   {availableStores.map((s) => (
                     <option key={s} value={s}>
                       {s}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400"
+                />
+              </div>
+            )}
+
+            {hasAnyPlanEntries && (
+              <div className="relative">
+                <select
+                  value={selectedPlan}
+                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  aria-label="Filtrar por plan"
+                  className="appearance-none rounded-xl border border-white/10 bg-[#0b0b12]/85 pl-3 pr-8 py-2 text-xs text-zinc-200 outline-none focus:border-primary/60 font-sans cursor-pointer hover:border-white/20 transition-colors"
+                >
+                  <option value="ALL">{t("filter_all_plans") || "Todos os plans"}</option>
+                  <option value="ANY_PLAN">{t("filter_any_plan") || "Calquera plan"}</option>
+                  {availablePlans.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
                     </option>
                   ))}
                 </select>
@@ -530,7 +585,18 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                   ) : (
                     <span className="text-zinc-600">—</span>
                   )}
-                  {latestPlaythrough?.purchasePrice != null && (
+                  {latestPlaythrough?.includedInPlan && (
+                    <span
+                      className="inline-flex items-center gap-1 text-purple-300 font-medium ml-auto truncate max-w-[90px]"
+                      title={latestPlaythrough.plan?.name || t("included_in_plan_unspecified")}
+                    >
+                      <Layers className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
+                      <span className="truncate">
+                        {latestPlaythrough.plan?.name || t("included_in_plan_badge")}
+                      </span>
+                    </span>
+                  )}
+                  {!latestPlaythrough?.includedInPlan && latestPlaythrough?.purchasePrice != null && (
                     <span
                       className="text-rose-300 font-semibold ml-auto tabular-nums"
                       title={latestPlaythrough.purchaseStore?.name}
@@ -538,7 +604,9 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
                       {latestPlaythrough.purchasePrice.toFixed(0)}€
                     </span>
                   )}
-                  {latestPlaythrough?.purchasePrice == null && latestPlaythrough?.salePrice != null && (
+                  {!latestPlaythrough?.includedInPlan &&
+                    latestPlaythrough?.purchasePrice == null &&
+                    latestPlaythrough?.salePrice != null && (
                     <span
                       className="text-emerald-300 font-semibold ml-auto tabular-nums"
                       title={latestPlaythrough.saleStore?.name}

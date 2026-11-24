@@ -15,9 +15,19 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext"
 import { updatePlaythrough, deletePlaythrough } from "@/lib/actions/library"
 import { Button } from "@/components/ui/Button"
+import {
+  STANDARD_PLATFORMS,
+  sortAlphabetically,
+  sortByNameAlphabetically,
+} from "@/lib/game-utils"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 
 interface StoreOption {
+  id: string
+  name: string
+}
+
+interface PlanOption {
   id: string
   name: string
 }
@@ -36,12 +46,16 @@ export interface SerializedPlaythrough {
   saleStoreId: string | null
   saleStore?: { id: string; name: string } | null
   saleDate: string | null
+  includedInPlan?: boolean
+  planId?: string | null
+  plan?: { id: string; name: string } | null
 }
 
 interface PlaythroughListProps {
   gameId: string
   playthroughs: SerializedPlaythrough[]
   stores: StoreOption[]
+  plans?: PlanOption[]
   customPlatforms: string[]
 }
 
@@ -49,6 +63,7 @@ export function PlaythroughList({
   gameId,
   playthroughs,
   stores,
+  plans = [],
   customPlatforms,
 }: PlaythroughListProps) {
   const { t } = useLanguage()
@@ -56,21 +71,11 @@ export function PlaythroughList({
   const [isPending, startTransition] = useTransition()
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const standardPlatforms = [
-    "PC",
-    "Steam Deck",
-    "Nintendo Switch 2",
-    "Nintendo Switch",
-    "PlayStation 5",
-    "PlayStation 4",
-    "Xbox Series X/S",
-    "Xbox One",
-    "Nintendo 3DS",
-    "PlayStation 3",
-    "PlayStation 2",
-    "Retro / Emulador",
-  ]
-  const allPlatforms = Array.from(new Set([...standardPlatforms, ...customPlatforms]))
+  const allPlatforms = sortAlphabetically(
+    Array.from(new Set([...STANDARD_PLATFORMS, ...customPlatforms]))
+  )
+  const sortedStores = sortByNameAlphabetically(stores)
+  void plans
 
   const statusLabels: Record<string, { label: string; dot: string; color: string }> = {
     PLAYING: {
@@ -279,7 +284,7 @@ export function PlaythroughList({
                         className={fieldClass}
                       >
                         <option value="">{t("select_store")}</option>
-                        {stores.map((s) => (
+                        {sortedStores.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
@@ -318,7 +323,7 @@ export function PlaythroughList({
                         className={fieldClass}
                       >
                         <option value="">{t("select_store")}</option>
-                        {stores.map((s) => (
+                        {sortedStores.map((s) => (
                           <option key={s.id} value={s.id}>
                             {s.name}
                           </option>
