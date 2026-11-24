@@ -116,6 +116,7 @@ export function PlaythroughsWidget({
               <Link
                 key={pt.id}
                 href={`/games/${gameId}/playthroughs/${pt.id}`}
+                transitionTypes={["nav-forward"]}
                 className="w-full px-5 py-4 flex items-center justify-between gap-4 hover:bg-white/[0.03] transition-colors group"
               >
                 <div className="min-w-0 space-y-1">

@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next"
+import { Suspense } from "react"
 import "./globals.css"
 import { auth } from "@/auth"
 import { LanguageProvider } from "@/contexts/LanguageContext"
 import { PwaProvider } from "@/contexts/PwaContext"
 import { Navbar } from "@/components/layout/Navbar"
 import { BottomNav } from "@/components/layout/BottomNav"
+import { NavigationProgress } from "@/components/layout/NavigationProgress"
+import { PageTransitionShell } from "@/components/layout/PageTransitionShell"
 import { PwaInstallBanner } from "@/components/pwa/PwaInstallBanner"
 
 export const viewport: Viewport = {
@@ -176,15 +179,20 @@ export default async function RootLayout({
 
         <LanguageProvider>
           <PwaProvider>
+            <Suspense fallback={null}>
+              <NavigationProgress />
+            </Suspense>
             {isAuthenticated && <Navbar />}
             <main
+              id="main-content"
+              tabIndex={-1}
               className={
                 isAuthenticated
-                  ? "pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:pt-[calc(5.75rem+env(safe-area-inset-top,0px))] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] min-h-dvh flex-1 flex flex-col"
-                  : "pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] min-h-dvh flex-1 flex flex-col"
+                  ? "pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:pt-[calc(5.75rem+env(safe-area-inset-top,0px))] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] min-h-dvh flex-1 flex flex-col outline-none"
+                  : "pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] min-h-dvh flex-1 flex flex-col outline-none"
               }
             >
-              <div className="flex-1 flex flex-col animate-page-enter">{children}</div>
+              <PageTransitionShell>{children}</PageTransitionShell>
             </main>
             {isAuthenticated && <BottomNav />}
             <PwaInstallBanner />

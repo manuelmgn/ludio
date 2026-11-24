@@ -38,6 +38,7 @@ export const GameCard = memo(function GameCard({
   return (
     <Link
       href={`/games/${id}`}
+      transitionTypes={["nav-forward"]}
       className={`block w-full group ${deferRender ? "card-defer-render" : ""}`}
     >
       <GlassPanel
