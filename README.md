@@ -55,7 +55,7 @@ La app estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ## Producción con Docker
 
-Flux **no levanta su propia base de datos PostgreSQL** en producción: se conecta a la instancia PostgreSQL compartida indicada en `DATABASE_URL` dentro de `.env` (por ejemplo `postgresql://usuario:contraseña@host.docker.internal:5432/flux_db` o la IP de tu servidor/NAS).
+Flux **no levanta su propia base de datos PostgreSQL** en producción: se conecta a la instancia PostgreSQL compartida (`db_postgres:5432`) a través de la red Docker externa `dab_db`, usando `DATABASE_URL` desde `.env`.
 
 El archivo `docker-compose.yml` orquesta dos servicios:
 1. **`flux-init`**: Contenedor de inicialización que aplica las migraciones y el seed contra `DATABASE_URL` (`npx prisma migrate deploy && npm run db:seed`).

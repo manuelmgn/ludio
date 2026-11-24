@@ -7,8 +7,8 @@ services:
     container_name: flux_init
     env_file:
       - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - dab_db
     restart: "no"
 
   app:
@@ -23,15 +23,19 @@ services:
     environment:
       AUTH_TRUST_HOST: "true"
       PORT: ${PORT:-5020}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "${PORT:-5020}:${PORT:-5020}"
     volumes:
       - flux_uploads:/app/public/uploads
+    networks:
+      - dab_db
     depends_on:
       flux-init:
         condition: service_completed_successfully
 
 volumes:
   flux_uploads:
+
+networks:
+  dab_db:
+    external: true
