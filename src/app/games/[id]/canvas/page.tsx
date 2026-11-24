@@ -80,6 +80,7 @@ export default async function CanvasPage({ params }: CanvasPageProps) {
       <div className="flex items-center justify-between pb-4 border-b border-white/[0.08] flex-wrap gap-3">
         <Link
           href={`/games/${gameId}`}
+          transitionTypes={["nav-back"]}
           className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm font-sans"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />

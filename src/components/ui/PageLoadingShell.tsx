@@ -34,7 +34,7 @@ export function PageLoadingShell({
         role="status"
         aria-busy="true"
         aria-live="polite"
-        className="flex flex-1 flex-col items-center px-4 sm:px-8 py-6 sm:py-8 skeleton-delay-enter"
+        className="flex flex-1 flex-col items-center px-3 sm:px-6 py-6 sm:py-8 skeleton-delay-enter"
       >
         <span className="sr-only">{label}</span>
 
@@ -54,7 +54,7 @@ export function PageLoadingShell({
 
 function GenericSkeleton() {
   return (
-    <div className="w-full max-w-5xl flex flex-col gap-6">
+    <div className="w-full max-w-6xl flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl skeleton-shimmer" />
@@ -161,7 +161,7 @@ function SearchSkeleton() {
 
 function DashboardSkeleton() {
   return (
-    <div className="w-full max-w-5xl flex flex-col gap-6">
+    <div className="w-full max-w-6xl flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-2xl skeleton-shimmer" />
@@ -237,7 +237,7 @@ function DetailSkeleton() {
 
 function EditorSkeleton() {
   return (
-    <div className="w-full max-w-5xl flex flex-col gap-6">
+    <div className="w-full max-w-6xl flex flex-col gap-6">
       <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
         <div className="h-5 w-48 rounded-lg skeleton-shimmer" />
         <div className="h-9 w-32 rounded-xl skeleton-shimmer" />
@@ -259,7 +259,7 @@ function EditorSkeleton() {
 
 function PlaythroughSkeleton() {
   return (
-    <div className="w-full max-w-5xl flex flex-col gap-6">
+    <div className="w-full max-w-6xl flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="h-5 w-44 rounded-lg skeleton-shimmer" />
         <div className="h-8 w-28 rounded-xl skeleton-shimmer" />
@@ -288,7 +288,7 @@ function PlaythroughSkeleton() {
 
 function SettingsSkeleton() {
   return (
-    <div className="w-full max-w-4xl flex flex-col gap-6">
+    <div className="w-full max-w-6xl flex flex-col gap-6">
       <div className="flex items-center gap-3">
         <div className="h-11 w-11 rounded-2xl skeleton-shimmer" />
         <div className="flex flex-col gap-2">

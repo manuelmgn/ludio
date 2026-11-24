@@ -1,6 +1,6 @@
 "use client"
 
-import { ViewTransition } from "react"
+import { ViewTransition, useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
 
 interface PageTransitionShellProps {
@@ -15,9 +15,28 @@ interface PageTransitionShellProps {
  * - Lateral routes use `page-transition`, while drill-down / back links tagged with
  *   `transitionTypes={['nav-forward']}` or `['nav-back']` animate directionally.
  * - Browsers without the View Transitions API fall back cleanly to `page-enter-fallback`.
+ * - Programmatic focus moves to `#main-content` when focus would otherwise be abandoned
+ *   after a route change, without stealing focus from an autofocused control inside `<main>`.
  */
 export function PageTransitionShell({ children }: PageTransitionShellProps) {
   const pathname = usePathname()
+  const prevPathnameRef = useRef(pathname)
+
+  useEffect(() => {
+    if (prevPathnameRef.current === pathname) return
+    prevPathnameRef.current = pathname
+
+    const main = document.getElementById("main-content")
+    if (!main) return
+
+    const active = document.activeElement
+    const focusAbandoned =
+      !active || active === document.body || !main.contains(active)
+
+    if (focusAbandoned) {
+      main.focus({ preventScroll: true })
+    }
+  }, [pathname])
 
   return (
     <ViewTransition

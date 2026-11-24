@@ -7,6 +7,13 @@ const SHOW_DELAY_MS = 120
 const FINISH_HIDE_DELAY_MS = 240
 const FAILSAFE_TIMEOUT_MS = 12000
 
+type ProgressPhase = "idle" | "loading" | "finishing"
+
+interface ProgressState {
+  phase: ProgressPhase
+  progress: number
+}
+
 /**
  * Subtle, non-intrusive top navigation progress bar.
  * - Waits 120ms before appearing so instant/cached navigations never flash.
@@ -16,9 +23,9 @@ const FAILSAFE_TIMEOUT_MS = 12000
 export function NavigationProgress() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [phase, setPhase] = useState<"idle" | "loading" | "finishing">("idle")
-  const [progress, setProgress] = useState(0)
+  const [state, setState] = useState<ProgressState>({ phase: "idle", progress: 0 })
 
+  const phaseRef = useRef<ProgressPhase>("idle")
   const showTimerRef = useRef<number | null>(null)
   const trickleTimerRef = useRef<number | null>(null)
   const hideTimerRef = useRef<number | null>(null)
@@ -48,18 +55,17 @@ export function NavigationProgress() {
     clearAllTimers()
 
     const rafId = window.requestAnimationFrame(() => {
-      setPhase((currentPhase) => {
-        if (currentPhase === "loading") {
-          setProgress(100)
-          hideTimerRef.current = window.setTimeout(() => {
-            setPhase("idle")
-            setProgress(0)
-          }, FINISH_HIDE_DELAY_MS)
-          return "finishing"
-        }
-        setProgress(0)
-        return "idle"
-      })
+      if (phaseRef.current === "loading") {
+        phaseRef.current = "finishing"
+        setState({ phase: "finishing", progress: 100 })
+        hideTimerRef.current = window.setTimeout(() => {
+          phaseRef.current = "idle"
+          setState({ phase: "idle", progress: 0 })
+        }, FINISH_HIDE_DELAY_MS)
+      } else {
+        phaseRef.current = "idle"
+        setState({ phase: "idle", progress: 0 })
+      }
     })
 
     return () => {
@@ -75,14 +81,17 @@ export function NavigationProgress() {
 
       showTimerRef.current = window.setTimeout(() => {
         if (!isNavigatingRef.current) return
-        setPhase("loading")
-        setProgress(22)
+        phaseRef.current = "loading"
+        setState({ phase: "loading", progress: 22 })
 
         trickleTimerRef.current = window.setInterval(() => {
-          setProgress((current) => {
-            if (current >= 88) return current
-            const step = Math.max(2, (90 - current) * 0.16)
-            return Math.min(88, current + step)
+          setState((current) => {
+            if (current.phase !== "loading" || current.progress >= 88) return current
+            const step = Math.max(2, (90 - current.progress) * 0.16)
+            return {
+              phase: "loading",
+              progress: Math.min(88, current.progress + step),
+            }
           })
         }, 220)
       }, SHOW_DELAY_MS)
@@ -90,8 +99,8 @@ export function NavigationProgress() {
       failsafeTimerRef.current = window.setTimeout(() => {
         isNavigatingRef.current = false
         clearAllTimers()
-        setPhase("idle")
-        setProgress(0)
+        phaseRef.current = "idle"
+        setState({ phase: "idle", progress: 0 })
       }, FAILSAFE_TIMEOUT_MS)
     }
 
@@ -114,7 +123,12 @@ export function NavigationProgress() {
       if (anchor.hasAttribute("download")) return
 
       const hrefAttr = anchor.getAttribute("href")
-      if (!hrefAttr || hrefAttr.startsWith("#") || hrefAttr.startsWith("mailto:") || hrefAttr.startsWith("tel:")) {
+      if (
+        !hrefAttr ||
+        hrefAttr.startsWith("#") ||
+        hrefAttr.startsWith("mailto:") ||
+        hrefAttr.startsWith("tel:")
+      ) {
         return
       }
 
@@ -145,7 +159,7 @@ export function NavigationProgress() {
     }
   }, [])
 
-  const isVisible = phase !== "idle"
+  const isVisible = state.phase !== "idle"
 
   return (
     <div
@@ -157,7 +171,7 @@ export function NavigationProgress() {
     >
       <div
         className="h-full origin-left bg-gradient-to-r from-purple-500 via-primary-hover to-accent-cyan shadow-[0_0_12px_rgba(168,85,247,0.75)] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] relative overflow-hidden"
-        style={{ transform: `scaleX(${progress / 100})` }}
+        style={{ transform: `scaleX(${state.progress / 100})` }}
       >
         <div className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/55 to-transparent nav-progress-sheen" />
       </div>
