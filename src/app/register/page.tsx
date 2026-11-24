@@ -22,7 +22,7 @@ export default function RegisterPage() {
               <Gamepad2 className="w-5 h-5 text-white" aria-hidden="true" />
             </span>
             <span className="font-pixel text-4xl text-white tracking-widest drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]">
-              LUDIO
+              FLUX
             </span>
           </div>
           <h1 className="text-xl font-display font-semibold text-white">{t("register")}</h1>
@@ -44,7 +44,7 @@ export default function RegisterPage() {
             type="email"
             autoComplete="email"
             required
-            placeholder="gamer@ludio.app"
+            placeholder="gamer@flux.app"
             disabled={isPending}
             icon={<Mail className="w-4 h-4" aria-hidden="true" />}
           />

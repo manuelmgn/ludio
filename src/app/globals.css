@@ -184,7 +184,7 @@ dialog::backdrop {
 }
 
 /* Shimmer loading skeleton */
-@keyframes ludio-shimmer {
+@keyframes flux-shimmer {
   0% {
     background-position: -200% 0;
   }
@@ -203,7 +203,7 @@ dialog::backdrop {
       rgba(255, 255, 255, 0.03) 75%
     );
     background-size: 200% 100%;
-    animation: ludio-shimmer 1.8s ease-in-out infinite;
+    animation: flux-shimmer 1.8s ease-in-out infinite;
   }
 }
 

@@ -1,14 +1,14 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ludio_postgres
+    container_name: flux_postgres
     restart: unless-stopped
     env_file:
       - .env
     ports:
       - "5432:5432"
     volumes:
-      - ludio_pgdata:/var/lib/postgresql/data
+      - flux_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -16,4 +16,4 @@ services:
       retries: 10
 
 volumes:
-  ludio_pgdata:
+  flux_pgdata:

@@ -1,4 +1,4 @@
-# Ludio
+# Flux
 
 Aplicación web construida con Next.js, Prisma 7, Auth.js y PostgreSQL.
 
@@ -55,10 +55,10 @@ La app estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ## Producción con Docker
 
-El archivo `docker-compose.yml` orquesta tres servicios (reutilizando el mismo contenedor `ludio_postgres` y volumen `ludio_pgdata` que el entorno local):
-1. **`db`** (`ludio_postgres`): PostgreSQL 15 con `healthcheck`.
-2. **`ludio-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy && npm run db:seed`.
-3. **`app`** (`ludio_app`): Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `ludio-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `ludio_uploads`.
+El archivo `docker-compose.yml` orquesta tres servicios (reutilizando el mismo contenedor `flux_postgres` y volumen `flux_pgdata` que el entorno local):
+1. **`db`** (`flux_postgres`): PostgreSQL 15 con `healthcheck`.
+2. **`flux-init`**: Contenedor de inicialización que espera a que `db` esté sano y ejecuta `npx prisma migrate deploy && npm run db:seed`.
+3. **`app`** (`flux_app`): Servidor Next.js (`output: "standalone"`) que arranca automáticamente cuando `flux-init` finaliza con éxito, persistiendo las imágenes subidas en el volumen `flux_uploads`.
 
 Para construir y levantar todo el stack en producción:
 
@@ -75,5 +75,5 @@ docker compose up -d --build
 Para ver los logs de inicialización o de la aplicación:
 
 ```bash
-docker compose logs -f ludio-init app
+docker compose logs -f flux-init app
 ```

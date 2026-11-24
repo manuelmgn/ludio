@@ -1,26 +1,26 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: ludio_postgres
+    container_name: flux_postgres
     restart: unless-stopped
     env_file:
       - .env
     ports:
       - "${DB_PORT:-5021}:5432"
     volumes:
-      - ludio_pgdata:/var/lib/postgresql/data
+      - flux_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  ludio-init:
+  flux-init:
     build:
       context: .
       dockerfile: Dockerfile
       target: init
-    container_name: ludio_init
+    container_name: flux_init
     env_file:
       - .env
     environment:
@@ -35,7 +35,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
-    container_name: ludio_app
+    container_name: flux_app
     restart: unless-stopped
     env_file:
       - .env
@@ -46,11 +46,11 @@ services:
     ports:
       - "${PORT:-5020}:${PORT:-5020}"
     volumes:
-      - ludio_uploads:/app/public/uploads
+      - flux_uploads:/app/public/uploads
     depends_on:
-      ludio-init:
+      flux-init:
         condition: service_completed_successfully
 
 volumes:
-  ludio_pgdata:
-  ludio_uploads:
+  flux_pgdata:
+  flux_uploads:

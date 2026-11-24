@@ -1,4 +1,4 @@
-const CACHE_VERSION = "ludio-v2"
+const CACHE_VERSION = "flux-v1"
 const STATIC_CACHE = `${CACHE_VERSION}-static`
 const IMAGE_CACHE = `${CACHE_VERSION}-images`
 const MAX_IMAGE_ENTRIES = 80
@@ -91,7 +91,7 @@ self.addEventListener("fetch", (event) => {
         const cachedOffline = await caches.match("/offline")
         if (cachedOffline) return cachedOffline
         return new Response(
-          "<!doctype html><html lang='gl'><body style='background:#08080d;color:#f4f4f7;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0'><div><h1>Ludio</h1><p>Sen conexión a internet.</p></div></body></html>",
+          "<!doctype html><html lang='gl'><body style='background:#08080d;color:#f4f4f7;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0'><div><h1>Flux</h1><p>Sen conexión a internet.</p></div></body></html>",
           { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }
         )
       })

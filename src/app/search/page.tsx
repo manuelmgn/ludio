@@ -30,7 +30,7 @@ function isValidTypeFilter(value: string | null): value is TypeFilterOption {
 
 const ITEMS_PER_PAGE = 24
 const CLIENT_CACHE_TTL_MS = 5 * 60 * 1000
-const SESSION_CACHE_KEY = "ludio_search_cache_v1"
+const SESSION_CACHE_KEY = "flux_search_cache_v1"
 const DEBOUNCE_MS = 350
 
 interface CachedSearchEntry {
@@ -128,7 +128,7 @@ function SearchContent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        const saved = localStorage.getItem("ludio_recent_searches")
+        const saved = localStorage.getItem("flux_recent_searches")
         if (saved) {
           setRecentSearches(JSON.parse(saved))
         }
@@ -146,7 +146,7 @@ function SearchContent() {
       setRecentSearches((prev) => {
         const filtered = prev.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())
         const next = [trimmed, ...filtered].slice(0, 6)
-        localStorage.setItem("ludio_recent_searches", JSON.stringify(next))
+        localStorage.setItem("flux_recent_searches", JSON.stringify(next))
         return next
       })
     } catch {
@@ -156,7 +156,7 @@ function SearchContent() {
 
   const clearRecentSearches = () => {
     try {
-      localStorage.removeItem("ludio_recent_searches")
+      localStorage.removeItem("flux_recent_searches")
       setRecentSearches([])
     } catch {
       // Ignore

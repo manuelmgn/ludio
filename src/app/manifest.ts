@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next"
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Ludio — Diario e Colección de Videoxogos",
-    short_name: "Ludio",
+    name: "Flux — Diario e Colección de Videoxogos",
+    short_name: "Flux",
     description:
       "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
     start_url: "/",
@@ -65,14 +65,14 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: "1080x1920",
         type: "image/png",
         form_factor: "narrow",
-        label: "Ludio en móbil — Biblioteca, diario e partidas",
+        label: "Flux en móbil — Biblioteca, diario e partidas",
       },
       {
         src: "/pwa/screenshot?type=wide",
         sizes: "1920x1080",
         type: "image/png",
         form_factor: "wide",
-        label: "Ludio en escritorio e tablet — O teu santuario gamer",
+        label: "Flux en escritorio e tablet — O teu santuario gamer",
       },
     ],
   }

@@ -20,7 +20,7 @@ export default function OfflinePage() {
             <Gamepad2 className="w-4 h-4 text-white" aria-hidden="true" />
           </span>
           <span className="font-pixel text-[1.75rem] text-white tracking-widest leading-none drop-shadow-[0_0_14px_rgba(168,85,247,0.55)]">
-            LUDIO
+            FLUX
           </span>
         </div>
 

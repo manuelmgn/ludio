@@ -24,7 +24,7 @@ const dictionaries: Record<Language, Dictionary> = {
   pt,
 }
 
-const STORAGE_KEY = "ludio_lang"
+const STORAGE_KEY = "flux_lang"
 
 function isValidLanguage(value: string | null): value is Language {
   return value === "gl" || value === "pt"

@@ -33,7 +33,7 @@ interface PwaContextValue {
   triggerInstall: () => Promise<InstallOutcome>
 }
 
-const DISMISS_STORAGE_KEY = "ludio_pwa_banner_dismissed_at"
+const DISMISS_STORAGE_KEY = "flux_pwa_banner_dismissed_at"
 const DISMISS_TTL_MS = 14 * 24 * 60 * 60 * 1000 // 14 days
 
 const PwaContext = createContext<PwaContextValue | undefined>(undefined)

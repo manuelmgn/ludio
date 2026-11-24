@@ -90,7 +90,7 @@ export function Navbar() {
             <Gamepad2 className="w-4 h-4 text-white" aria-hidden="true" />
           </span>
           <span className="font-pixel text-[1.75rem] text-white tracking-widest leading-none drop-shadow-[0_0_14px_rgba(168,85,247,0.55)] group-hover:text-primary-hover transition-colors">
-            LUDIO
+            FLUX
           </span>
           <span className="hidden lg:inline-flex items-center text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-purple-200 border border-primary/25">
             v0.2

@@ -53,9 +53,9 @@ async function main() {
   }
 
   // 2. Usuario administrador / inicial
-  const adminEmail = (process.env.ADMIN_EMAIL || "admin@ludio.app").trim()
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@flux.app").trim()
   const adminUsername = (process.env.ADMIN_USERNAME || "admin").trim()
-  const adminPassword = process.env.ADMIN_PASSWORD || "ludio_admin_123"
+  const adminPassword = process.env.ADMIN_PASSWORD || "flux_admin_123"
 
   const existingUser = await prisma.user.findFirst({
     where: {

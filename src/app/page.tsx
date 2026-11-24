@@ -82,7 +82,7 @@ export default async function HomePage() {
         </div>
 
         <h1 className="font-pixel text-7xl sm:text-8xl md:text-[7.25rem] tracking-[0.14em] leading-none bg-gradient-to-b from-white via-purple-100 to-purple-400 bg-clip-text text-transparent drop-shadow-[0_0_40px_rgba(168,85,247,0.45)] mb-5 select-none">
-          LUDIO
+          FLUX
         </h1>
 
         <p className="max-w-2xl text-base sm:text-lg text-zinc-300/90 font-sans leading-relaxed mb-9">
@@ -153,7 +153,7 @@ export default async function HomePage() {
               <Gamepad2 className="w-4 h-4" aria-hidden="true" />
             </span>
             <h2 className="text-xl sm:text-2xl font-display font-semibold text-white tracking-tight">
-              {recentEntries.length > 0 ? "As túas partidas recentes" : "Descubre xogos en Ludio"}
+              {recentEntries.length > 0 ? "As túas partidas recentes" : "Descubre xogos en Flux"}
             </h2>
           </div>
           <Link
@@ -350,7 +350,7 @@ export default async function HomePage() {
       <footer className="w-full max-w-5xl py-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 font-mono gap-4">
         <div className="flex items-center gap-2">
           <Gamepad2 className="w-3.5 h-3.5 text-primary-hover" aria-hidden="true" />
-          <span>LUDIO © 2026 — O teu santuario gamer</span>
+          <span>FLUX © 2026 — O teu santuario gamer</span>
         </div>
         <div className="flex items-center gap-5">
           <Link href="/library" className="hover:text-zinc-200 transition-colors">

@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
             color: "#ffffff",
           }}
         >
-          L
+          F
         </div>
         <div
           style={{
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
             color: "#ffffff",
           }}
         >
-          LUDIO
+          FLUX
         </div>
       </div>
     ),

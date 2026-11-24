@@ -23,14 +23,14 @@ const appBaseUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(appBaseUrl),
   title: {
-    default: "Ludio — Diario e Colección de Videoxogos",
-    template: "%s · Ludio",
+    default: "Flux — Diario e Colección de Videoxogos",
+    template: "%s · Flux",
   },
-  applicationName: "Ludio",
+  applicationName: "Flux",
   description:
     "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
   keywords: [
-    "Ludio",
+    "Flux",
     "videoxogos",
     "diario gamer",
     "colección de videoxogos",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Ludio",
+    title: "Flux",
     statusBarStyle: "black-translucent",
     startupImage: [
       {
@@ -116,14 +116,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "gl_ES",
-    siteName: "Ludio",
-    title: "Ludio — Diario e Colección de Videoxogos",
+    siteName: "Flux",
+    title: "Flux — Diario e Colección de Videoxogos",
     description:
       "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ludio — Diario e Colección de Videoxogos",
+    title: "Flux — Diario e Colección de Videoxogos",
     description:
       "O teu santuario persoal de videoxogos: biblioteca, partidas, caderno canvas e diario.",
   },

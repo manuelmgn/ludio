@@ -79,7 +79,7 @@ export default function SettingsPage() {
         const downloadAnchor = document.createElement("a")
         downloadAnchor.setAttribute("href", blobUrl)
         const dateStr = new Date().toISOString().split("T")[0]
-        downloadAnchor.setAttribute("download", `ludio-backup-${dateStr}.json`)
+        downloadAnchor.setAttribute("download", `flux-backup-${dateStr}.json`)
         document.body.appendChild(downloadAnchor)
         downloadAnchor.click()
         downloadAnchor.remove()

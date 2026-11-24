@@ -22,7 +22,7 @@ export default function LoginPage() {
               <Gamepad2 className="w-5 h-5 text-white" aria-hidden="true" />
             </span>
             <span className="font-pixel text-4xl text-white tracking-widest drop-shadow-[0_0_16px_rgba(168,85,247,0.6)]">
-              LUDIO
+              FLUX
             </span>
           </div>
           <h1 className="text-xl font-display font-semibold text-white">{t("login")}</h1>
