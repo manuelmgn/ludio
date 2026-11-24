@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Star, Pencil, Check, X, Trash2, AlertTriangle, Loader2, Euro, Layers } from "lucide-react"
+import { Pencil, Check, X, Trash2, AlertTriangle, Loader2, Euro, Layers } from "lucide-react"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import {
   updatePlaythrough,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/game-utils"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button } from "@/components/ui/Button"
+import { StarRatingInput } from "@/components/ui/StarRatingInput"
 import type { StoreOption, PlanOption } from "@/components/game/AddToLibraryModal"
 
 /* ============================================================================
@@ -37,16 +38,13 @@ export function PlaythroughRatingCard({
 }: PlaythroughRatingCardProps) {
   const router = useRouter()
   const [rating, setRating] = useState<number>(initialRating ?? 0)
-  const [hovered, setHovered] = useState<number>(0)
   const [isEditingReview, setIsEditingReview] = useState(false)
   const [review, setReview] = useState(initialReview ?? "")
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const handleStarClick = (star: number) => {
+  const handleRatingChange = (nextRating: number) => {
     const prevRating = rating
-    const nextRating = rating === star ? 0 : star
-    setHovered(0)
     setErrorMsg(null)
     setRating(nextRating)
     startTransition(async () => {
@@ -82,8 +80,6 @@ export function PlaythroughRatingCard({
     })
   }
 
-  const activeStars = hovered || rating
-
   return (
     <GlassPanel className="p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -97,32 +93,12 @@ export function PlaythroughRatingCard({
         )}
       </div>
 
-      <div
-        className="flex items-center gap-1"
-        onMouseLeave={() => setHovered(0)}
-      >
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            disabled={isPending}
-            onMouseEnter={() => setHovered(star)}
-            onClick={() => handleStarClick(star)}
-            className="p-1.5 sm:p-0.5 transition-transform hover:scale-110 cursor-pointer"
-            title={`${star} estrela(s)`}
-            aria-label={`${star} estrela(s)`}
-          >
-            <Star
-              className={`w-5 h-5 transition-colors ${
-                star <= activeStars
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-zinc-600 hover:text-zinc-400"
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-        ))}
-      </div>
+      <StarRatingInput
+        value={rating}
+        onChange={handleRatingChange}
+        disabled={isPending}
+        size="sm"
+      />
 
       {errorMsg && (
         <p className="text-xs text-rose-400">{errorMsg}</p>

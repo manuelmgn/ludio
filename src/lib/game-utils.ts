@@ -25,29 +25,43 @@ export const STANDARD_PLATFORMS = sortAlphabetically([
   "Xbox Series X/S",
 ])
 
-export const STATUS_META: Record<
-  PlaythroughStatus,
-  { label: string; dot: string; pill: string }
-> = {
+export type LibraryStatusKey = PlaythroughStatus | "WISH"
+
+export interface StatusStyleMeta {
+  label: string
+  dot: string
+  pill: string
+}
+
+export const STATUS_META: Record<PlaythroughStatus, StatusStyleMeta> = {
   PLAYING: {
     label: "Xogando",
     dot: "bg-sky-400",
-    pill: "bg-sky-950/75 text-sky-200 border-sky-400/35",
+    pill: "bg-sky-950/85 text-sky-200 border-sky-400/35",
   },
   COMPLETED: {
     label: "Completado",
     dot: "bg-emerald-400",
-    pill: "bg-emerald-950/75 text-emerald-200 border-emerald-400/35",
+    pill: "bg-emerald-950/85 text-emerald-200 border-emerald-400/35",
   },
   ON_HOLD: {
     label: "En Pausa",
     dot: "bg-amber-400",
-    pill: "bg-amber-950/75 text-amber-200 border-amber-400/35",
+    pill: "bg-amber-950/85 text-amber-200 border-amber-400/35",
   },
   ABANDONED: {
     label: "Abandonado",
     dot: "bg-rose-400",
-    pill: "bg-rose-950/75 text-rose-200 border-rose-400/35",
+    pill: "bg-rose-950/85 text-rose-200 border-rose-400/35",
+  },
+}
+
+export const LIBRARY_STATUS_META: Record<LibraryStatusKey, StatusStyleMeta> = {
+  ...STATUS_META,
+  WISH: {
+    label: "Desexado",
+    dot: "bg-purple-400",
+    pill: "bg-purple-950/85 text-purple-200 border-purple-400/35",
   },
 }
 

@@ -1,46 +1,21 @@
 import Link from "next/link"
-import Image from "next/image"
 import {
-  Search,
   Library,
   Compass,
-  Settings,
   Palette,
   BookOpen,
   Gamepad2,
-  Star,
   ArrowRight,
   Sparkles,
 } from "lucide-react"
 import { prisma } from "@/lib/prisma"
 import { requireAuthenticatedUser } from "@/lib/auth-user"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { GameCard } from "@/components/ui/GameCard"
+import { EmptyState } from "@/components/ui/PageShell"
 import { buttonVariants } from "@/components/ui/Button"
 
 export const dynamic = "force-dynamic"
-
-const statusStyles: Record<string, { label: string; dot: string; badge: string }> = {
-  PLAYING: {
-    label: "Xogando",
-    dot: "bg-sky-400",
-    badge: "bg-sky-950/80 text-sky-200 border-sky-400/30",
-  },
-  COMPLETED: {
-    label: "Completado",
-    dot: "bg-emerald-400",
-    badge: "bg-emerald-950/80 text-emerald-200 border-emerald-400/30",
-  },
-  ON_HOLD: {
-    label: "En Pausa",
-    dot: "bg-amber-400",
-    badge: "bg-amber-950/80 text-amber-200 border-amber-400/30",
-  },
-  ABANDONED: {
-    label: "Abandonado",
-    dot: "bg-rose-400",
-    badge: "bg-rose-950/80 text-rose-200 border-rose-400/30",
-  },
-}
 
 export default async function HomePage() {
   const user = await requireAuthenticatedUser()
@@ -86,34 +61,9 @@ export default async function HomePage() {
           FLUX
         </h1>
 
-        <p className="max-w-2xl text-base sm:text-lg text-zinc-300/90 font-sans leading-relaxed mb-9">
+        <p className="max-w-2xl text-base sm:text-lg text-zinc-300/90 font-sans leading-relaxed mb-8">
           O teu santuario persoal de videoxogos. Rexistra as túas partidas, anota estratexias no teu caderno e garda as túas memorias gamer para sempre.
         </p>
-
-        {/* Hero Quick Search Bar (Liquid Glass Spotlight) */}
-        <form
-          action="/search"
-          method="GET"
-          className="w-full max-w-2xl flex items-center gap-2 liquid-glass-pill rounded-2xl p-2 mb-8 group focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition-[border-color,box-shadow] duration-200"
-        >
-          <Search
-            className="w-4 h-4 text-zinc-400 ml-3 shrink-0 group-focus-within:text-primary-hover transition-colors"
-            aria-hidden="true"
-          />
-          <input
-            name="q"
-            type="text"
-            placeholder="Buscar calquera videoxogo (ex: Chrono Trigger, Zelda, Metroid)..."
-            aria-label="Buscar videoxogos"
-            className="flex-1 bg-transparent px-2 py-2.5 text-sm text-white placeholder-zinc-400/80 outline-none font-sans"
-          />
-          <button
-            type="submit"
-            className="rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 px-5 py-2.5 text-xs font-medium text-white border border-purple-300/35 shadow-[0_6px_20px_-4px_rgba(168,85,247,0.55),inset_0_1px_0_rgba(255,255,255,0.28)] transition-[transform,background-color,box-shadow] duration-200 active:scale-[0.97] font-sans cursor-pointer"
-          >
-            Buscar
-          </button>
-        </form>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -135,13 +85,6 @@ export default async function HomePage() {
           >
             <Compass className="w-4 h-4 text-primary-hover" aria-hidden="true" />
             <span>Explorar Xogos</span>
-          </Link>
-          <Link
-            href="/settings"
-            className={buttonVariants({ variant: "secondary", size: "lg" })}
-          >
-            <Settings className="w-4 h-4 text-zinc-400" aria-hidden="true" />
-            <span>Axustes</span>
           </Link>
         </div>
       </section>
@@ -168,71 +111,21 @@ export default async function HomePage() {
 
         {recentEntries.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
-            {recentEntries.map((entry) => {
-              const statusKey = entry.playthroughs[0]?.status
-              const statusMeta = statusKey ? statusStyles[statusKey] : null
-              return (
-                <GlassPanel
-                  key={entry.game.id}
-                  variant="card"
-                  interactive
-                  className="p-2.5 flex flex-col justify-between group"
-                >
-                  <Link href={`/games/${entry.game.id}`} transitionTypes={["nav-forward"]} className="block">
-                    <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-3 ring-1 ring-white/[0.06]">
-                      {entry.game.coverUrl ? (
-                        <>
-                          <Image
-                            src={entry.game.coverUrl}
-                            alt={entry.game.title}
-                            fill
-                            unoptimized
-                            className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                          />
-                          <div
-                            aria-hidden="true"
-                            className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"
-                          />
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/90 via-[#1b1030] to-[#0c0c16] p-3 text-center">
-                          <Gamepad2 className="w-6 h-6 text-primary-hover/60" aria-hidden="true" />
-                          <span className="text-xs text-purple-100/90 line-clamp-3">
-                            {entry.game.title}
-                          </span>
-                        </div>
-                      )}
-
-                      {statusMeta && (
-                        <div
-                          className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono border flex items-center gap-1.5 ${statusMeta.badge}`}
-                        >
-                          <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} />
-                          <span>{statusMeta.label}</span>
-                        </div>
-                      )}
-
-                      {entry.game.firstReleaseDate && (
-                        <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
-                          {entry.game.firstReleaseDate.getFullYear()}
-                        </div>
-                      )}
-
-                      {entry.game.igdbRating !== null && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
-                          <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                          <span>{entry.game.igdbRating}</span>
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-xs font-medium text-zinc-100 line-clamp-1 group-hover:text-primary-hover transition-colors px-0.5">
-                      {entry.game.title}
-                    </h3>
-                  </Link>
-
-                  <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/[0.06] text-[11px] font-mono px-0.5">
+            {recentEntries.map((entry) => (
+              <GameCard
+                key={entry.game.id}
+                id={entry.game.id}
+                title={entry.game.title}
+                coverUrl={entry.game.coverUrl}
+                firstReleaseDate={entry.game.firstReleaseDate}
+                rating={entry.game.igdbRating}
+                personalRating={entry.rating}
+                status={entry.playthroughs[0]?.status ?? "WISH"}
+                footer={
+                  <div className="flex items-center justify-between text-[11px] font-mono">
                     <Link
                       href={`/games/${entry.game.id}/canvas`}
+                      transitionTypes={["nav-forward"]}
                       className="inline-flex items-center gap-1 text-primary-hover hover:text-white transition-colors"
                     >
                       <Palette className="w-3 h-3" aria-hidden="true" />
@@ -240,71 +133,45 @@ export default async function HomePage() {
                     </Link>
                     <Link
                       href={`/games/${entry.game.id}/journal`}
+                      transitionTypes={["nav-forward"]}
                       className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors"
                     >
                       <BookOpen className="w-3 h-3" aria-hidden="true" />
                       <span>Diario</span>
                     </Link>
                   </div>
-                </GlassPanel>
-              )
-            })}
+                }
+              />
+            ))}
           </div>
         ) : suggestedGames.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
             {suggestedGames.map((game) => (
-              <Link key={game.id} href={`/games/${game.id}`} transitionTypes={["nav-forward"]} className="block group">
-                <GlassPanel variant="card" interactive className="p-2.5 flex flex-col h-full">
-                  <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-3 ring-1 ring-white/[0.06]">
-                    {game.coverUrl ? (
-                      <Image
-                        src={game.coverUrl}
-                        alt={game.title}
-                        fill
-                        unoptimized
-                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/90 via-[#1b1030] to-[#0c0c16] p-3 text-center">
-                        <Gamepad2 className="w-6 h-6 text-primary-hover/60" aria-hidden="true" />
-                        <span className="text-xs text-purple-100/90 line-clamp-3">{game.title}</span>
-                      </div>
-                    )}
-                    {game.firstReleaseDate && (
-                      <div className="absolute top-2 left-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
-                        {game.firstReleaseDate.getFullYear()}
-                      </div>
-                    )}
-                    {game.igdbRating !== null && (
-                      <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-amber-300 border border-amber-400/20 flex items-center gap-1">
-                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                        <span>{game.igdbRating}</span>
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="text-xs font-medium text-zinc-100 line-clamp-2 group-hover:text-primary-hover transition-colors px-0.5">
-                    {game.title}
-                  </h3>
-                </GlassPanel>
-              </Link>
+              <GameCard
+                key={game.id}
+                id={game.id}
+                title={game.title}
+                coverUrl={game.coverUrl}
+                firstReleaseDate={game.firstReleaseDate}
+                rating={game.igdbRating}
+              />
             ))}
           </div>
         ) : (
-          <GlassPanel className="p-10 text-center flex flex-col items-center justify-center gap-3">
-            <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover mb-1">
-              <Gamepad2 className="w-6 h-6" aria-hidden="true" />
-            </span>
-            <p className="text-sm text-zinc-200 font-sans max-w-md">
-              Aínda non tes xogos na túa biblioteca. Comeza buscando o teu xogo favorito!
-            </p>
-            <Link
-              href="/search"
-              className={buttonVariants({ variant: "primary", size: "sm", className: "mt-2" })}
-            >
-              <span>Buscar Xogos</span>
-              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-            </Link>
-          </GlassPanel>
+          <EmptyState
+            icon={<Gamepad2 className="w-6 h-6" aria-hidden="true" />}
+            title="Aínda non tes xogos na túa biblioteca."
+            description="Comeza buscando o teu xogo favorito desde a lupa da cabeceira ou explora o catálogo global."
+            action={
+              <Link
+                href="/search"
+                className={buttonVariants({ variant: "primary", size: "sm" })}
+              >
+                <span>Buscar Xogos</span>
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </Link>
+            }
+          />
         )}
       </section>
 

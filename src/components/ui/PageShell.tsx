@@ -1,5 +1,5 @@
 import React from "react"
-import { cn } from "./GlassPanel"
+import { GlassPanel, cn } from "./GlassPanel"
 
 interface PageContainerProps {
   children: React.ReactNode
@@ -70,5 +70,44 @@ export function PageHeader({
 
       {actions && <div className="w-full sm:w-auto shrink-0">{actions}</div>}
     </div>
+  )
+}
+
+interface EmptyStateProps {
+  icon: React.ReactNode
+  title: string
+  description?: string
+  action?: React.ReactNode
+  className?: string
+}
+
+/**
+ * Consistent empty state card used across Library, Dashboard, Home, Search, Journal and Canvas.
+ */
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
+  return (
+    <GlassPanel
+      className={cn(
+        "p-10 sm:p-12 text-center flex flex-col items-center justify-center gap-3",
+        className
+      )}
+    >
+      <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover mb-1">
+        {icon}
+      </span>
+      <p className="text-zinc-100 font-display font-medium text-base">{title}</p>
+      {description && (
+        <p className="text-zinc-400 text-xs sm:text-sm font-sans max-w-md leading-relaxed">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-2">{action}</div>}
+    </GlassPanel>
   )
 }

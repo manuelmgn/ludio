@@ -2,18 +2,12 @@
 
 import { useState, useMemo, useDeferredValue } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import {
   Library,
   Search,
-  Gamepad2,
   Euro,
   Layers,
   RotateCcw,
-  Star,
-  Palette,
-  BookOpen,
-  FileText,
   ArrowUpDown,
   ChevronDown,
   ArrowRight,
@@ -22,7 +16,8 @@ import {
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Input } from "@/components/ui/Input"
 import { Button, buttonVariants } from "@/components/ui/Button"
-import { PageHeader } from "@/components/ui/PageShell"
+import { GameCard } from "@/components/ui/GameCard"
+import { EmptyState, PageHeader } from "@/components/ui/PageShell"
 import { useLanguage } from "@/contexts/LanguageContext"
 import { sortAlphabetically } from "@/lib/game-utils"
 
@@ -454,198 +449,88 @@ export function LibraryFilter({ entries }: LibraryFilterProps) {
       {filteredAndSortedEntries.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
           {filteredAndSortedEntries.map((entry, idx) => {
-            const deferRender = idx >= 10
             const latestPlaythrough = entry.playthroughs[0]
-            const isWish = entry.playthroughs.length === 0
-            const statusBadge = isWish
-              ? { label: "Desexado", dot: "bg-purple-400", color: "bg-purple-950/90 text-purple-200 border-purple-400/35" }
-              : latestPlaythrough?.status === "PLAYING"
-              ? { label: "Xogando", dot: "bg-sky-400", color: "bg-sky-950/90 text-sky-200 border-sky-400/35" }
-              : latestPlaythrough?.status === "COMPLETED"
-              ? { label: "Completado", dot: "bg-emerald-400", color: "bg-emerald-950/90 text-emerald-200 border-emerald-400/35" }
-              : latestPlaythrough?.status === "ON_HOLD"
-              ? { label: "En Pausa", dot: "bg-amber-400", color: "bg-amber-950/90 text-amber-200 border-amber-400/35" }
-              : { label: "Abandonado", dot: "bg-rose-400", color: "bg-rose-950/90 text-rose-200 border-rose-400/35" }
+            const status = entry.playthroughs.length === 0 ? "WISH" : latestPlaythrough.status
 
             return (
-              <GlassPanel
+              <GameCard
                 key={entry.game.id}
-                variant="card"
-                interactive
-                className={`p-2.5 flex flex-col justify-between overflow-hidden group ${
-                  deferRender ? "card-defer-render" : ""
-                }`}
-              >
-                <div className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#0c0c14] relative mb-2.5 ring-1 ring-white/[0.06]">
-                  {entry.game.coverUrl ? (
-                    <>
-                      <Image
-                        src={entry.game.coverUrl}
-                        alt={entry.game.title}
-                        fill
-                        unoptimized
-                        loading={deferRender ? "lazy" : undefined}
-                        className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none"
-                      />
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/90 via-[#1b1030] to-[#0c0c16] p-3 border border-primary/20">
-                      <Gamepad2 className="w-6 h-6 text-primary-hover/60" aria-hidden="true" />
-                      <span className="text-purple-100/90 text-xs text-center font-medium line-clamp-3">
-                        {entry.game.title}
+                id={entry.game.id}
+                title={entry.game.title}
+                coverUrl={entry.game.coverUrl}
+                firstReleaseDate={entry.game.firstReleaseDate}
+                rating={entry.game.igdbRating}
+                personalRating={entry.rating}
+                status={status}
+                showHoverActions
+                deferRender={idx >= 10}
+                footer={
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    {latestPlaythrough?.platform ? (
+                      <span className="text-zinc-400 truncate max-w-[110px]">
+                        {latestPlaythrough.platform}
                       </span>
-                    </div>
-                  )}
-
-                  {/* Status Badge */}
-                  <div
-                    className={`absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-mono border flex items-center gap-1.5 ${statusBadge.color}`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
-                    <span>{statusBadge.label}</span>
-                  </div>
-
-                  {/* Release Year Badge */}
-                  {entry.game.firstReleaseDate && (
-                    <div className="absolute top-2 right-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
-                      {new Date(entry.game.firstReleaseDate).getFullYear()}
-                    </div>
-                  )}
-
-                  {/* IGDB Rating Badge */}
-                  {entry.game.igdbRating !== null && entry.game.igdbRating !== undefined && (
-                    <div className="absolute bottom-2 left-2 bg-black/80 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-zinc-200 border border-white/10">
-                      IGDB {entry.game.igdbRating}
-                    </div>
-                  )}
-
-                  {/* Personal Rating Badge */}
-                  {entry.rating && (
-                    <div className="absolute bottom-2 right-2 bg-black/85 px-1.5 py-0.5 rounded-md text-[11px] font-mono text-amber-300 border border-amber-400/25 flex items-center gap-1">
-                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-                      <span>{entry.rating}</span>
-                    </div>
-                  )}
-
-                  {/* Direct Tap Navigation on Touch Devices */}
-                  <Link
-                    href={`/games/${entry.game.id}`}
-                    aria-label={entry.game.title}
-                    className="[@media(hover:hover)]:hidden absolute inset-0 z-10"
-                  />
-
-                  {/* Hover Quick Action Overlay (Desktop / Pointer devices with hover) */}
-                  <div className="hidden [@media(hover:hover)]:flex absolute inset-0 bg-[#08080f]/75 backdrop-blur-md opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] flex-col items-center justify-center gap-2 p-3">
-                    <Link
-                      href={`/games/${entry.game.id}`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/14 hover:bg-white/22 text-white text-xs font-medium border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
-                    >
-                      <FileText className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Ficha do xogo</span>
-                    </Link>
-                    <Link
-                      href={`/games/${entry.game.id}/canvas`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-primary/55 hover:bg-primary/75 text-white text-xs font-medium border border-purple-300/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition-[background-color,transform] duration-150 active:scale-[0.97]"
-                    >
-                      <Palette className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Canvas</span>
-                    </Link>
-                    <Link
-                      href={`/games/${entry.game.id}/journal`}
-                      className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] text-zinc-100 text-xs font-medium border border-white/15 transition-[background-color,transform] duration-150 active:scale-[0.97]"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
-                      <span>Diario</span>
-                    </Link>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/games/${entry.game.id}`}
-                  className="font-medium text-zinc-100 font-sans text-xs line-clamp-2 hover:text-primary-hover transition-colors leading-snug px-0.5"
-                >
-                  {entry.game.title}
-                </Link>
-
-                <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-white/[0.05] text-[10px] font-mono px-0.5">
-                  {latestPlaythrough?.platform ? (
-                    <span className="text-zinc-400 truncate max-w-[110px]">
-                      {latestPlaythrough.platform}
-                    </span>
-                  ) : (
-                    <span className="text-zinc-600">—</span>
-                  )}
-                  {latestPlaythrough?.includedInPlan && (
-                    <span
-                      className="inline-flex items-center gap-1 text-purple-300 font-medium ml-auto truncate max-w-[90px]"
-                      title={latestPlaythrough.plan?.name || t("included_in_plan_unspecified")}
-                    >
-                      <Layers className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
-                      <span className="truncate">
-                        {latestPlaythrough.plan?.name || t("included_in_plan_badge")}
+                    ) : (
+                      <span className="text-zinc-600">—</span>
+                    )}
+                    {latestPlaythrough?.includedInPlan && (
+                      <span
+                        className="inline-flex items-center gap-1 text-purple-300 font-medium ml-auto truncate max-w-[90px]"
+                        title={latestPlaythrough.plan?.name || t("included_in_plan_unspecified")}
+                      >
+                        <Layers className="w-2.5 h-2.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">
+                          {latestPlaythrough.plan?.name || t("included_in_plan_badge")}
+                        </span>
                       </span>
-                    </span>
-                  )}
-                  {!latestPlaythrough?.includedInPlan && latestPlaythrough?.purchasePrice != null && (
-                    <span
-                      className="text-rose-300 font-semibold ml-auto tabular-nums"
-                      title={latestPlaythrough.purchaseStore?.name}
-                    >
-                      {latestPlaythrough.purchasePrice.toFixed(0)}€
-                    </span>
-                  )}
-                  {!latestPlaythrough?.includedInPlan &&
-                    latestPlaythrough?.purchasePrice == null &&
-                    latestPlaythrough?.salePrice != null && (
-                    <span
-                      className="text-emerald-300 font-semibold ml-auto tabular-nums"
-                      title={latestPlaythrough.saleStore?.name}
-                    >
-                      +{latestPlaythrough.salePrice.toFixed(0)}€
-                    </span>
-                  )}
-                </div>
-              </GlassPanel>
+                    )}
+                    {!latestPlaythrough?.includedInPlan && latestPlaythrough?.purchasePrice != null && (
+                      <span
+                        className="text-rose-300 font-semibold ml-auto tabular-nums"
+                        title={latestPlaythrough.purchaseStore?.name}
+                      >
+                        {latestPlaythrough.purchasePrice.toFixed(0)}€
+                      </span>
+                    )}
+                    {!latestPlaythrough?.includedInPlan &&
+                      latestPlaythrough?.purchasePrice == null &&
+                      latestPlaythrough?.salePrice != null && (
+                        <span
+                          className="text-emerald-300 font-semibold ml-auto tabular-nums"
+                          title={latestPlaythrough.saleStore?.name}
+                        >
+                          +{latestPlaythrough.salePrice.toFixed(0)}€
+                        </span>
+                      )}
+                  </div>
+                }
+              />
             )
           })}
         </div>
       ) : (
-        <GlassPanel className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover mb-4">
-            <Sparkles className="w-6 h-6" aria-hidden="true" />
-          </span>
-          <p className="text-zinc-200 font-display font-medium text-base mb-2">
-            {hasActiveFilters ? "Non hai xogos que coincidan cos filtros." : t("library_empty")}
-          </p>
-          <p className="text-zinc-500 text-xs max-w-sm mb-6 leading-relaxed">
-            {hasActiveFilters
+        <EmptyState
+          icon={<Sparkles className="w-6 h-6" aria-hidden="true" />}
+          title={hasActiveFilters ? "Non hai xogos que coincidan cos filtros." : t("library_empty")}
+          description={
+            hasActiveFilters
               ? "Proba a cambiar ou limpar os filtros de busca, plataforma ou tenda."
-              : "Busca calquera videoxogo e engádeo para comezar o teu diario e caderno de capturas."}
-          </p>
-          {hasActiveFilters ? (
-            <Button
-              type="button"
-              variant="glass"
-              size="sm"
-              onClick={handleResetFilters}
-            >
-              <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Limpar Filtros</span>
-            </Button>
-          ) : (
-            <Link
-              href="/search"
-              className={buttonVariants({ variant: "primary", size: "md" })}
-            >
-              <span>{t("library_explore_cta")}</span>
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-          )}
-        </GlassPanel>
+              : "Busca calquera videoxogo e engádeo para comezar o teu diario e caderno de capturas."
+          }
+          action={
+            hasActiveFilters ? (
+              <Button type="button" variant="glass" size="sm" onClick={handleResetFilters}>
+                <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Limpar Filtros</span>
+              </Button>
+            ) : (
+              <Link href="/search" className={buttonVariants({ variant: "primary", size: "md" })}>
+                <span>{t("library_explore_cta")}</span>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            )
+          }
+        />
       )}
     </div>
   )

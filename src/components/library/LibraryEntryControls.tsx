@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Star, Pencil, X, Check } from "lucide-react"
-import { updateLibraryReview, deletePlaythrough } from "@/lib/actions/library"
+import { updateLibraryReview } from "@/lib/actions/library"
 import { Button } from "@/components/ui/Button"
+import { StarRatingInput } from "@/components/ui/StarRatingInput"
 
 interface ReviewEditorProps {
   gameId: string
@@ -16,7 +17,6 @@ export function ReviewEditor({ gameId, initialRating, initialReview }: ReviewEdi
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [rating, setRating] = useState<number>(initialRating || 0)
-  const [hoveredStar, setHoveredStar] = useState<number>(0)
   const [review, setReview] = useState(initialReview || "")
   const [isPending, startTransition] = useTransition()
   const [message, setMessage] = useState<string | null>(null)
@@ -81,8 +81,6 @@ export function ReviewEditor({ gameId, initialRating, initialReview }: ReviewEdi
     )
   }
 
-  const activeStars = hoveredStar || rating
-
   return (
     <div className="bg-primary/[0.06] border border-primary/30 rounded-2xl p-4 flex flex-col gap-3.5">
       <div className="flex items-center justify-between">
@@ -99,38 +97,7 @@ export function ReviewEditor({ gameId, initialRating, initialReview }: ReviewEdi
         </button>
       </div>
 
-      {/* Interactive Star Picker */}
-      <div
-        className="flex items-center gap-1.5"
-        onMouseLeave={() => setHoveredStar(0)}
-      >
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onMouseEnter={() => setHoveredStar(star)}
-            onClick={() => {
-              setHoveredStar(0)
-              setRating(rating === star ? 0 : star)
-            }}
-            className="p-1.5 sm:p-1 transition-transform hover:scale-115 cursor-pointer"
-            title={`${star} estrela(s)`}
-            aria-label={`${star} estrela(s)`}
-          >
-            <Star
-              className={`w-5 h-5 transition-colors ${
-                star <= activeStars
-                  ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.45)]"
-                  : "text-zinc-600 hover:text-zinc-400"
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-        ))}
-        {rating > 0 && (
-          <span className="text-xs font-mono text-amber-300 ml-2 tabular-nums">{rating}/5</span>
-        )}
-      </div>
+      <StarRatingInput value={rating} onChange={setRating} disabled={isPending} showValue />
 
       <textarea
         value={review}
@@ -150,39 +117,5 @@ export function ReviewEditor({ gameId, initialRating, initialReview }: ReviewEdi
         </Button>
       </div>
     </div>
-  )
-}
-
-export function DeletePlaythroughButton({
-  playthroughId,
-  gameId,
-}: {
-  playthroughId: string
-  gameId: string
-}) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-
-  const handleDelete = () => {
-    if (!confirm("Eliminar esta partida do historial?")) return
-    startTransition(async () => {
-      const res = await deletePlaythrough(playthroughId, gameId)
-      if (res.success) {
-        router.refresh()
-      }
-    })
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleDelete}
-      disabled={isPending}
-      className="text-zinc-500 hover:text-rose-400 transition-colors p-1 rounded cursor-pointer"
-      title="Eliminar partida"
-      aria-label="Eliminar partida"
-    >
-      {isPending ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
-    </button>
   )
 }

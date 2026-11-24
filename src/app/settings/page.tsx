@@ -9,8 +9,6 @@ import {
   Layers,
   Download,
   Check,
-  X,
-  Plus,
   Smartphone,
   Share,
   PlusSquare,
@@ -19,9 +17,9 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext"
 import { usePwa } from "@/contexts/PwaContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
-import { Input } from "@/components/ui/Input"
 import { Button } from "@/components/ui/Button"
 import { PageContainer, PageHeader } from "@/components/ui/PageShell"
+import { SettingsTagSection } from "./SettingsTagSection"
 import { sortByNameAlphabetically } from "@/lib/game-utils"
 import {
   addCustomPlatform,
@@ -285,249 +283,73 @@ export default function SettingsPage() {
         </GlassPanel>
 
         {/* Section 2: Custom Platforms */}
-        <GlassPanel>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <Gamepad2 className="w-5 h-5 text-primary-hover" aria-hidden="true" />
-            <h2 className="text-lg font-display font-semibold text-white">
-              {t("custom_platforms_title")}
-            </h2>
-          </div>
-          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">
-            {t("custom_platforms_desc")}
-          </p>
-
-          <form onSubmit={handleAddPlatform} className="flex gap-2 mb-5 items-end">
-            <div className="flex-1">
-              <Input
-                value={platformName}
-                onChange={(e) => setPlatformName(e.target.value)}
-                placeholder={t("platform_name_placeholder")}
-                disabled={isPending}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={isPending || platformName.trim().length === 0}
-              className="h-[42px] shrink-0"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>{isPending ? t("saving") : t("add_platform_btn")}</span>
-            </Button>
-          </form>
-
-          {message && (
-            <p
-              className={`mb-4 text-xs font-mono ${
-                message.type === "success" ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {message.text}
-            </p>
-          )}
-
-          <div className="pt-4 border-t border-white/[0.08]">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
-              As túas plataformas activas ({platforms.length})
-            </span>
-
-            {platforms.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {platforms.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
-                  >
-                    <span>{p.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePlatform(p.id)}
-                      disabled={deletingId === p.id}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-                      title={t("delete")}
-                      aria-label={`${t("delete")} ${p.name}`}
-                    >
-                      {deletingId === p.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-zinc-500 italic">{t("no_custom_platforms")}</p>
-            )}
-          </div>
-        </GlassPanel>
+        <SettingsTagSection
+          icon={<Gamepad2 className="w-5 h-5" aria-hidden="true" />}
+          title={t("custom_platforms_title")}
+          description={t("custom_platforms_desc")}
+          inputValue={platformName}
+          onInputChange={setPlatformName}
+          placeholder={t("platform_name_placeholder")}
+          addButtonLabel={t("add_platform_btn")}
+          savingLabel={t("saving")}
+          isPending={isPending}
+          onSubmit={handleAddPlatform}
+          feedback={message}
+          customItems={platforms}
+          customItemsLabel="As túas plataformas activas"
+          emptyCustomText={t("no_custom_platforms")}
+          deletingId={deletingId}
+          deleteLabel={t("delete")}
+          onDelete={handleDeletePlatform}
+        />
 
         {/* Section 3: Stores */}
-        <GlassPanel>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <Store className="w-5 h-5 text-primary-hover" aria-hidden="true" />
-            <h2 className="text-lg font-display font-semibold text-white">{t("stores_title")}</h2>
-          </div>
-          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">{t("stores_desc")}</p>
-
-          <form onSubmit={handleAddStore} className="flex gap-2 mb-5 items-end">
-            <div className="flex-1">
-              <Input
-                value={storeName}
-                onChange={(e) => setStoreName(e.target.value)}
-                placeholder={t("store_name_placeholder")}
-                disabled={isStorePending}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={isStorePending || storeName.trim().length === 0}
-              className="h-[42px] shrink-0"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>{isStorePending ? t("saving") : t("add_store_btn")}</span>
-            </Button>
-          </form>
-
-          {storeMessage && (
-            <p
-              className={`mb-4 text-xs font-mono ${
-                storeMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {storeMessage.text}
-            </p>
-          )}
-
-          <div className="pt-4 border-t border-white/[0.08]">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
-              {t("stores_default_label")} ({defaultStores.length})
-            </span>
-            {defaultStores.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {defaultStores.map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/[0.07] border border-amber-500/20 text-xs font-sans text-zinc-200"
-                  >
-                    <span>{s.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-zinc-500 italic mb-4">{t("no_stores")}</p>
-            )}
-          </div>
-
-          {customStores.length > 0 && (
-            <div className="pt-3 border-t border-white/[0.08]">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
-                {t("stores_custom_label")} ({customStores.length})
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {customStores.map((s) => (
-                  <div
-                    key={s.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
-                  >
-                    <span>{s.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteStore(s.id)}
-                      disabled={deletingStoreId === s.id}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-                      title={t("delete")}
-                      aria-label={`${t("delete")} ${s.name}`}
-                    >
-                      {deletingStoreId === s.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </GlassPanel>
+        <SettingsTagSection
+          icon={<Store className="w-5 h-5" aria-hidden="true" />}
+          title={t("stores_title")}
+          description={t("stores_desc")}
+          inputValue={storeName}
+          onInputChange={setStoreName}
+          placeholder={t("store_name_placeholder")}
+          addButtonLabel={t("add_store_btn")}
+          savingLabel={t("saving")}
+          isPending={isStorePending}
+          onSubmit={handleAddStore}
+          feedback={storeMessage}
+          defaultItems={defaultStores}
+          defaultItemsLabel={t("stores_default_label")}
+          defaultChipClassName="bg-amber-500/[0.07] border-amber-500/20"
+          emptyDefaultText={t("no_stores")}
+          customItems={customStores}
+          customItemsLabel={t("stores_custom_label")}
+          deletingId={deletingStoreId}
+          deleteLabel={t("delete")}
+          onDelete={handleDeleteStore}
+        />
 
         {/* Section 4: Plans */}
-        <GlassPanel>
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <Layers className="w-5 h-5 text-primary-hover" aria-hidden="true" />
-            <h2 className="text-lg font-display font-semibold text-white">{t("plans_title")}</h2>
-          </div>
-          <p className="text-xs text-zinc-400 mb-4 font-sans leading-relaxed">{t("plans_desc")}</p>
-
-          <form onSubmit={handleAddPlan} className="flex gap-2 mb-5 items-end">
-            <div className="flex-1">
-              <Input
-                value={planName}
-                onChange={(e) => setPlanName(e.target.value)}
-                placeholder={t("plan_name_placeholder")}
-                disabled={isPlanPending}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={isPlanPending || planName.trim().length === 0}
-              className="h-[42px] shrink-0"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>{isPlanPending ? t("saving") : t("add_plan_btn")}</span>
-            </Button>
-          </form>
-
-          {planMessage && (
-            <p
-              className={`mb-4 text-xs font-mono ${
-                planMessage.type === "success" ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
-              {planMessage.text}
-            </p>
-          )}
-
-          <div className="pt-4 border-t border-white/[0.08]">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
-              {t("plans_default_label")} ({defaultPlans.length})
-            </span>
-            {defaultPlans.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {defaultPlans.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-500/[0.08] border border-purple-400/25 text-xs font-sans text-zinc-200"
-                  >
-                    <span>{p.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-zinc-500 italic mb-4">{t("no_plans")}</p>
-            )}
-          </div>
-
-          {customPlans.length > 0 && (
-            <div className="pt-3 border-t border-white/[0.08]">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block mb-3">
-                {t("plans_custom_label")} ({customPlans.length})
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {customPlans.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs font-sans text-zinc-200"
-                  >
-                    <span>{p.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePlan(p.id)}
-                      disabled={deletingPlanId === p.id}
-                      className="text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
-                      title={t("delete")}
-                      aria-label={`${t("delete")} ${p.name}`}
-                    >
-                      {deletingPlanId === p.id ? "..." : <X className="w-3.5 h-3.5" aria-hidden="true" />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </GlassPanel>
+        <SettingsTagSection
+          icon={<Layers className="w-5 h-5" aria-hidden="true" />}
+          title={t("plans_title")}
+          description={t("plans_desc")}
+          inputValue={planName}
+          onInputChange={setPlanName}
+          placeholder={t("plan_name_placeholder")}
+          addButtonLabel={t("add_plan_btn")}
+          savingLabel={t("saving")}
+          isPending={isPlanPending}
+          onSubmit={handleAddPlan}
+          feedback={planMessage}
+          defaultItems={defaultPlans}
+          defaultItemsLabel={t("plans_default_label")}
+          defaultChipClassName="bg-purple-500/[0.08] border-purple-400/25"
+          emptyDefaultText={t("no_plans")}
+          customItems={customPlans}
+          customItemsLabel={t("plans_custom_label")}
+          deletingId={deletingPlanId}
+          deleteLabel={t("delete")}
+          onDelete={handleDeletePlan}
+        />
 
         {/* Section 5: Install as Mobile App (PWA) */}
         <GlassPanel>

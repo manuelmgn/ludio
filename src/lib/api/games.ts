@@ -1,8 +1,102 @@
 "use server"
 
 import { after } from "next/server"
+import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { mapIGDBGameType, type GameType } from "@/lib/game-types"
+
+export interface UnifiedLibraryHit {
+  id: string
+  title: string
+  coverUrl: string | null
+  releaseYear: number | null
+  rating: number | null
+  status: "PLAYING" | "COMPLETED" | "ON_HOLD" | "ABANDONED" | "WISH"
+  platform: string | null
+}
+
+export interface UnifiedSearchResult {
+  success: true
+  library: UnifiedLibraryHit[]
+  catalog: SearchGameItem[]
+}
+
+export async function searchUnified(
+  query: string
+): Promise<UnifiedSearchResult | { success: false; error: string }> {
+  const trimmed = query.trim()
+  if (trimmed.length < 2) {
+    return { success: true, library: [], catalog: [] }
+  }
+
+  try {
+    const session = await auth()
+    const userId = session?.user?.id
+
+    const [libraryEntries, catalogResult] = await Promise.all([
+      userId
+        ? prisma.libraryEntry.findMany({
+            where: {
+              userId,
+              game: {
+                title: {
+                  contains: trimmed,
+                  mode: "insensitive",
+                },
+              },
+            },
+            take: 6,
+            orderBy: { updatedAt: "desc" },
+            include: {
+              game: {
+                select: {
+                  id: true,
+                  title: true,
+                  coverUrl: true,
+                  firstReleaseDate: true,
+                },
+              },
+              playthroughs: {
+                take: 1,
+                orderBy: { updatedAt: "desc" },
+                select: {
+                  status: true,
+                  platform: true,
+                },
+              },
+            },
+          })
+        : Promise.resolve([]),
+      searchGames(trimmed),
+    ])
+
+    const libraryIds = new Set<string>()
+    const library: UnifiedLibraryHit[] = libraryEntries.map((entry) => {
+      libraryIds.add(entry.game.id)
+      const latest = entry.playthroughs[0]
+      return {
+        id: entry.game.id,
+        title: entry.game.title,
+        coverUrl: entry.game.coverUrl,
+        releaseYear: entry.game.firstReleaseDate
+          ? entry.game.firstReleaseDate.getFullYear()
+          : null,
+        rating: entry.rating ?? null,
+        status: latest ? latest.status : "WISH",
+        platform: latest?.platform ?? null,
+      }
+    })
+
+    const catalog = catalogResult.success
+      ? catalogResult.data.filter((item) => !libraryIds.has(item.id)).slice(0, 6)
+      : []
+
+    return { success: true, library, catalog }
+  } catch (error) {
+    console.error("[searchUnified] Error:", error)
+    return { success: false, error: "Erro ao buscar xogos." }
+  }
+}
 
 export interface SearchGameItem {
   id: string

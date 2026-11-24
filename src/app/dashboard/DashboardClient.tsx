@@ -22,7 +22,9 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext"
 import { GlassPanel } from "@/components/ui/GlassPanel"
 import { Button, buttonVariants } from "@/components/ui/Button"
-import { PageContainer } from "@/components/ui/PageShell"
+import { EmptyState, PageContainer } from "@/components/ui/PageShell"
+import { StatusBadge } from "@/components/ui/StatusBadge"
+import type { LibraryStatusKey } from "@/lib/game-utils"
 import type { UserStats } from "./page"
 
 interface DashboardClientProps {
@@ -36,34 +38,6 @@ interface DashboardClientProps {
 
 export function DashboardClient({ user, stats, signOutAction }: DashboardClientProps) {
   const { t } = useLanguage()
-
-  const statusBadges: Record<string, { label: string; dot: string; color: string }> = {
-    PLAYING: {
-      label: t("filter_playing") || "Xogando",
-      dot: "bg-sky-400",
-      color: "bg-sky-950/80 text-sky-200 border-sky-400/35",
-    },
-    COMPLETED: {
-      label: t("filter_completed") || "Completado",
-      dot: "bg-emerald-400",
-      color: "bg-emerald-950/80 text-emerald-200 border-emerald-400/35",
-    },
-    ON_HOLD: {
-      label: t("filter_on_hold") || "En Pausa",
-      dot: "bg-amber-400",
-      color: "bg-amber-950/80 text-amber-200 border-amber-400/35",
-    },
-    ABANDONED: {
-      label: t("filter_abandoned") || "Abandonado",
-      dot: "bg-rose-400",
-      color: "bg-rose-950/80 text-rose-200 border-rose-400/35",
-    },
-    WISH: {
-      label: t("filter_wish") || "Desexado",
-      dot: "bg-purple-400",
-      color: "bg-purple-950/80 text-purple-200 border-purple-400/35",
-    },
-  }
 
   const completionPct =
     stats.totalGames > 0 ? Math.round((stats.completedCount / stats.totalGames) * 100) : 0
@@ -360,7 +334,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
           {stats.recentEntries.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {stats.recentEntries.map((entry) => {
-                const badge = entry.latestStatus ? statusBadges[entry.latestStatus] : null
+                const statusKey = (entry.latestStatus as LibraryStatusKey | null) ?? null
                 return (
                   <GlassPanel
                     key={entry.id}
@@ -369,6 +343,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                   >
                     <Link
                       href={`/games/${entry.game.id}`}
+                      transitionTypes={["nav-forward"]}
                       className="w-16 h-20 rounded-xl overflow-hidden bg-[#0c0c14] relative shrink-0 ring-1 ring-white/[0.08]"
                     >
                       {entry.game.coverUrl ? (
@@ -389,20 +364,14 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                     <div className="flex flex-col flex-1 min-w-0">
                       <Link
                         href={`/games/${entry.game.id}`}
+                        transitionTypes={["nav-forward"]}
                         className="text-sm font-medium text-zinc-100 hover:text-primary-hover transition-colors line-clamp-1"
                       >
                         {entry.game.title}
                       </Link>
 
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        {badge && (
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono border ${badge.color}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
-                            <span>{badge.label}</span>
-                          </span>
-                        )}
+                        {statusKey && <StatusBadge status={statusKey} />}
                         {entry.game.firstReleaseDate && (
                           <span className="text-zinc-400 text-[10px] font-mono bg-white/[0.05] px-1.5 py-0.5 rounded-md border border-white/10">
                             {new Date(entry.game.firstReleaseDate).getFullYear()}
@@ -423,6 +392,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                       <div className="flex items-center gap-4 mt-3 pt-2 border-t border-white/[0.06] text-[11px] font-mono">
                         <Link
                           href={`/games/${entry.game.id}/canvas`}
+                          transitionTypes={["nav-forward"]}
                           className="inline-flex items-center gap-1 text-primary-hover hover:text-white transition-colors"
                         >
                           <Palette className="w-3 h-3" aria-hidden="true" />
@@ -430,6 +400,7 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
                         </Link>
                         <Link
                           href={`/games/${entry.game.id}/journal`}
+                          transitionTypes={["nav-forward"]}
                           className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors"
                         >
                           <BookOpen className="w-3 h-3" aria-hidden="true" />
@@ -442,21 +413,20 @@ export function DashboardClient({ user, stats, signOutAction }: DashboardClientP
               })}
             </div>
           ) : (
-            <GlassPanel className="p-10 text-center flex flex-col items-center justify-center gap-3">
-              <span className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary-hover">
-                <Gamepad2 className="w-6 h-6" aria-hidden="true" />
-              </span>
-              <p className="text-sm text-zinc-300 font-sans">
-                Aínda non tes xogos na túa biblioteca. Comeza explorando xogos!
-              </p>
-              <Link
-                href="/search"
-                className={buttonVariants({ variant: "primary", size: "sm", className: "mt-1" })}
-              >
-                <span>Buscar Xogos</span>
-                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-              </Link>
-            </GlassPanel>
+            <EmptyState
+              icon={<Gamepad2 className="w-6 h-6" aria-hidden="true" />}
+              title="Aínda non tes xogos na túa biblioteca."
+              description="Comeza explorando xogos e engádeos para rexistrar partidas, valoracións e prezos."
+              action={
+                <Link
+                  href="/search"
+                  className={buttonVariants({ variant: "primary", size: "sm" })}
+                >
+                  <span>Buscar Xogos</span>
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              }
+            />
           )}
         </section>
     </PageContainer>

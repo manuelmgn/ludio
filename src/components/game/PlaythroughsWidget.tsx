@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, Plus, Star, Layers } from "lucide-react"
 import type { PlaythroughStatus } from "@generated/prisma/enums"
 import { GlassPanel } from "@/components/ui/GlassPanel"
+import { Button } from "@/components/ui/Button"
 import {
   AddToLibraryModal,
   type StoreOption,
@@ -59,14 +60,16 @@ export function PlaythroughsWidget({
           <p className="text-xs text-zinc-400 max-w-md leading-relaxed">
             Aínda non tes ningunha partida rexistrada. Cando comeces a xogalo, engade a túa primeira partida para levar o diario, a valoración e os prezos.
           </p>
-          <button
+          <Button
             type="button"
+            variant="primary"
+            size="sm"
             onClick={() => setModalOpen(true)}
-            className="mt-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-colors cursor-pointer"
+            className="mt-1"
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Rexistrar primeira partida</span>
-          </button>
+          </Button>
         </GlassPanel>
 
         <AddToLibraryModal

@@ -24,6 +24,7 @@ import {
   sortByNameAlphabetically,
 } from "@/lib/game-utils"
 import { Button } from "@/components/ui/Button"
+import { StarRatingInput } from "@/components/ui/StarRatingInput"
 
 export interface StoreOption {
   id: string
@@ -334,26 +335,12 @@ export function AddToLibraryModal({
                 <span className="text-xs font-mono text-amber-300">{selectedRating}/5</span>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setSelectedRating(selectedRating === star ? 0 : star)}
-                  className="p-1 cursor-pointer transition-transform hover:scale-110"
-                  aria-label={`${star} estrelas`}
-                >
-                  <Star
-                    className={`w-5 h-5 ${
-                      star <= selectedRating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-zinc-600 hover:text-zinc-400"
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-              ))}
-            </div>
+            <StarRatingInput
+              value={selectedRating}
+              onChange={setSelectedRating}
+              disabled={isPending}
+              size="sm"
+            />
             {status === "COMPLETED" && (
               <textarea
                 name="publicReview"
@@ -580,20 +567,17 @@ export function GameHeroActions({
     return (
       <>
         <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white text-sm font-medium shadow-[0_10px_28px_-8px_rgba(168,85,247,0.55)] transition-all cursor-pointer"
-          >
+          <Button type="button" variant="primary" size="md" onClick={() => setModalOpen(true)}>
             <Plus className="w-4 h-4" aria-hidden="true" />
             <span>Engadir á biblioteca</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="glass"
+            size="md"
             onClick={handleQuickWish}
             disabled={isPendingWish}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-purple-500/15 border border-white/12 hover:border-purple-400/40 text-zinc-200 hover:text-purple-100 text-sm font-medium transition-all disabled:opacity-60 cursor-pointer"
           >
             {isPendingWish ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -601,7 +585,7 @@ export function GameHeroActions({
               <Heart className="w-4 h-4" aria-hidden="true" />
             )}
             <span>{isPendingWish ? "Gardando..." : "Desexados"}</span>
-          </button>
+          </Button>
         </div>
 
         <AddToLibraryModal
@@ -655,14 +639,10 @@ export function GameHeroActions({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-colors cursor-pointer"
-          >
+          <Button type="button" variant="primary" size="sm" onClick={() => setModalOpen(true)}>
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{isWishedOnly ? "Comezar partida" : "Nova partida"}</span>
-          </button>
+          </Button>
 
           {!confirmRemove ? (
             <button
